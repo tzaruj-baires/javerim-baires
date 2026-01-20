@@ -6,8 +6,10 @@
         <div class="card shadow-sm bg-gradient-info text-white">
           <div class="card-body d-flex justify-content-between align-items-center">
             <div>
-              <h2 class="mb-0"><i class="bi bi-house"></i> Bienvenido, {{ authStore.user?.nickname || authStore.user?.email }}</h2>
-              <p class="mb-0 small">Nivel IT: <strong>{{ getLevelName(authStore.user?.it_level) }}</strong></p>
+              <h2 class="mb-0">
+                <i class="bi bi-house"></i> Hola,
+                {{ authStore.user?.nickname || authStore.user?.email }}!
+              </h2>
             </div>
             <router-link v-if="can(1)" to="/mi-perfil" class="btn btn-light">
               <i class="bi bi-person-circle"></i> Mi Perfil
@@ -21,12 +23,20 @@
     <div v-if="authStore.user?.it_level === 0" class="row mb-4">
       <div class="col-12">
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
-          <h5 class="alert-heading"><i class="bi bi-exclamation-triangle"></i> Acceso Restringido</h5>
+          <h5 class="alert-heading">
+            <i class="bi bi-exclamation-triangle"></i> Acceso Restringido
+          </h5>
           <p class="mb-0">
-            Tu cuenta ha sido creada correctamente, pero requiere aprobación del administrador para acceder a las funcionalidades.
+            Tu cuenta ha sido creada correctamente, pero requiere aprobación del administrador para
+            acceder a las funcionalidades.
             <strong>Contacta con el administrador</strong> para que asigne tu nivel de acceso.
           </p>
-          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="alert"
+            aria-label="Close"
+          ></button>
         </div>
       </div>
     </div>
@@ -37,10 +47,10 @@
         <div class="card shadow-sm">
           <div class="card-header bg-primary text-white">
             <h5 class="mb-2"><i class="bi bi-people"></i> Usuarios</h5>
-            <input 
-              v-model="searchQuery" 
-              type="text" 
-              class="form-control form-control-sm" 
+            <input
+              v-model="searchQuery"
+              type="text"
+              class="form-control form-control-sm"
               placeholder="Buscar en todos los campos..."
             />
           </div>
@@ -59,8 +69,14 @@
                     <th @click="sortBy('apodo')" class="cursor-pointer">
                       Apodo {{ getSortIndicator('apodo') }}
                     </th>
-                    <th v-if="can(2)" @click="sortBy('organizacion')" class="cursor-pointer">
+                    <th @click="sortBy('organizacion')" class="cursor-pointer">
                       Org. {{ getSortIndicator('organizacion') }}
+                    </th>
+                    <th @click="sortBy('areas')" class="cursor-pointer">
+                      Áreas {{ getSortIndicator('areas') }}
+                    </th>
+                    <th @click="sortBy('celular')" class="cursor-pointer">
+                      Celular {{ getSortIndicator('celular') }}
                     </th>
                     <th @click="sortBy('mail')" class="cursor-pointer">
                       E-Mail {{ getSortIndicator('mail') }}
@@ -71,30 +87,51 @@
 
                 <tbody>
                   <tr v-if="loading">
-                    <td :colspan="can(2) ? 6 : 5" class="text-center py-4">
+                    <td colspan="8" class="text-center py-4">
                       <span class="spinner-border spinner-border-sm me-2"></span> Cargando...
                     </td>
                   </tr>
 
                   <tr v-else-if="filteredUsers.length === 0">
-                    <td :colspan="can(2) ? 6 : 5" class="text-center py-4 text-muted">
-                      No hay usuarios
-                    </td>
+                    <td colspan="8" class="text-center py-4 text-muted">No hay usuarios</td>
                   </tr>
 
                   <tr v-else v-for="user in paginatedUsers" :key="user.id">
-                    <td><small>{{ user.DNI }}</small></td>
+                    <td>
+                      <small>{{ user.DNI }}</small>
+                    </td>
                     <td>{{ user.nombre }} {{ user.apellido }}</td>
                     <td>{{ user.apodo }}</td>
-                    <td v-if="can(2)">{{ user.organizacion }}</td>
-                    <td><small>{{ user.mail_operativo || user.mail_personal || '-' }}</small></td>
+                    <td>{{ user.organizacion }}</td>
+                    <td>
+                      <small>{{ user.areas || '-' }}</small>
+                    </td>
+                    <td>
+                      <small
+                        ><a :href="`https://wa.me/${user.celular}`" v-if="user.celular !== ''">
+                          {{ user.celular }}</a
+                        >
+                        <span v-else>-</span></small
+                      >
+                    </td>
+                    <td>
+                      <small>
+                        <a
+                          :href="`mailto:${user.mail_operativo || user.mail_personal}`"
+                          v-if="user.mail_operativo !== '' || user.mail_personal !== ''"
+                          >{{ user.mail_operativo || user.mail_personal }}</a
+                        >
+                        <span v-else>-</span></small
+                      >
+                    </td>
                     <td class="text-center">
-                      <router-link v-if="can(2)" :to="`/javer/${user.DNI}`" class="btn btn-sm btn-outline-primary" title="Editar">
+                      <router-link
+                        :to="`/javer/${user.DNI}`"
+                        class="btn btn-sm btn-outline-primary"
+                        title="Editar"
+                      >
                         <i class="bi bi-pencil"></i>
                       </router-link>
-                      <button class="btn btn-sm btn-outline-danger" v-if="can(3)" title="Eliminar">
-                        <i class="bi bi-trash"></i>
-                      </button>
                     </td>
                   </tr>
                 </tbody>
@@ -108,16 +145,16 @@
               Mostrando {{ paginatedUsers.length }} de {{ filteredUsers.length }} usuarios
             </small>
             <div>
-              <button 
+              <button
                 v-if="displayedCount < filteredUsers.length"
-                @click="loadMore" 
+                @click="loadMore"
                 class="btn btn-sm btn-outline-primary me-2"
               >
                 <i class="bi bi-chevron-down"></i> Más
               </button>
-              <button 
+              <button
                 v-if="displayedCount > itemsPerPage"
-                @click="showLess" 
+                @click="showLess"
                 class="btn btn-sm btn-outline-secondary"
               >
                 <i class="bi bi-chevron-up"></i> Menos
@@ -127,139 +164,126 @@
         </div>
       </div>
     </div>
-
-    <!-- Info de permisos -->
-    <div class="row">
-      <div class="col-12">
-        <div class="alert alert-info" role="alert">
-          <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Sistema de Permisos</h6>
-          <small>
-            Tu nivel: <strong>{{ authStore.user?.it_level }} ({{ getLevelName(authStore.user?.it_level) }})</strong> |
-            Funcionalidades disponibles: 
-            <span v-if="can(1)" class="badge bg-success me-1">Básico</span>
-            <span v-if="can(2)" class="badge bg-warning text-dark me-1">Intermedio</span>
-            <span v-if="can(3)" class="badge bg-danger">Avanzado</span>
-            <span v-if="!can(1)" class="badge bg-secondary">Ninguna (Esperando aprobación)</span>
-          </small>
-        </div>
-      </div>
-    </div>
-    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
-import { getAll } from "@/services/api";
-import { useAuthStore } from "@/stores/auth";
-import { usePermissions } from "@/composables/usePermissions";
+import { ref, onMounted, computed } from 'vue'
+import { getAll } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
+import { usePermissions } from '@/composables/usePermissions'
 
-const authStore = useAuthStore();
-const { can, getLevelName } = usePermissions();
+const authStore = useAuthStore()
+const { can, getLevelName } = usePermissions()
 
-const users = ref([]);
-const loading = ref(true);
-const searchQuery = ref("");
-const displayedCount = ref(10);
-const itemsPerPage = 10;
-const sortKey = ref("");
-const sortOrder = ref("asc");
+const users = ref([])
+const loading = ref(true)
+const searchQuery = ref('')
+const displayedCount = ref(10)
+const itemsPerPage = 10
+const sortKey = ref('')
+const sortOrder = ref('asc')
 
 const loadUsers = async () => {
-  loading.value = true;
+  loading.value = true
   try {
-    const res = await getAll("main");
-    users.value = res.data;
+    const res = await getAll('main')
+    users.value = res.data
   } catch (err) {
-    console.error("Error cargando usuarios", err);
+    console.error('Error cargando usuarios', err)
   } finally {
-    loading.value = false;
+    loading.value = false
   }
-};
+}
 
 const filteredUsers = computed(() => {
-  let filtered = users.value.filter(user => {
-    const mail = user.mail_operativo || user.mail_personal || "";
+  let filtered = users.value.filter((user) => {
+    const mail = user.mail_operativo || user.mail_personal || ''
     return !(
-      !user.DNI && !user.nombre && !user.apellido && !user.apodo && 
-      !user.organizacion && !mail
-    );
-  });
+      !user.DNI &&
+      !user.nombre &&
+      !user.apellido &&
+      !user.apodo &&
+      !user.organizacion &&
+      !mail
+    )
+  })
 
   if (!searchQuery.value.trim()) {
-    return filtered;
+    return filtered
   }
 
-  const query = searchQuery.value.toLowerCase();
-  return filtered.filter(user => {
-    const mail = user.mail_operativo || user.mail_personal || "";
+  const query = searchQuery.value.toLowerCase()
+  return filtered.filter((user) => {
+    const mail = user.mail_operativo || user.mail_personal || ''
     return (
       user.DNI.toString().toLowerCase().includes(query) ||
       `${user.nombre} ${user.apellido}`.toLowerCase().includes(query) ||
       user.apodo.toLowerCase().includes(query) ||
       user.organizacion.toLowerCase().includes(query) ||
       mail.toLowerCase().includes(query)
-    );
-  });
-});
+    )
+  })
+})
 
 const sortedAndPaginated = computed(() => {
-  let sorted = [...filteredUsers.value];
+  let sorted = [...filteredUsers.value]
 
   if (sortKey.value) {
     sorted.sort((a, b) => {
-      let aVal, bVal;
+      let aVal, bVal
 
-      if (sortKey.value === "nombre") {
-        aVal = `${a.nombre} ${a.apellido}`.toLowerCase();
-        bVal = `${b.nombre} ${b.apellido}`.toLowerCase();
-      } else if (sortKey.value === "mail") {
-        aVal = (a.mail_operativo || a.mail_personal || "").toLowerCase();
-        bVal = (b.mail_operativo || b.mail_personal || "").toLowerCase();
+      if (sortKey.value === 'nombre') {
+        aVal = `${a.nombre} ${a.apellido}`.toLowerCase()
+        bVal = `${b.nombre} ${b.apellido}`.toLowerCase()
+      } else if (sortKey.value === 'mail') {
+        aVal = (a.mail_operativo || a.mail_personal || '').toLowerCase()
+        bVal = (b.mail_operativo || b.mail_personal || '').toLowerCase()
       } else {
-        aVal = a[sortKey.value];
-        bVal = b[sortKey.value];
+        aVal = a[sortKey.value]
+        bVal = b[sortKey.value]
 
-        if (!isNaN(aVal)) aVal = Number(aVal);
-        if (!isNaN(bVal)) bVal = Number(bVal);
+        if (!isNaN(aVal)) aVal = Number(aVal)
+        if (!isNaN(bVal)) bVal = Number(bVal)
 
-        if (typeof aVal === "string") aVal = aVal.toLowerCase();
-        if (typeof bVal === "string") bVal = bVal.toLowerCase();
+        if (typeof aVal === 'string') aVal = aVal.toLowerCase()
+        if (typeof bVal === 'string') bVal = bVal.toLowerCase()
       }
 
-      if (aVal < bVal) return sortOrder.value === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortOrder.value === "asc" ? 1 : -1;
-      return 0;
-    });
+      if (aVal < bVal) return sortOrder.value === 'asc' ? -1 : 1
+      if (aVal > bVal) return sortOrder.value === 'asc' ? 1 : -1
+      return 0
+    })
   }
 
-  return sorted.slice(0, displayedCount.value);
-});
+  return sorted.slice(0, displayedCount.value)
+})
 
-const paginatedUsers = sortedAndPaginated;
+const paginatedUsers = sortedAndPaginated
 
 const sortBy = (key) => {
   if (sortKey.value === key) {
-    sortOrder.value = sortOrder.value === "asc" ? "desc" : "asc";
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
   } else {
-    sortKey.value = key;
-    sortOrder.value = "asc";
+    sortKey.value = key
+    sortOrder.value = 'asc'
   }
-};
+}
 
 const getSortIndicator = (key) => {
-  if (sortKey.value !== key) return "";
-  return sortOrder.value === "asc" ? "▲" : "▼";
-};
+  if (sortKey.value !== key) return ''
+  return sortOrder.value === 'asc' ? '▲' : '▼'
+}
 
 const loadMore = () => {
-  displayedCount.value += itemsPerPage;
-};
+  displayedCount.value += itemsPerPage
+}
 
 const showLess = () => {
-  displayedCount.value = itemsPerPage;
-};
+  displayedCount.value = itemsPerPage
+}
 
-onMounted(loadUsers);
+onMounted(loadUsers)
 </script>
 
 <style scoped>
@@ -279,7 +303,9 @@ onMounted(loadUsers);
 
 .card {
   border-radius: 8px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .card:hover {

@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
         email: userData.email,
         cellphone: parseInt(userData.cellphone),
         it_level: 0, // Por defecto sin acceso, solo admin puede asignar nivel
-        hash_pwd
+        hash_pwd,
       }
 
       // Enviar a API
@@ -82,7 +82,7 @@ export const useAuthStore = defineStore('auth', () => {
       const users = response.data
 
       // Buscar usuario por email
-      const foundUser = users.find(u => u.email === email)
+      const foundUser = users.find((u) => u.email === email)
       if (!foundUser) {
         throw new Error('Usuario no encontrado')
       }
@@ -93,9 +93,22 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error('Contraseña incorrecta')
       }
 
-      // Guardar sesión (sin contraseña)
+      // Obtener datos adicionales de la tabla main (areas_ref, organizacion, etc.)
+      const mainResponse = await api.getAll('main')
+      const mainData = mainResponse.data
+      const mainRecord = mainData.find((m) => m.DNI === foundUser.dni)
+
+      // Guardar sesión (sin contraseña) + datos de main
       const userSession = { ...foundUser }
       delete userSession.hash_pwd
+
+      // Agregar datos de main si existen
+      if (mainRecord) {
+        userSession.areas_ref = mainRecord.areas_ref || ''
+        userSession.areas = mainRecord.areas || ''
+        userSession.organizacion = mainRecord.organizacion || ''
+      }
+
       user.value = userSession
       localStorage.setItem('user', JSON.stringify(userSession))
 
@@ -118,6 +131,6 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     login,
     logout,
-    loadUserFromStorage
+    loadUserFromStorage,
   }
 })

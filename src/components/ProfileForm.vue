@@ -29,7 +29,7 @@
         <!-- Campos de formulario (genéricos) -->
         <!-- Acordeones por temática -->
         <div class="accordion mb-4" id="formAccordion">
-          <!-- Información Personal -->
+          <!-- 1. Información Personal -->
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button
@@ -38,7 +38,10 @@
                 data-bs-toggle="collapse"
                 data-bs-target="#formPersonal"
               >
-                <i class="bi bi-person me-2"></i> Información Personal
+                <i class="bi bi-person me-2"></i> Información personal
+                <span v-if="!canEditSection('personal')" class="badge bg-secondary ms-auto"
+                  >Solo lectura</span
+                >
               </button>
             </h2>
             <div
@@ -61,6 +64,18 @@
                 </div>
 
                 <div class="mb-3">
+                  <label for="cuil" class="form-label">CUIL</label>
+                  <input
+                    v-model="formData.CUIL"
+                    type="text"
+                    class="form-control"
+                    id="cuil"
+                    placeholder="Ej: 20-12345678-9"
+                    :disabled="isLoading || !canEditSection('personal')"
+                  />
+                </div>
+
+                <div class="mb-3">
                   <label for="nombre" class="form-label">Nombre</label>
                   <input
                     v-model="formData.nombre"
@@ -68,7 +83,7 @@
                     class="form-control"
                     id="nombre"
                     placeholder="Ingrese nombre"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('personal')"
                   />
                 </div>
 
@@ -80,7 +95,7 @@
                     class="form-control"
                     id="apellido"
                     placeholder="Ingrese apellido"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('personal')"
                   />
                 </div>
 
@@ -91,7 +106,7 @@
                     type="date"
                     class="form-control"
                     id="nacimiento"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('personal')"
                   />
                 </div>
 
@@ -101,7 +116,7 @@
                     v-model="formData.genero"
                     class="form-select"
                     id="genero"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('personal')"
                   >
                     <option value="">Seleccionar...</option>
                     <option value="M">Masculino</option>
@@ -109,23 +124,11 @@
                     <option value="O">Otro</option>
                   </select>
                 </div>
-
-                <div class="mb-3">
-                  <label for="cuil" class="form-label">CUIL</label>
-                  <input
-                    v-model="formData.CUIL"
-                    type="text"
-                    class="form-control"
-                    id="cuil"
-                    placeholder="Ej: 20-12345678-9"
-                    :disabled="isLoading"
-                  />
-                </div>
               </div>
             </div>
           </div>
 
-          <!-- Contacto -->
+          <!-- 2. Contacto -->
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button
@@ -135,6 +138,9 @@
                 data-bs-target="#formContacto"
               >
                 <i class="bi bi-telephone me-2"></i> Contacto
+                <span v-if="!canEditSection('contacto')" class="badge bg-secondary ms-auto"
+                  >Solo lectura</span
+                >
               </button>
             </h2>
             <div
@@ -144,38 +150,14 @@
             >
               <div class="accordion-body">
                 <div class="mb-3">
-                  <label for="email" class="form-label">Email</label>
+                  <label for="celular" class="form-label">Celular</label>
                   <input
-                    v-model="formData.email"
-                    type="email"
-                    class="form-control"
-                    id="email"
-                    placeholder="Ingrese email"
-                    :disabled="isLoading"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="cellphone" class="form-label">Teléfono</label>
-                  <input
-                    v-model="formData.cellphone"
+                    v-model="formData.celular"
                     type="text"
                     class="form-control"
-                    id="cellphone"
-                    placeholder="Ingrese teléfono"
-                    :disabled="isLoading"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="mail_operativo" class="form-label">Email Operativo</label>
-                  <input
-                    v-model="formData.mail_operativo"
-                    type="email"
-                    class="form-control"
-                    id="mail_operativo"
-                    placeholder="Ingrese email operativo"
-                    :disabled="isLoading"
+                    id="celular"
+                    placeholder="Ingrese celular"
+                    :disabled="isLoading || !canEditSection('contacto')"
                   />
                 </div>
 
@@ -187,14 +169,26 @@
                     class="form-control"
                     id="mail_personal"
                     placeholder="Ingrese email personal"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('contacto')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="mail_operativo" class="form-label">Email Operativo</label>
+                  <input
+                    v-model="formData.mail_operativo"
+                    type="email"
+                    class="form-control"
+                    id="mail_operativo"
+                    placeholder="Ingrese email operativo"
+                    :disabled="isLoading || !canEditSection('contacto')"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Domicilio -->
+          <!-- 3. Domicilio -->
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button
@@ -204,6 +198,9 @@
                 data-bs-target="#formDomicilio"
               >
                 <i class="bi bi-houses me-2"></i> Domicilio
+                <span v-if="!canEditSection('domicilio')" class="badge bg-secondary ms-auto"
+                  >Solo lectura</span
+                >
               </button>
             </h2>
             <div
@@ -213,25 +210,25 @@
             >
               <div class="accordion-body">
                 <div class="mb-3">
-                  <label for="direccion" class="form-label">Dirección 1</label>
+                  <label for="direccion1" class="form-label">Dirección 1</label>
                   <input
                     v-model="formData.direccion1"
                     type="text"
                     class="form-control"
-                    id="direccion"
+                    id="direccion1"
                     placeholder="Ingrese dirección"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('domicilio')"
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="barrio" class="form-label">Barrio 1</label>
+                  <label for="barrio1" class="form-label">Barrio 1</label>
                   <input
                     v-model="formData.barrio1"
                     type="text"
                     class="form-control"
-                    id="barrio"
+                    id="barrio1"
                     placeholder="Ingrese barrio"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('domicilio')"
                   />
                 </div>
 
@@ -241,9 +238,9 @@
                     v-model="formData.direccion2"
                     type="text"
                     class="form-control"
-                    id="direccion"
+                    id="direccion2"
                     placeholder="Ingrese dirección"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('domicilio')"
                   />
                 </div>
                 <div class="mb-3">
@@ -254,14 +251,14 @@
                     class="form-control"
                     id="barrio2"
                     placeholder="Ingrese barrio"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('domicilio')"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Médicos -->
+          <!-- 4. Médicos -->
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button
@@ -271,6 +268,9 @@
                 data-bs-target="#formMedicos"
               >
                 <i class="bi bi-heart-pulse me-2"></i> Médicos
+                <span v-if="!canEditSection('medicos')" class="badge bg-secondary ms-auto"
+                  >Solo lectura</span
+                >
               </button>
             </h2>
             <div
@@ -280,57 +280,322 @@
             >
               <div class="accordion-body">
                 <div class="mb-3">
-                  <label for="medico_cabecera" class="form-label">Médico de Cabecera</label>
+                  <label for="obraSocial" class="form-label">Obra Social</label>
                   <input
-                    v-model="formData.medico_cabecera"
+                    v-model="formData.obraSocial"
                     type="text"
                     class="form-control"
-                    id="medico_cabecera"
-                    placeholder="Nombre del médico"
-                    :disabled="isLoading"
+                    id="obraSocial"
+                    placeholder="Ingrese obra social"
+                    :disabled="isLoading || !canEditSection('medicos')"
                   />
                 </div>
 
                 <div class="mb-3">
-                  <label for="especialidad_medico" class="form-label">Especialidad</label>
+                  <label for="obraSocial_Plan" class="form-label">Plan Obra Social</label>
                   <input
-                    v-model="formData.especialidad_medico"
+                    v-model="formData.obraSocial_Plan"
                     type="text"
                     class="form-control"
-                    id="especialidad_medico"
-                    placeholder="Ej: Cardiólogo, Dermatólogo, etc"
-                    :disabled="isLoading"
+                    id="obraSocial_Plan"
+                    placeholder="Ingrese plan"
+                    :disabled="isLoading || !canEditSection('medicos')"
                   />
                 </div>
 
                 <div class="mb-3">
-                  <label for="telefono_medico" class="form-label">Teléfono</label>
+                  <label for="obraSocial_id" class="form-label">ID Obra Social</label>
                   <input
-                    v-model="formData.telefono_medico"
+                    v-model="formData.obraSocial_id"
                     type="text"
                     class="form-control"
-                    id="telefono_medico"
-                    placeholder="Ingrese teléfono"
-                    :disabled="isLoading"
+                    id="obraSocial_id"
+                    placeholder="Ingrese ID"
+                    :disabled="isLoading || !canEditSection('medicos')"
                   />
                 </div>
 
                 <div class="mb-3">
-                  <label for="obra_social" class="form-label">Obra Social</label>
+                  <label for="obraSocial_Carnet" class="form-label">Carnet Obra Social</label>
                   <input
-                    v-model="formData.obra_social"
+                    v-model="formData.obraSocial_Carnet"
                     type="text"
                     class="form-control"
-                    id="obra_social"
-                    placeholder="Ej: OSDE, Medicus, etc"
-                    :disabled="isLoading"
+                    id="obraSocial_Carnet"
+                    placeholder="Ingrese carnet"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_dieta" class="form-label">Dieta</label>
+                  <input
+                    v-model="formData.med_dieta"
+                    type="text"
+                    class="form-control"
+                    id="med_dieta"
+                    placeholder="Ingrese restricciones dietarias"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_sangre" class="form-label">Tipo de Sangre</label>
+                  <input
+                    v-model="formData.med_sangre"
+                    type="text"
+                    class="form-control"
+                    id="med_sangre"
+                    placeholder="Ej: O+, A-, etc"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_historia" class="form-label">Historia Médica</label>
+                  <input
+                    v-model="formData.med_historia"
+                    type="text"
+                    class="form-control"
+                    id="med_historia"
+                    placeholder="Ingrese antecedentes médicos"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_problemas" class="form-label">Problemas de Salud</label>
+                  <input
+                    v-model="formData.med_problemas"
+                    type="text"
+                    class="form-control"
+                    id="med_problemas"
+                    placeholder="Ingrese problemas actuales"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_act" class="form-label">Actividad Física</label>
+                  <input
+                    v-model="formData.med_act"
+                    type="text"
+                    class="form-control"
+                    id="med_act"
+                    placeholder="Ingrese actividades realizadas"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_actLesion" class="form-label">Lesiones Actuales</label>
+                  <input
+                    v-model="formData.med_actLesion"
+                    type="text"
+                    class="form-control"
+                    id="med_actLesion"
+                    placeholder="Ingrese lesiones"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="foto_dni" class="form-label">Foto DNI</label>
+                  <input
+                    v-model="formData.foto_dni"
+                    type="text"
+                    class="form-control"
+                    id="foto_dni"
+                    placeholder="Ruta o URL de foto"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="foto_rostro" class="form-label">Foto Rostro</label>
+                  <input
+                    v-model="formData.foto_rostro"
+                    type="text"
+                    class="form-control"
+                    id="foto_rostro"
+                    placeholder="Ruta o URL de foto"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios" class="form-label">Estudios Realizados</label>
+                  <input
+                    v-model="formData.med_estudios"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios"
+                    placeholder="Ingrese estudios"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_lab" class="form-label">Estudios Laboratorio</label>
+                  <input
+                    v-model="formData.med_estudios_lab"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_lab"
+                    placeholder="Ingrese análisis"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_ergo" class="form-label">Estudios Ergonómico</label>
+                  <input
+                    v-model="formData.med_estudios_ergo"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_ergo"
+                    placeholder="Ingrese ergonomía"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_ecodoppler" class="form-label">Ecodoppler</label>
+                  <input
+                    v-model="formData.med_estudios_ecodoppler"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_ecodoppler"
+                    placeholder="Ingrese resultado"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_rx" class="form-label">Radiografías</label>
+                  <input
+                    v-model="formData.med_estudios_rx"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_rx"
+                    placeholder="Ingrese resultado"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_extras" class="form-label">Otros Estudios</label>
+                  <input
+                    v-model="formData.med_estudios_extras"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_extras"
+                    placeholder="Ingrese otros"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_extraMotivo" class="form-label"
+                    >Motivo Otros Estudios</label
+                  >
+                  <input
+                    v-model="formData.med_estudios_extraMotivo"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_extraMotivo"
+                    placeholder="Ingrese motivo"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_certificado" class="form-label">Certificado</label>
+                  <input
+                    v-model="formData.med_estudios_certificado"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_certificado"
+                    placeholder="Ingrese certificado"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_fechaEst" class="form-label">Fecha Estudio</label>
+                  <input
+                    v-model="formData.med_estudios_fechaEst"
+                    type="date"
+                    class="form-control"
+                    id="med_estudios_fechaEst"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_aclararimg" class="form-label">Aclaraciones Imágenes</label>
+                  <input
+                    v-model="formData.med_aclararimg"
+                    type="text"
+                    class="form-control"
+                    id="med_aclararimg"
+                    placeholder="Ingrese aclaraciones"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_img1" class="form-label">Imagen 1</label>
+                  <input
+                    v-model="formData.med_estudios_img1"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_img1"
+                    placeholder="Ruta o URL"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_img2" class="form-label">Imagen 2</label>
+                  <input
+                    v-model="formData.med_estudios_img2"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_img2"
+                    placeholder="Ruta o URL"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_img3" class="form-label">Imagen 3</label>
+                  <input
+                    v-model="formData.med_estudios_img3"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_img3"
+                    placeholder="Ruta o URL"
+                    :disabled="isLoading || !canEditSection('medicos')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="med_estudios_otro" class="form-label">Otro</label>
+                  <input
+                    v-model="formData.med_estudios_otro"
+                    type="text"
+                    class="form-control"
+                    id="med_estudios_otro"
+                    placeholder="Ingrese otros datos"
+                    :disabled="isLoading || !canEditSection('medicos')"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Organización -->
+          <!-- 5. Organización -->
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button
@@ -340,6 +605,9 @@
                 data-bs-target="#formOrganizacion"
               >
                 <i class="bi bi-building me-2"></i> Organización
+                <span v-if="!canEditSection('organizacion')" class="badge bg-secondary ms-auto"
+                  >Solo lectura</span
+                >
               </button>
             </h2>
             <div
@@ -348,105 +616,175 @@
               data-bs-parent="#formAccordion"
             >
               <div class="accordion-body">
-                <div v-if="showOrgField" class="mb-3">
+                <div class="mb-3">
                   <label for="organizacion" class="form-label">Organización</label>
-                  <select
+                  <input
                     v-model="formData.organizacion"
                     type="text"
-                    class="form-select"
+                    class="form-control"
                     id="organizacion"
                     placeholder="Ingrese organización"
-                    :disabled="isLoading"
-                  >
-                    <option value="DAC">DAC</option>
-                    <option value="FJ">FJ</option>
-                    <option value="BH">BH</option>
-                    <option value="LH">LH</option>
-                    <option value="IONA">IONA</option>
-                  </select>
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
                 </div>
 
                 <div class="mb-3">
                   <label for="areas" class="form-label">Áreas</label>
-                  <select
+                  <input
                     v-model="formData.areas"
                     type="text"
-                    class="form-select"
+                    class="form-control"
                     id="areas"
-                    multiple="multiple"
-                    :disabled="isLoading"
-                  >
-                    <option value="HBTJ">HBTJ</option>
-                    <option value="ENSH">ENSH</option>
-                    <option value="CARE">CARE</option>
-                    <option value="IT">IT</option>
-                    <option value="IE">IE</option>
-                    <option value="MILU">MILU</option>
-                    <option value="HDRJ - MDRJ/RSH">HDRJ - MDRJ/RSH</option>
-                    <option value="HDRJ - JNJ RGL K1">HDRJ - JNJ RGL K1</option>
-                    <option value="HDRJ - JNJ RGL K2B">HDRJ - JNJ RGL K2B</option>
-                    <option value="HDRJ - JNJ RGL K2A">HDRJ - JNJ RGL K2A</option>
-                    <option value="HDRJ - JNJ DDM K1">HDRJ - JNJ DDM K1</option>
-                    <option value="HDRJ - JNJ DDM K2">HDRJ - JNJ DDM K2</option>
-                    <option value="FND">FND</option>
-                    <option value="FND - JNJ">FND - JNJ</option>
-                  </select>
+                    placeholder="Ingrese áreas"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
                 </div>
 
                 <div class="mb-3">
-                  <label for="apodo" class="form-label">Apodo</label>
+                  <label for="apodoCBok" class="form-label">Apodo CBok</label>
                   <input
-                    v-model="formData.apodo"
+                    v-model="formData.apodoCBok"
                     type="text"
                     class="form-control"
-                    id="apodo"
+                    id="apodoCBok"
                     placeholder="Ingrese apodo"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('organizacion')"
                   />
                 </div>
 
-                <div class="mb-3">
-                  <label for="fecha_ingresoOrg" class="form-label">Fecha de Ingreso</label>
-                  <input
-                    v-model="formData.fecha_ingresoOrg"
-                    type="date"
-                    class="form-control"
-                    id="fecha_ingresoOrg"
-                    :disabled="isLoading"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="nivelHBTJ" class="form-label">Nivel de HBTJ</label>
-                  <select
-                    v-model="formData.nivelHBTJ"
-                    class="form-select"
-                    id="nivelHBTJ"
-                    :disabled="isLoading"
-                  >
-                    <option value=""></option>
-                    <option value="B">B</option>
-                    <option value="A">A</option>
-                    <option value="MFKD0">MFKD0</option>
-                    <option value="MFKD1">MFKD1</option>
-                    <option value="MFKD2">MFKD2</option>
-                    <option value="MFKD3">MFKD3</option>
-                  </select>
-                </div>
                 <div class="mb-3">
                   <label for="activo" class="form-label me-2">¿Activo?</label>
                   <input
                     v-model="formData.activo"
                     type="checkbox"
-                    class="form-check-input ml-2"
+                    class="form-check-input"
                     id="activo"
-                    :disabled="isLoading"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="nivel" class="form-label">Nivel</label>
+                  <input
+                    v-model="formData.nivel"
+                    type="text"
+                    class="form-control"
+                    id="nivel"
+                    placeholder="Ingrese nivel"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="nivelHBTJ" class="form-label">Nivel HBTJ</label>
+                  <input
+                    v-model="formData.nivelHBTJ"
+                    type="text"
+                    class="form-control"
+                    id="nivelHBTJ"
+                    placeholder="Ingrese nivel HBTJ"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="fecha_ingresoOrg" class="form-label">Fecha de Ingreso a Org</label>
+                  <input
+                    v-model="formData.fecha_ingresoOrg"
+                    type="date"
+                    class="form-control"
+                    id="fecha_ingresoOrg"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="fecha_ingresoMilu" class="form-label">Fecha de Ingreso a Milu</label>
+                  <input
+                    v-model="formData.fecha_ingresoMilu"
+                    type="date"
+                    class="form-control"
+                    id="fecha_ingresoMilu"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="areas_historicas" class="form-label">Áreas Históricas</label>
+                  <input
+                    v-model="formData.areas_historicas"
+                    type="text"
+                    class="form-control"
+                    id="areas_historicas"
+                    placeholder="Ingrese áreas históricas"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="curso_TL" class="form-label">Curso TL</label>
+                  <input
+                    v-model="formData.curso_TL"
+                    type="text"
+                    class="form-control"
+                    id="curso_TL"
+                    placeholder="Ingrese datos del curso"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="curso_AvH" class="form-label">Curso Av H</label>
+                  <input
+                    v-model="formData.curso_AvH"
+                    type="text"
+                    class="form-control"
+                    id="curso_AvH"
+                    placeholder="Ingrese datos del curso"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="curso_AvKM" class="form-label">Curso Av KM</label>
+                  <input
+                    v-model="formData.curso_AvKM"
+                    type="text"
+                    class="form-control"
+                    id="curso_AvKM"
+                    placeholder="Ingrese datos del curso"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="curso_IE" class="form-label">Curso IE</label>
+                  <input
+                    v-model="formData.curso_IE"
+                    type="text"
+                    class="form-control"
+                    id="curso_IE"
+                    placeholder="Ingrese datos del curso"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="curso_FND" class="form-label">Curso FND</label>
+                  <input
+                    v-model="formData.curso_FND"
+                    type="text"
+                    class="form-control"
+                    id="curso_FND"
+                    placeholder="Ingrese datos del curso"
+                    :disabled="isLoading || !canEditSection('organizacion')"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Vida y Desarrollo -->
+          <!-- 6. Vida y Desarrollo -->
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button
@@ -456,6 +794,9 @@
                 data-bs-target="#formDesarrollo"
               >
                 <i class="bi bi-book me-2"></i> Vida y Desarrollo
+                <span v-if="!canEditSection('desarrollo')" class="badge bg-secondary ms-auto"
+                  >Solo lectura</span
+                >
               </button>
             </h2>
             <div
@@ -464,59 +805,47 @@
               data-bs-parent="#formAccordion"
             >
               <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="educacion" class="form-label">Educación</label>
-                  <input
-                    v-model="formData.educacion"
-                    type="text"
-                    class="form-control"
-                    id="educacion"
-                    placeholder="Ej: Licenciado en..., Técnico en..."
-                    :disabled="isLoading"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="profesion" class="form-label">Profesión</label>
-                  <input
-                    v-model="formData.profesion"
-                    type="text"
-                    class="form-control"
-                    id="profesion"
-                    placeholder="Ingrese profesión"
-                    :disabled="isLoading"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="experiencia" class="form-label">Experiencia</label>
-                  <input
-                    v-model="formData.experiencia"
-                    type="text"
-                    class="form-control"
-                    id="experiencia"
-                    placeholder="Años y áreas de experiencia"
-                    :disabled="isLoading"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="habilidades" class="form-label">Habilidades</label>
-                  <input
-                    v-model="formData.habilidades"
-                    type="text"
-                    class="form-control"
-                    id="habilidades"
-                    placeholder="Ingrese habilidades (separadas por comas)"
-                    :disabled="isLoading"
-                  />
-                </div>
+                <p class="text-muted">
+                  <small
+                    >Esta sección puede ampliarse con campos adicionales según sea necesario</small
+                  >
+                </p>
               </div>
             </div>
           </div>
 
-          <!-- Técnicos -->
+          <!-- 7. Familia -->
           <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#formFamilia"
+              >
+                <i class="bi bi-people me-2"></i> Familia
+                <span v-if="!canEditSection('familia')" class="badge bg-secondary ms-auto"
+                  >Solo lectura</span
+                >
+              </button>
+            </h2>
+            <div
+              id="formFamilia"
+              class="accordion-collapse collapse"
+              data-bs-parent="#formAccordion"
+            >
+              <div class="accordion-body">
+                <p class="text-muted">
+                  <small
+                    >Esta sección puede ampliarse con campos adicionales según sea necesario</small
+                  >
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. Técnicos -->
+          <div v-if="canSeeTechnical" class="accordion-item">
             <h2 class="accordion-header">
               <button
                 class="accordion-button collapsed"
@@ -525,6 +854,9 @@
                 data-bs-target="#formTecnicos"
               >
                 <i class="bi bi-gear me-2"></i> Técnicos
+                <span v-if="!canEditSection('tecnicos')" class="badge bg-secondary ms-auto"
+                  >Solo lectura</span
+                >
               </button>
             </h2>
             <div
@@ -533,29 +865,11 @@
               data-bs-parent="#formAccordion"
             >
               <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="telegram" class="form-label">Telegram ID</label>
-                  <input
-                    v-model="formData['Telegram ID']"
-                    type="text"
-                    class="form-control"
-                    id="telegram"
-                    placeholder="Ingrese Telegram ID"
-                    :disabled="isLoading"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="id_jvr" class="form-label">ID Javerim</label>
-                  <input
-                    v-model="formData.ID_JVR"
-                    type="text"
-                    class="form-control"
-                    id="id_jvr"
-                    placeholder="Ingrese ID Javerim"
-                    :disabled="isLoading"
-                  />
-                </div>
+                <p class="text-muted">
+                  <small
+                    >Esta sección puede ampliarse con campos adicionales según sea necesario</small
+                  >
+                </p>
               </div>
             </div>
           </div>
@@ -563,7 +877,7 @@
 
         <!-- Botones -->
         <div class="d-grid gap-2 mt-4">
-          <button type="submit" class="btn btn-primary" :disabled="isLoading">
+          <button type="submit" class="btn btn-primary" :disabled="isLoading || !canEditAny">
             <span v-if="!isLoading"><i class="bi bi-check-circle me-2"></i>Actualizar Datos</span>
             <span v-else>
               <span class="spinner-border spinner-border-sm me-2"></span>Guardando...
@@ -573,7 +887,7 @@
             type="button"
             class="btn btn-outline-secondary"
             @click="close"
-            :disabled="isLoading"
+            :disabled="isLoading || !canEditAny"
           >
             Cancelar
           </button>
@@ -604,6 +918,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  canEditSection: {
+    type: Function,
+    default: () => true,
+  },
+  canSeeTechnical: {
+    type: Function,
+    default: () => false,
+  },
 })
 
 // Emits
@@ -616,57 +938,82 @@ const successMessage = ref('')
 const errorMessage = ref('')
 const offcanvasId = computed(() => `profileForm-${Math.random().toString(36).substr(2, 9)}`)
 
+// Computed: verificar si puede editar al menos una sección
+const canEditAny = computed(() => {
+  const sections = [
+    'personal',
+    'contacto',
+    'domicilio',
+    'medicos',
+    'desarrollo',
+    'familia',
+    'organizacion',
+    'tecnicos',
+  ]
+  return sections.some((section) => props.canEditSection(section))
+})
+
 // Formulario
 const formData = ref({
-  // Datos personales
+  // Información Personal
   DNI: null,
   dni: null,
+  CUIL: '',
   nombre: '',
   apellido: '',
-  email: '',
-  cellphone: null,
   nacimiento: '',
   genero: '',
-  CUIL: '',
   // Contacto
-  mail_operativo: '',
+  celular: '',
   mail_personal: '',
+  mail_operativo: '',
   // Domicilio
   direccion1: '',
   barrio1: '',
   direccion2: '',
   barrio2: '',
   // Médicos
-  foto_dni: '',
-  foto_rostro: '',
   obraSocial: '',
   obraSocial_Plan: '',
   obraSocial_id: '',
+  obraSocial_Carnet: '',
   med_dieta: '',
   med_sangre: '',
   med_historia: '',
   med_problemas: '',
   med_act: '',
   med_actLesion: '',
+  foto_dni: '',
+  foto_rostro: '',
+  med_estudios: '',
+  med_estudios_lab: '',
+  med_estudios_ergo: '',
+  med_estudios_ecodoppler: '',
+  med_estudios_rx: '',
+  med_estudios_extras: '',
+  med_estudios_extraMotivo: '',
+  med_estudios_certificado: '',
+  med_estudios_fechaEst: '',
+  med_aclararimg: '',
+  med_estudios_img1: '',
+  med_estudios_img2: '',
+  med_estudios_img3: '',
+  med_estudios_otro: '',
   // Organización
   organizacion: '',
   areas: '',
-  apodo: '',
-  fecha_ingresoOrg: '',
+  apodoCBok: '',
+  activo: false,
+  nivel: '',
   nivelHBTJ: '',
-  activo: '',
+  fecha_ingresoOrg: '',
   fecha_ingresoMilu: '',
   areas_historicas: '',
-  CBok: '',
   curso_TL: '',
-  curso_FND: '',
   curso_AvH: '',
   curso_AvKM: '',
   curso_IE: '',
-  // Vida y Desarrollo
-  // Técnicos
-  ID_JVR: '',
-  TelegramID: '',
+  curso_FND: '',
 })
 
 // Watchers
@@ -675,48 +1022,65 @@ watch(
   (newData) => {
     if (newData && Object.keys(newData).length > 0) {
       formData.value = {
+        // Información Personal
         DNI: newData.DNI || newData.dni,
         dni: newData.dni || newData.DNI,
         CUIL: newData.CUIL || '',
         nombre: newData.nombre || '',
         apellido: newData.apellido || '',
-        email: newData.email || newData.mail_operativo || newData.mail_personal || '',
-        cellphone: newData.cellphone || newData.celular || '',
         nacimiento: newData.nacimiento || '',
         genero: newData.genero || '',
-        mail_operativo: newData.mail_operativo || '',
+        // Contacto
+        celular: newData.celular || newData.cellphone || '',
         mail_personal: newData.mail_personal || '',
+        mail_operativo: newData.mail_operativo || '',
+        // Domicilio
         direccion1: newData.direccion1 || '',
         barrio1: newData.barrio1 || '',
         direccion2: newData.direccion2 || '',
         barrio2: newData.barrio2 || '',
-        foto_dni: newData.foto_dni || '',
-        foto_rostro: newData.foto_rostro || '',
+        // Médicos
         obraSocial: newData.obraSocial || '',
         obraSocial_Plan: newData.obraSocial_Plan || '',
         obraSocial_id: newData.obraSocial_id || '',
+        obraSocial_Carnet: newData.obraSocial_Carnet || '',
         med_dieta: newData.med_dieta || '',
         med_sangre: newData.med_sangre || '',
         med_historia: newData.med_historia || '',
         med_problemas: newData.med_problemas || '',
         med_act: newData.med_act || '',
         med_actLesion: newData.med_actLesion || '',
+        foto_dni: newData.foto_dni || '',
+        foto_rostro: newData.foto_rostro || '',
+        med_estudios: newData.med_estudios || '',
+        med_estudios_lab: newData.med_estudios_lab || '',
+        med_estudios_ergo: newData.med_estudios_ergo || '',
+        med_estudios_ecodoppler: newData.med_estudios_ecodoppler || '',
+        med_estudios_rx: newData.med_estudios_rx || '',
+        med_estudios_extras: newData.med_estudios_extras || '',
+        med_estudios_extraMotivo: newData.med_estudios_extraMotivo || '',
+        med_estudios_certificado: newData.med_estudios_certificado || '',
+        med_estudios_fechaEst: newData.med_estudios_fechaEst || '',
+        med_aclararimg: newData.med_aclararimg || '',
+        med_estudios_img1: newData.med_estudios_img1 || '',
+        med_estudios_img2: newData.med_estudios_img2 || '',
+        med_estudios_img3: newData.med_estudios_img3 || '',
+        med_estudios_otro: newData.med_estudios_otro || '',
+        // Organización
         organizacion: newData.organizacion || '',
         areas: newData.areas || '',
-        apodo: newData.apodo || '',
-        fecha_ingresoOrg: newData.fecha_ingresoOrg || '',
+        apodoCBok: newData.apodoCBok || '',
+        activo: newData.activo || false,
+        nivel: newData.nivel || '',
         nivelHBTJ: newData.nivelHBTJ || '',
-        activo: newData.activo || '',
+        fecha_ingresoOrg: newData.fecha_ingresoOrg || '',
         fecha_ingresoMilu: newData.fecha_ingresoMilu || '',
         areas_historicas: newData.areas_historicas || '',
-        CBok: newData.CBok || '',
         curso_TL: newData.curso_TL || '',
-        curso_FND: newData.curso_FND || '',
         curso_AvH: newData.curso_AvH || '',
         curso_AvKM: newData.curso_AvKM || '',
         curso_IE: newData.curso_IE || '',
-        ID_JVR: newData.ID_JVR || newData.id_jvr || '',
-        TelegramID: newData.TelegramID || newData.telegram_id || '',
+        curso_FND: newData.curso_FND || '',
       }
     }
   },
@@ -748,46 +1112,64 @@ const handleSubmit = async () => {
 
     // Actualizar en main con TODOS los campos
     const mainData = {
+      // Información Personal
       DNI: formData.value.DNI,
+      CUIL: formData.value.CUIL,
       nombre: formData.value.nombre,
       apellido: formData.value.apellido,
-      celular: formData.value.cellphone,
       nacimiento: formData.value.nacimiento,
       genero: formData.value.genero,
-      mail_operativo: formData.value.mail_operativo,
+      // Contacto
+      celular: formData.value.celular,
       mail_personal: formData.value.mail_personal,
-      CUIL: formData.value.CUIL,
+      mail_operativo: formData.value.mail_operativo,
+      // Domicilio
       direccion1: formData.value.direccion1,
       barrio1: formData.value.barrio1,
       direccion2: formData.value.direccion2,
       barrio2: formData.value.barrio2,
-      foto_dni: formData.value.foto_dni,
-      foto_rostro: formData.value.foto_rostro,
+      // Médicos
       obraSocial: formData.value.obraSocial,
       obraSocial_Plan: formData.value.obraSocial_Plan,
       obraSocial_id: formData.value.obraSocial_id,
+      obraSocial_Carnet: formData.value.obraSocial_Carnet,
       med_dieta: formData.value.med_dieta,
       med_sangre: formData.value.med_sangre,
       med_historia: formData.value.med_historia,
       med_problemas: formData.value.med_problemas,
       med_act: formData.value.med_act,
       med_actLesion: formData.value.med_actLesion,
+      foto_dni: formData.value.foto_dni,
+      foto_rostro: formData.value.foto_rostro,
+      med_estudios: formData.value.med_estudios,
+      med_estudios_lab: formData.value.med_estudios_lab,
+      med_estudios_ergo: formData.value.med_estudios_ergo,
+      med_estudios_ecodoppler: formData.value.med_estudios_ecodoppler,
+      med_estudios_rx: formData.value.med_estudios_rx,
+      med_estudios_extras: formData.value.med_estudios_extras,
+      med_estudios_extraMotivo: formData.value.med_estudios_extraMotivo,
+      med_estudios_certificado: formData.value.med_estudios_certificado,
+      med_estudios_fechaEst: formData.value.med_estudios_fechaEst,
+      med_aclararimg: formData.value.med_aclararimg,
+      med_estudios_img1: formData.value.med_estudios_img1,
+      med_estudios_img2: formData.value.med_estudios_img2,
+      med_estudios_img3: formData.value.med_estudios_img3,
+      med_estudios_otro: formData.value.med_estudios_otro,
+      // Organización
       organizacion: formData.value.organizacion,
       areas: formData.value.areas,
-      apodo: formData.value.apodo,
-      fecha_ingresoOrg: formData.value.fecha_ingresoOrg,
-      nivelHBTJ: formData.value.nivelHBTJ,
+      apodoCBok: formData.value.apodoCBok,
       activo: formData.value.activo,
+      nivel: formData.value.nivel,
+      nivelHBTJ: formData.value.nivelHBTJ,
+      fecha_ingresoOrg: formData.value.fecha_ingresoOrg,
       fecha_ingresoMilu: formData.value.fecha_ingresoMilu,
       areas_historicas: formData.value.areas_historicas,
-      CBok: formData.value.CBok,
       curso_TL: formData.value.curso_TL,
-      curso_FND: formData.value.curso_FND,
       curso_AvH: formData.value.curso_AvH,
       curso_AvKM: formData.value.curso_AvKM,
       curso_IE: formData.value.curso_IE,
-      TelegramID: formData.value.TelegramID,
-      ID_JVR: formData.value.ID_JVR,
+      curso_FND: formData.value.curso_FND,
     }
 
     await update('main', mainData)
@@ -796,8 +1178,8 @@ const handleSubmit = async () => {
     try {
       await update('users', {
         dni: formData.value.dni,
-        email: formData.value.email,
-        cellphone: formData.value.cellphone,
+        email: formData.value.mail_operativo || formData.value.mail_personal,
+        cellphone: formData.value.celular,
       })
     } catch (err) {
       console.log('No se actualizó en users (puede no existir)')

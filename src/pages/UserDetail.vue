@@ -20,7 +20,7 @@
 
     <!-- Error: Sin permisos -->
     <div v-if="noPermission" class="alert alert-warning">
-      <i class="bi bi-exclamation-triangle"></i> No tienes permisos para editar este usuario
+      <i class="bi bi-exclamation-triangle"></i> No tienes permisos para ver este usuario
     </div>
 
     <!-- Contenido principal -->
@@ -42,22 +42,22 @@
 
             <!-- Acordeones por temática -->
             <div v-else-if="userData" class="accordion" :id="accordionId">
-              <!-- Información Personal -->
+              <!-- 1. Información Personal -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <button
                     class="accordion-button collapsed"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#personal"
+                    :data-bs-target="`#personal-${accordionId}`"
                   >
-                    <i class="bi bi-person me-2"></i> Información Personal
+                    <i class="bi bi-person me-2"></i> Información personal
                   </button>
                 </h2>
                 <div
-                  id="personal"
+                  :id="`personal-${accordionId}`"
                   class="accordion-collapse collapse"
-                  data-bs-parent="#personal-accordion"
+                  :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
                     <div class="row g-3">
@@ -90,69 +90,58 @@
                 </div>
               </div>
 
-              <!-- Contacto -->
+              <!-- 2. Contacto -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <button
                     class="accordion-button collapsed"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#contacto"
+                    :data-bs-target="`#contacto-${accordionId}`"
                   >
                     <i class="bi bi-telephone me-2"></i> Contacto
                   </button>
                 </h2>
                 <div
-                  id="contacto"
+                  :id="`contacto-${accordionId}`"
                   class="accordion-collapse collapse"
-                  data-bs-parent="#contacto-accordion"
+                  :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
                     <div class="row g-3">
                       <div class="col-md-6">
-                        <label class="text-muted small">Email</label>
-                        <p class="fw-bold text-break">
-                          {{
-                            userData.email ||
-                            userData.mail_operativo ||
-                            userData.mail_personal ||
-                            '-'
-                          }}
-                        </p>
+                        <label class="text-muted small">Celular</label>
+                        <p class="fw-bold">{{ userData.celular || '-' }}</p>
                       </div>
                       <div class="col-md-6">
-                        <label class="text-muted small">Teléfono</label>
-                        <p class="fw-bold">{{ userData.celular || userData.cellphone || '-' }}</p>
-                      </div>
-                      <div v-if="userData.mail_operativo" class="col-md-6">
-                        <label class="text-muted small">Email Operativo</label>
-                        <p class="fw-bold text-break">{{ userData.mail_operativo }}</p>
-                      </div>
-                      <div v-if="userData.mail_personal" class="col-md-6">
                         <label class="text-muted small">Email Personal</label>
-                        <p class="fw-bold text-break">{{ userData.mail_personal }}</p>
+                        <p class="fw-bold text-break">{{ userData.mail_personal || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Email Operativo</label>
+                        <p class="fw-bold text-break">{{ userData.mail_operativo || '-' }}</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Domicilio -->
+              <!-- 3. Domicilio -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <button
                     class="accordion-button collapsed"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#domicilio"
+                    :data-bs-target="`#domicilio-${accordionId}`"
                   >
                     <i class="bi bi-houses me-2"></i> Domicilio
                   </button>
                 </h2>
                 <div
-                  id="domicilio"
+                  :id="`domicilio-${accordionId}`"
                   class="accordion-collapse collapse"
-                  data-bs-parent="#domicilio-accordion"
+                  :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
                     <div class="row g-3">
@@ -164,8 +153,6 @@
                         <label class="text-muted small">Barrio 1</label>
                         <p class="fw-bold">{{ userData.barrio1 || '-' }}</p>
                       </div>
-                    </div>
-                    <div class="row g-3">
                       <div class="col-md-6">
                         <label class="text-muted small">Dirección 2</label>
                         <p class="fw-bold">{{ userData.direccion2 || '-' }}</p>
@@ -179,25 +166,65 @@
                 </div>
               </div>
 
-              <!-- Médicos -->
+              <!-- 4. Médicos -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <button
                     class="accordion-button collapsed"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#medicos"
+                    :data-bs-target="`#medicos-${accordionId}`"
                   >
                     <i class="bi bi-heart-pulse me-2"></i> Médicos
                   </button>
                 </h2>
                 <div
-                  id="medicos"
+                  :id="`medicos-${accordionId}`"
                   class="accordion-collapse collapse"
-                  data-bs-parent="#medicos-accordion"
+                  :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
                     <div class="row g-3">
+                      <div class="col-md-6">
+                        <label class="text-muted small">Obra Social</label>
+                        <p class="fw-bold">{{ userData.obraSocial || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Plan</label>
+                        <p class="fw-bold">{{ userData.obraSocial_Plan || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">ID Obra Social</label>
+                        <p class="fw-bold">{{ userData.obraSocial_id || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Carnet</label>
+                        <p class="fw-bold">{{ userData.obraSocial_Carnet || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Dieta</label>
+                        <p class="fw-bold">{{ userData.med_dieta || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Tipo de Sangre</label>
+                        <p class="fw-bold">{{ userData.med_sangre || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Historia Médica</label>
+                        <p class="fw-bold">{{ userData.med_historia || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Problemas de Salud</label>
+                        <p class="fw-bold">{{ userData.med_problemas || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Actividad Física</label>
+                        <p class="fw-bold">{{ userData.med_act || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Lesiones Actuales</label>
+                        <p class="fw-bold">{{ userData.med_actLesion || '-' }}</p>
+                      </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Foto DNI</label>
                         <p class="fw-bold">{{ userData.foto_dni || '-' }}</p>
@@ -207,80 +234,26 @@
                         <p class="fw-bold">{{ userData.foto_rostro || '-' }}</p>
                       </div>
                     </div>
-                    <div class="row g-3">
-                      <div class="col-md-4">
-                        <label class="text-muted small">Obra Social / Prepaga</label>
-                        <p class="fw-bold">{{ userData.obraSocial || '-' }}</p>
-                      </div>
-                      <div class="col-md-4">
-                        <label class="text-muted small">Plan</label>
-                        <p class="fw-bold">{{ userData.obraSocial_Plan || '-' }}</p>
-                      </div>
-                      <div class="col-md-4">
-                        <label class="text-muted small">N° Socio</label>
-                        <p class="fw-bold">{{ userData.obraSocial_id || '-' }}</p>
-                      </div>
-                    </div>
-                    <div class="row g-3">
-                      <div class="col-md-6">
-                        <label class="text-muted small">Dieta</label>
-                        <p class="fw-bold">{{ userData.med_dieta || '-' }}</p>
-                      </div>
-                      <div class="col-md-6">
-                        <label class="text-muted small">Tipo sanguíneo</label>
-                        <p class="fw-bold">{{ userData.med_sangre || '-' }}</p>
-                      </div>
-                    </div>
-                    <div class="row g-3">
-                      <div class="col-md-6">
-                        <label class="text-muted small">Lesiones, operaciones o medicación</label>
-                        <p class="fw-bold">{{ userData.med_historia || '-' }}</p>
-                      </div>
-                      <div class="col-md-6">
-                        <label class="text-muted small">Lesiones/Problemas crónicos</label>
-                        <p class="fw-bold">{{ userData.med_problemas || '-' }}</p>
-                      </div>
-                    </div>
-                    <div class="row g-3">
-                      <div class="col-md-6">
-                        <label class="text-muted small">Puede hacer act. física</label>
-                        <p class="fw-bold">{{ userData.med_act || '-' }}</p>
-                      </div>
-                      <div class="col-md-6">
-                        <label class="text-muted small">Lesiones/Problemas con Act. física</label>
-                        <p class="fw-bold">{{ userData.med_actLesion || '-' }}</p>
-                      </div>
-                    </div>
-                    <div class="row g-3">
-                      <div class="col-md-6">
-                        <label class="text-muted small">Lesiones, operaciones o medicación</label>
-                        <p class="fw-bold">{{ userData.med_historia || '-' }}</p>
-                      </div>
-                      <div class="col-md-6">
-                        <label class="text-muted small">Lesiones/Problemas crónicos</label>
-                        <p class="fw-bold">{{ userData.med_problemas || '-' }}</p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Organización -->
+              <!-- 5. Organización -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <button
                     class="accordion-button collapsed"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#organizacion"
+                    :data-bs-target="`#organizacion-${accordionId}`"
                   >
                     <i class="bi bi-building me-2"></i> Organización
                   </button>
                 </h2>
                 <div
-                  id="organizacion"
+                  :id="`organizacion-${accordionId}`"
                   class="accordion-collapse collapse"
-                  data-bs-parent="#organizacion-accordion"
+                  :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
                     <div class="row g-3">
@@ -292,146 +265,124 @@
                         <label class="text-muted small">Áreas</label>
                         <p class="fw-bold">{{ userData.areas || '-' }}</p>
                       </div>
-                    </div>
-                    <div class="row g-3">
                       <div class="col-md-6">
-                        <label class="text-muted small">Apodo</label>
-                        <p class="fw-bold">{{ userData.apodo || '-' }}</p>
-                      </div>
-                      <div class="col-md-6">
-                        <label class="text-muted small">Fecha de Ingreso</label>
-                        <p class="fw-bold">{{ userData.fecha_ingresoOrg || '-' }}</p>
-                      </div>
-                    </div>
-                    <div class="row g-3">
-                      <div class="col-md-6">
-                        <label class="text-muted small">Nivel de HBTJ</label>
-                        <p class="fw-bold">{{ userData.nivelHBTJ || '-' }}</p>
+                        <label class="text-muted small">Apodo CBok</label>
+                        <p class="fw-bold">{{ userData.apodoCBok || '-' }}</p>
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">¿Activo?</label>
-                        <p class="fw-bold">
-                          {{ userData.activo === 1 ? 'Sí' : 'No' || '-' }}
-                        </p>
+                        <p class="fw-bold">{{ userData.activo ? 'Sí' : 'No' }}</p>
                       </div>
-                    </div>
-                    <div class="row g-3">
                       <div class="col-md-6">
-                        <label class="text-muted small">Fecha de Ingreso MILU</label>
+                        <label class="text-muted small">Nivel</label>
+                        <p class="fw-bold">{{ userData.nivel || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Nivel HBTJ</label>
+                        <p class="fw-bold">{{ userData.nivelHBTJ || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Fecha de Ingreso Org</label>
+                        <p class="fw-bold">{{ userData.fecha_ingresoOrg || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Fecha de Ingreso Milu</label>
                         <p class="fw-bold">{{ userData.fecha_ingresoMilu || '-' }}</p>
                       </div>
                       <div class="col-md-6">
-                        <label class="text-muted small">Áreas históricas</label>
-                        <p class="fw-bold">
-                          {{ userData.areas_historicas || '-' }}
-                        </p>
+                        <label class="text-muted small">Áreas Históricas</label>
+                        <p class="fw-bold">{{ userData.areas_historicas || '-' }}</p>
                       </div>
-                    </div>
-                    <hr />
-                    <div class="row g-3">
-                      <h3>Cursos</h3>
-                      <div class="col-md-4">
-                        <label class="text-muted small">Curso Básico</label>
-                        <p class="fw-bold">{{ userData.CBok || '-' }}</p>
-                      </div>
-                      <div class="col-md-4">
+                      <div class="col-md-6">
                         <label class="text-muted small">Curso TL</label>
-                        <p class="fw-bold">
-                          {{ userData.curso_TL || '-' }}
-                        </p>
+                        <p class="fw-bold">{{ userData.curso_TL || '-' }}</p>
                       </div>
-                      <div class="col-md-4">
-                        <label class="text-muted small">Curso FND</label>
-                        <p class="fw-bold">
-                          {{ userData.curso_FND || '-' }}
-                        </p>
-                      </div>
-                      <div class="col-md-4">
-                        <label class="text-muted small">Curso Avanzado H</label>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Curso Av H</label>
                         <p class="fw-bold">{{ userData.curso_AvH || '-' }}</p>
                       </div>
-                      <div class="col-md-4">
-                        <label class="text-muted small">Curso Avanzado KM</label>
-                        <p class="fw-bold">
-                          {{ userData.curso_AvKM || '-' }}
-                        </p>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Curso Av KM</label>
+                        <p class="fw-bold">{{ userData.curso_AvKM || '-' }}</p>
                       </div>
-                      <div class="col-md-4">
+                      <div class="col-md-6">
                         <label class="text-muted small">Curso IE</label>
-                        <p class="fw-bold">
-                          {{ userData.curso_IE || '-' }}
-                        </p>
+                        <p class="fw-bold">{{ userData.curso_IE || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Curso FND</label>
+                        <p class="fw-bold">{{ userData.curso_FND || '-' }}</p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Vida y Desarrollo -->
+              <!-- 6. Vida y Desarrollo -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <button
                     class="accordion-button collapsed"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#desarrollo"
+                    :data-bs-target="`#desarrollo-${accordionId}`"
                   >
                     <i class="bi bi-book me-2"></i> Vida y Desarrollo
                   </button>
                 </h2>
                 <div
-                  id="desarrollo"
+                  :id="`desarrollo-${accordionId}`"
                   class="accordion-collapse collapse"
-                  data-bs-parent="#desarrollo-accordion"
+                  :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
-                    <div class="row g-3">
-                      <div class="col-md-6">
-                        <label class="text-muted small">Educación</label>
-                        <p class="fw-bold">{{ userData.educacion || '-' }}</p>
-                      </div>
-                      <div class="col-md-6">
-                        <label class="text-muted small">Profesión</label>
-                        <p class="fw-bold">{{ userData.profesion || '-' }}</p>
-                      </div>
-                      <div class="col-md-6">
-                        <label class="text-muted small">Experiencia</label>
-                        <p class="fw-bold">{{ userData.experiencia || '-' }}</p>
-                      </div>
-                      <div class="col-md-6">
-                        <label class="text-muted small">Habilidades</label>
-                        <p class="fw-bold">{{ userData.habilidades || '-' }}</p>
-                      </div>
-                    </div>
+                    <p class="text-muted"><small>No hay datos en esta sección</small></p>
                   </div>
                 </div>
               </div>
 
-              <!-- Técnicos -->
+              <!-- 7. Familia -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
                   <button
                     class="accordion-button collapsed"
                     type="button"
                     data-bs-toggle="collapse"
-                    data-bs-target="#tecnicos"
+                    :data-bs-target="`#familia-${accordionId}`"
+                  >
+                    <i class="bi bi-people me-2"></i> Familia
+                  </button>
+                </h2>
+                <div
+                  :id="`familia-${accordionId}`"
+                  class="accordion-collapse collapse"
+                  :data-bs-parent="`#${accordionId}`"
+                >
+                  <div class="accordion-body p-3">
+                    <p class="text-muted"><small>No hay datos en esta sección</small></p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 8. Técnicos (Solo visible para nivel 3) -->
+              <div v-if="canSeeTechnical" class="accordion-item">
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    :data-bs-target="`#tecnicos-${accordionId}`"
                   >
                     <i class="bi bi-gear me-2"></i> Técnicos
                   </button>
                 </h2>
                 <div
-                  id="tecnicos"
+                  :id="`tecnicos-${accordionId}`"
                   class="accordion-collapse collapse"
-                  data-bs-parent="#tecnicos-accordion"
+                  :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
                     <div class="row g-3">
-                      <div class="col-md-6">
-                        <label class="text-muted small">Telegram ID</label>
-                        <p class="fw-bold">
-                          {{ userData.telegram_id || userData.TelegramID || '-' }}
-                        </p>
-                      </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Nivel IT</label>
                         <p class="fw-bold">
@@ -439,10 +390,6 @@
                             {{ getLevelName(userData.it_level) }}
                           </span>
                         </p>
-                      </div>
-                      <div class="col-md-6">
-                        <label class="text-muted small">ID Javerim</label>
-                        <p class="fw-bold">{{ userData.ID_JVR || userData.id_jvr || '-' }}</p>
                       </div>
                     </div>
                   </div>
@@ -453,12 +400,16 @@
 
           <!-- Botones de acción -->
           <div class="card-footer d-flex gap-2">
-            <button @click="openEditForm" class="btn btn-primary" :disabled="loading">
+            <button @click="openEditForm" class="btn btn-primary" :disabled="loading || !canEdit">
               <i class="bi bi-pencil"></i> Editar Datos
             </button>
-            <button v-if="can(3)" class="btn btn-danger" :disabled="loading" @click="handleDelete">
+            <!-- Eliminar usuario: deshabilitado por ahora, lógica backend en handleDelete() -->
+            <!-- <button v-if="can(3)" class="btn btn-danger" :disabled="loading" @click="handleDelete">
               <i class="bi bi-trash"></i> Eliminar
-            </button>
+            </button> -->
+            <div v-if="!canEdit" class="ms-auto">
+              <span class="badge bg-warning">Solo lectura</span>
+            </div>
           </div>
         </div>
       </div>
@@ -467,28 +418,34 @@
       <div class="col-md-4">
         <div class="card shadow-sm bg-light mb-3">
           <div class="card-header bg-info text-white">
-            <h6 class="mb-0"><i class="bi bi-shield-check"></i> Permisos de Edición</h6>
+            <h6 class="mb-0"><i class="bi bi-shield-check"></i> Permisos</h6>
           </div>
           <div class="card-body small">
             <p class="mb-2">
-              <i class="bi bi-check-circle text-success"></i>
-              Puedes editar datos del usuario
+              <i v-if="canEdit" class="bi bi-check-circle text-success"></i>
+              <i v-else class="bi bi-x-circle text-danger"></i>
+              Editar datos
             </p>
             <p class="mb-0">
-              <i class="bi bi-x-circle text-danger"></i>
-              No puedes cambiar el nivel IT
+              <i v-if="canSeeTechnical" class="bi bi-check-circle text-success"></i>
+              <i v-else class="bi bi-x-circle text-danger"></i>
+              Ver datos técnicos
             </p>
+            <!-- Eliminar usuarios: funcionalidad deshabilitada por ahora -->
           </div>
         </div>
 
         <div class="card shadow-sm bg-light">
           <div class="card-header bg-warning text-dark">
-            <h6 class="mb-0"><i class="bi bi-exclamation-circle"></i> Nota</h6>
+            <h6 class="mb-0"><i class="bi bi-info-circle"></i> Nivel del Usuario</h6>
           </div>
           <div class="card-body small">
-            <p class="mb-0">
-              Solo un administrador de nivel 3 puede cambiar el nivel IT de los usuarios.
+            <p class="fw-bold mb-2">
+              <span :class="getLevelBadgeClass(userData.it_level)">
+                {{ getLevelName(userData.it_level) }}
+              </span>
             </p>
+            <p class="mb-0">{{ getLevelDescription(userData.it_level) }}</p>
           </div>
         </div>
       </div>
@@ -499,7 +456,8 @@
       ref="profileForm"
       :profileData="userData"
       :isEditing="true"
-      :showOrgField="true"
+      :canEditSection="canEditSection"
+      :canSeeTechnical="canSeeTechnical"
       @update="onUserUpdated"
       @close="onFormClosed"
     />
@@ -507,7 +465,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { usePermissions } from '@/composables/usePermissions'
@@ -517,7 +475,7 @@ import ProfileForm from '@/components/ProfileForm.vue'
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-const { can, getLevelName } = usePermissions()
+const { can, canEditSection, canSeeTechnical, canAccessUser, getLevelName } = usePermissions()
 
 const profileForm = ref(null)
 const userData = ref({})
@@ -526,9 +484,50 @@ const notFound = ref(false)
 const noPermission = ref(false)
 const accordionId = 'userAccordion'
 
+// Computed: verificar si puede editar
+const canEdit = computed(() => {
+  if (!authStore.user) return false
+  const userLevel = authStore.user.it_level ?? 0
+  const targetDni = parseInt(route.params.dni)
+
+  // Nivel 3: acceso total
+  if (userLevel === 3) return true
+
+  // Nivel 1: solo su propio perfil
+  if (userLevel === 1) return authStore.user.dni === targetDni
+
+  // Nivel 2: su propio perfil + usuarios que comparten MISMA organización
+  if (userLevel === 2) {
+    if (authStore.user.dni === targetDni) return true
+    if (userData.value && authStore.user.organizacion) {
+      // Verificar que sean de la misma organización
+      const sameOrganization = authStore.user.organizacion === userData.value.organizacion
+      if (!sameOrganization) return false
+
+      // CASO ESPECIAL: Si el usuario tiene "ROSH" en areas_ref, puede editar a TODOS de su organización
+      if (authStore.user.areas_ref && authStore.user.areas_ref.includes('ROSH')) {
+        return true
+      }
+
+      // CASO NORMAL: Verificar que compartan al menos una área
+      if (authStore.user.areas_ref && userData.value.areas_ref) {
+        const shareAreas = (areas1, areas2) => {
+          if (!areas1 || !areas2) return false
+          const areasArray1 = areas1.split(',').map((a) => a.trim())
+          const areasArray2 = areas2.split(',').map((a) => a.trim())
+          return areasArray1.some((area) => areasArray2.includes(area))
+        }
+        return shareAreas(authStore.user.areas_ref, userData.value.areas_ref)
+      }
+    }
+  }
+
+  return false
+})
+
 onMounted(async () => {
-  // Verificar que sea nivel 2+
-  if (!authStore.user || !can(2)) {
+  // Verificar que sea nivel 1+
+  if (!authStore.user || authStore.user.it_level < 1) {
     noPermission.value = true
     return
   }
@@ -558,6 +557,12 @@ const loadUserData = async () => {
       return
     }
 
+    // Verificar permisos de acceso (se usa areas_ref del mainRecord)
+    if (!canAccessUser(dni, mainRecord)) {
+      noPermission.value = true
+      return
+    }
+
     // Combinar datos de ambas tablas
     userData.value = {
       dni: dni,
@@ -567,7 +572,6 @@ const loadUserData = async () => {
       apellido: mainRecord?.apellido || '',
       genero: mainRecord?.genero || '',
       nacimiento: mainRecord?.nacimiento || '',
-      email: userRecord?.email || mainRecord?.mail_operativo || mainRecord?.mail_personal || '',
       celular: mainRecord?.celular || userRecord?.cellphone || '',
       mail_operativo: mainRecord?.mail_operativo || '',
       mail_personal: mainRecord?.mail_personal || '',
@@ -580,29 +584,43 @@ const loadUserData = async () => {
       obraSocial: mainRecord?.obraSocial || '',
       obraSocial_Plan: mainRecord?.obraSocial_Plan || '',
       obraSocial_id: mainRecord?.obraSocial_id || '',
+      obraSocial_Carnet: mainRecord?.obraSocial_Carnet || '',
       med_dieta: mainRecord?.med_dieta || '',
       med_sangre: mainRecord?.med_sangre || '',
       med_historia: mainRecord?.med_historia || '',
       med_problemas: mainRecord?.med_problemas || '',
       med_act: mainRecord?.med_act || '',
       med_actLesion: mainRecord?.med_actLesion || '',
+      med_estudios: mainRecord?.med_estudios || '',
+      med_estudios_lab: mainRecord?.med_estudios_lab || '',
+      med_estudios_ergo: mainRecord?.med_estudios_ergo || '',
+      med_estudios_ecodoppler: mainRecord?.med_estudios_ecodoppler || '',
+      med_estudios_rx: mainRecord?.med_estudios_rx || '',
+      med_estudios_extras: mainRecord?.med_estudios_extras || '',
+      med_estudios_extraMotivo: mainRecord?.med_estudios_extraMotivo || '',
+      med_estudios_certificado: mainRecord?.med_estudios_certificado || '',
+      med_estudios_fechaEst: mainRecord?.med_estudios_fechaEst || '',
+      med_aclararimg: mainRecord?.med_aclararimg || '',
+      med_estudios_img1: mainRecord?.med_estudios_img1 || '',
+      med_estudios_img2: mainRecord?.med_estudios_img2 || '',
+      med_estudios_img3: mainRecord?.med_estudios_img3 || '',
+      med_estudios_otro: mainRecord?.med_estudios_otro || '',
       organizacion: mainRecord?.organizacion || '',
       areas: mainRecord?.areas || '',
-      apodo: mainRecord?.apodo || '',
-      fecha_ingresoOrg: mainRecord?.fecha_ingresoOrg || '',
+      areas_ref: mainRecord?.areas_ref || '',
+      apodoCBok: mainRecord?.apodoCBok || '',
+      activo: mainRecord?.activo || false,
+      nivel: mainRecord?.nivel || '',
       nivelHBTJ: mainRecord?.nivelHBTJ || '',
-      activo: mainRecord?.activo || '',
+      fecha_ingresoOrg: mainRecord?.fecha_ingresoOrg || '',
       fecha_ingresoMilu: mainRecord?.fecha_ingresoMilu || '',
       areas_historicas: mainRecord?.areas_historicas || '',
-      CBok: mainRecord?.CBok || '',
       curso_TL: mainRecord?.curso_TL || '',
-      curso_FND: mainRecord?.curso_FND || '',
       curso_AvH: mainRecord?.curso_AvH || '',
       curso_AvKM: mainRecord?.curso_AvKM || '',
       curso_IE: mainRecord?.curso_IE || '',
+      curso_FND: mainRecord?.curso_FND || '',
       it_level: userRecord?.it_level || 0,
-      fecha_ult: userRecord?.fecha_ult || '',
-      TelegramID: userRecord?.TelegramID || '',
     }
   } catch (error) {
     console.error('Error loading user data:', error)
@@ -613,7 +631,9 @@ const loadUserData = async () => {
 }
 
 const openEditForm = () => {
-  profileForm.value.open()
+  if (canEdit.value) {
+    profileForm.value.open()
+  }
 }
 
 const onUserUpdated = () => {
@@ -661,6 +681,16 @@ const getLevelBadgeClass = (level) => {
     3: 'badge bg-danger',
   }
   return classes[level] || 'badge bg-secondary'
+}
+
+const getLevelDescription = (level) => {
+  const descriptions = {
+    0: 'Sin acceso - No puede realizar operaciones',
+    1: 'Básico - Solo ve su propio perfil. Edita: personal, contacto, domicilio, médicos, desarrollo, familia',
+    2: 'Intermedio - Ve usuarios de sus áreas. Edita: personal, contacto, domicilio, médicos, desarrollo, familia, organización',
+    3: 'Avanzado - Acceso total a todos los usuarios, incluyendo datos técnicos',
+  }
+  return descriptions[level] || 'Nivel desconocido'
 }
 </script>
 

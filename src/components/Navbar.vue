@@ -7,13 +7,13 @@
       </router-link>
 
       <!-- Botón de Toggle para mobile -->
-      <button 
-        class="navbar-toggler" 
-        type="button" 
-        data-bs-toggle="collapse" 
-        data-bs-target="#navbarNav" 
-        aria-controls="navbarNav" 
-        aria-expanded="false" 
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#navbarNav"
+        aria-controls="navbarNav"
+        aria-expanded="false"
         aria-label="Toggle navigation"
       >
         <span class="navbar-toggler-icon"></span>
@@ -41,15 +41,16 @@
           </li>
 
           <li class="nav-item dropdown" v-if="authStore.isAuthenticated">
-            <a 
-              class="nav-link dropdown-toggle" 
-              href="#" 
-              id="navbarDropdown" 
-              role="button" 
-              data-bs-toggle="dropdown" 
+            <a
+              class="nav-link dropdown-toggle"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              <i class="bi bi-person-circle"></i> {{ authStore.user?.nickname || authStore.user?.email }}
+              <i class="bi bi-person-circle"></i>
+              {{ authStore.user?.nickname || authStore.user?.email }}
             </a>
             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
               <li>
@@ -59,26 +60,31 @@
               </li>
               <li>
                 <a class="dropdown-item disabled" href="#">
-                  <i class="bi bi-bar-chart"></i> Nivel: {{ getLevelName(authStore.user?.it_level) }}
+                  <i class="bi bi-bar-chart"></i> Nivel:
+                  {{ getLevelName(authStore.user?.it_level) }}
                 </a>
               </li>
+              <li>
+                <hr class="dropdown-divider" />
+              </li>
+              <li>
+                <router-link :to="`/javer/${authStore.user?.dni}`" class="dropdown-item">
+                  <i class="bi bi-person"></i> Mi Perfil
+                </router-link>
+              </li>
               <li v-if="can(2)">
-                <hr class="dropdown-divider">
+                <hr class="dropdown-divider" />
               </li>
               <!-- Opciones solo para nivel 2+ -->
               <li v-if="can(2)">
-                <a class="dropdown-item" href="#">
-                  <i class="bi bi-gear"></i> Configuración
-                </a>
+                <a class="dropdown-item" href="#"> <i class="bi bi-gear"></i> Configuración </a>
               </li>
               <li v-if="can(2)">
-                <a class="dropdown-item" href="#">
-                  <i class="bi bi-graph-up"></i> Reportes
-                </a>
+                <a class="dropdown-item" href="#"> <i class="bi bi-graph-up"></i> Reportes </a>
               </li>
               <!-- Opciones solo para nivel 3 -->
               <li v-if="can(3)">
-                <hr class="dropdown-divider">
+                <hr class="dropdown-divider" />
               </li>
               <li v-if="can(3)">
                 <a class="dropdown-item text-warning" href="#">
@@ -91,13 +97,10 @@
                 </a>
               </li>
               <li>
-                <hr class="dropdown-divider">
+                <hr class="dropdown-divider" />
               </li>
               <li>
-                <button 
-                  @click="handleLogout" 
-                  class="dropdown-item text-danger"
-                >
+                <button @click="handleLogout" class="dropdown-item text-danger">
                   <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
                 </button>
               </li>
