@@ -4,9 +4,14 @@
     <div class="row mb-4">
       <div class="col-12">
         <div class="card shadow-sm bg-gradient-info text-white">
-          <div class="card-body">
-            <h2><i class="bi bi-house"></i> Bienvenido, {{ authStore.user?.nickname || authStore.user?.email }}</h2>
-            <p class="mb-0">Nivel IT: <strong>{{ getLevelName(authStore.user?.it_level) }}</strong></p>
+          <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="mb-0"><i class="bi bi-house"></i> Bienvenido, {{ authStore.user?.nickname || authStore.user?.email }}</h2>
+              <p class="mb-0 small">Nivel IT: <strong>{{ getLevelName(authStore.user?.it_level) }}</strong></p>
+            </div>
+            <router-link v-if="can(1)" to="/mi-perfil" class="btn btn-light">
+              <i class="bi bi-person-circle"></i> Mi Perfil
+            </router-link>
           </div>
         </div>
       </div>
@@ -84,9 +89,9 @@
                     <td v-if="can(2)">{{ user.organizacion }}</td>
                     <td><small>{{ user.mail_operativo || user.mail_personal || '-' }}</small></td>
                     <td class="text-center">
-                      <button class="btn btn-sm btn-outline-primary" v-if="can(2)" title="Editar">
+                      <router-link v-if="can(2)" :to="`/javer/${user.DNI}`" class="btn btn-sm btn-outline-primary" title="Editar">
                         <i class="bi bi-pencil"></i>
-                      </button>
+                      </router-link>
                       <button class="btn btn-sm btn-outline-danger" v-if="can(3)" title="Eliminar">
                         <i class="bi bi-trash"></i>
                       </button>
