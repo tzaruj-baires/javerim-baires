@@ -26,42 +26,6 @@
       </div>
     </div>
 
-    <!-- Grid de permisos (solo si tiene acceso) -->
-    <div v-if="can(1)" class="row mb-4">
-      <div class="col-md-4" v-if="can(1)">
-        <div class="card shadow-sm border-success">
-          <div class="card-header bg-success text-white">
-            <h5 class="mb-0"><i class="bi bi-unlock"></i> Nivel Básico (1+)</h5>
-          </div>
-          <div class="card-body">
-            <p>Acceso a funciones básicas del sistema.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-4" v-if="can(2)">
-        <div class="card shadow-sm border-warning">
-          <div class="card-header bg-warning text-dark">
-            <h5 class="mb-0"><i class="bi bi-shield-lock"></i> Nivel Intermedio (2+)</h5>
-          </div>
-          <div class="card-body">
-            <p>Acceso a análisis avanzado y reportes detallados.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-4" v-if="can(3)">
-        <div class="card shadow-sm border-danger mt-3 mt-md-0">
-          <div class="card-header bg-danger text-white">
-            <h5 class="mb-0"><i class="bi bi-shield-exclamation"></i> Nivel Avanzado (3)</h5>
-          </div>
-          <div class="card-body">
-            <p>Acceso a panel administrativo y gestión de usuarios.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- Tabla de usuarios (visible para nivel 1+) -->
     <div class="row mb-4" v-if="can(1)">
       <div class="col-12">

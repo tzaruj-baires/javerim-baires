@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://script.google.com/macros/s/AKfycbyvt34FFUZpadBqLVvoXOjLFuA1GeY1kGFknfh5by0Bd6Eu68wnvLOL3zOUvmKaRNdR/exec";
+const API_URL = import.meta.env.VITE_GOOGLE_API;
 
 const params = (resource, action, data = {}) =>
   new URLSearchParams({ resource, action, ...data });
