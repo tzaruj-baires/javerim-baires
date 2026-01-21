@@ -79,7 +79,7 @@
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Nacimiento</label>
-                        <p class="fw-bold">{{ userData.nacimiento || '-' }}</p>
+                        <p class="fw-bold">{{ formatFecha(userData.nacimiento) || '-' }}</p>
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Género</label>
@@ -184,7 +184,19 @@
                   :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
-                    <div class="row g-3">
+                    <!-- Fotos -->
+                    <div class="row g-2">
+                      <div class="col-md-6">
+                        <label class="text-muted small">Foto DNI</label>
+                        <p class="fw-bold">{{ userData.foto_dni || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Foto Rostro</label>
+                        <p class="fw-bold">{{ userData.foto_rostro || '-' }}</p>
+                      </div>
+                    </div>
+                    <!-- Obra Social -->
+                    <div class="row g-2 mt-1">
                       <div class="col-md-6">
                         <label class="text-muted small">Obra Social</label>
                         <p class="fw-bold">{{ userData.obraSocial || '-' }}</p>
@@ -201,6 +213,9 @@
                         <label class="text-muted small">Carnet</label>
                         <p class="fw-bold">{{ userData.obraSocial_Carnet || '-' }}</p>
                       </div>
+                    </div>
+                    <!-- Dieta y Sangre-->
+                    <div class="row g-2 mt-1">
                       <div class="col-md-6">
                         <label class="text-muted small">Dieta</label>
                         <p class="fw-bold">{{ userData.med_dieta || '-' }}</p>
@@ -209,29 +224,60 @@
                         <label class="text-muted small">Tipo de Sangre</label>
                         <p class="fw-bold">{{ userData.med_sangre || '-' }}</p>
                       </div>
+                    </div>
+                    <!-- Historia Médica -->
+                    <div class="row g-2 mt-1">
                       <div class="col-md-6">
-                        <label class="text-muted small">Historia Médica</label>
+                        <label class="text-muted small">Lesiones, operaciones o medicación</label>
                         <p class="fw-bold">{{ userData.med_historia || '-' }}</p>
                       </div>
                       <div class="col-md-6">
-                        <label class="text-muted small">Problemas de Salud</label>
+                        <label class="text-muted small">Problemas de crónicos</label>
                         <p class="fw-bold">{{ userData.med_problemas || '-' }}</p>
                       </div>
                       <div class="col-md-6">
-                        <label class="text-muted small">Actividad Física</label>
+                        <label class="text-muted small">¿Actividad Física?</label>
                         <p class="fw-bold">{{ userData.med_act || '-' }}</p>
                       </div>
                       <div class="col-md-6">
-                        <label class="text-muted small">Lesiones Actuales</label>
+                        <label class="text-muted small">Lesiones actuales</label>
                         <p class="fw-bold">{{ userData.med_actLesion || '-' }}</p>
                       </div>
-                      <div class="col-md-6">
-                        <label class="text-muted small">Foto DNI</label>
-                        <p class="fw-bold">{{ userData.foto_dni || '-' }}</p>
+                    </div>
+                    <hr />
+                    <!-- Estudios Médicos -->
+                    <div class="row g-2 mt-1">
+                      <div class="col-md-12">
+                        <label class="text-muted small">Estudios realizados</label>
+                        <p class="fw-bold">{{ userData.med_estudios || '-' }}</p>
                       </div>
                       <div class="col-md-6">
-                        <label class="text-muted small">Foto Rostro</label>
-                        <p class="fw-bold">{{ userData.foto_rostro || '-' }}</p>
+                        <label class="text-muted small">Estudios extras</label>
+                        <p class="fw-bold">{{ userData.med_estudios_extras || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">¿Por qué estudio extra?</label>
+                        <p class="fw-bold">{{ userData.med_estudios_extraMotivo || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Archivo de estudios</label>
+                        <p class="fw-bold">{{ userData.med_estudios_pdf || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Archivo de certificado</label>
+                        <p class="fw-bold">{{ userData.med_estudios_certificado || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Fecha de emisión certificado</label>
+                        <p class="fw-bold">{{ userData.med_estudios_fecha || '-' }}</p>
+                      </div>
+                      <div class="col-md-12">
+                        <label class="text-muted small">Historia clinica</label>
+                        <p class="fw-bold">{{ userData.med_estudios_img || '-' }}</p>
+                      </div>
+                      <div class="col-md-12">
+                        <label class="text-muted small">Comentarios</label>
+                        <p class="fw-bold">{{ userData.med_estudios_otro || '-' }}</p>
                       </div>
                     </div>
                   </div>
@@ -256,7 +302,8 @@
                   :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
-                    <div class="row g-3">
+                    <div class="row g-2 mt-1">
+                      <h5>Datos básicos</h5>
                       <div class="col-md-6">
                         <label class="text-muted small">Organización</label>
                         <p class="fw-bold">{{ userData.organizacion || '-' }}</p>
@@ -266,13 +313,16 @@
                         <p class="fw-bold">{{ userData.areas || '-' }}</p>
                       </div>
                       <div class="col-md-6">
-                        <label class="text-muted small">Apodo CBok</label>
-                        <p class="fw-bold">{{ userData.apodoCBok || '-' }}</p>
+                        <label class="text-muted small">Apodo</label>
+                        <p class="fw-bold">{{ userData.apodo || '-' }}</p>
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">¿Activo?</label>
-                        <p class="fw-bold">{{ userData.activo ? 'Sí' : 'No' }}</p>
+                        <p class="fw-bold">{{ userData.activo === 1 ? 'Sí' : 'No' }}</p>
                       </div>
+                    </div>
+                    <div class="row g-2 mt-1">
+                      <h5>Historia en la Organización</h5>
                       <div class="col-md-6">
                         <label class="text-muted small">Nivel</label>
                         <p class="fw-bold">{{ userData.nivel || '-' }}</p>
@@ -283,26 +333,34 @@
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Fecha de Ingreso Org</label>
-                        <p class="fw-bold">{{ userData.fecha_ingresoOrg || '-' }}</p>
+                        <p class="fw-bold">{{ formatFecha(userData.fecha_ingresoOrg) || '-' }}</p>
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Fecha de Ingreso Milu</label>
-                        <p class="fw-bold">{{ userData.fecha_ingresoMilu || '-' }}</p>
+                        <p class="fw-bold">{{ formatFecha(userData.fecha_ingresoMilu) || '-' }}</p>
                       </div>
-                      <div class="col-md-6">
+                      <div class="col-md-12">
                         <label class="text-muted small">Áreas Históricas</label>
                         <p class="fw-bold">{{ userData.areas_historicas || '-' }}</p>
                       </div>
+                    </div>
+                    <div class="row g-2 mt-1">
+                      <h5>Cursos realizados</h5>
+
                       <div class="col-md-6">
-                        <label class="text-muted small">Curso TL</label>
+                        <label class="text-muted small">Curso Básico</label>
+                        <p class="fw-bold">{{ userData.CBok || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Curso Team Leader</label>
                         <p class="fw-bold">{{ userData.curso_TL || '-' }}</p>
                       </div>
                       <div class="col-md-6">
-                        <label class="text-muted small">Curso Av H</label>
+                        <label class="text-muted small">Curso Avanzado H</label>
                         <p class="fw-bold">{{ userData.curso_AvH || '-' }}</p>
                       </div>
                       <div class="col-md-6">
-                        <label class="text-muted small">Curso Av KM</label>
+                        <label class="text-muted small">Curso Avanzado KM</label>
                         <p class="fw-bold">{{ userData.curso_AvKM || '-' }}</p>
                       </div>
                       <div class="col-md-6">
@@ -336,7 +394,50 @@
                   :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
-                    <p class="text-muted"><small>No hay datos en esta sección</small></p>
+                    <!-- Estudios -->
+                    <div class="row g-2">
+                      <h5>Estudios</h5>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Grado de estudios alcanzado</label>
+                        <p class="fw-bold">{{ userData.estudios_grado || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Área de estudios</label>
+                        <p class="fw-bold">{{ userData.estudios_area || '-' }}</p>
+                      </div>
+                      <div class="col-md-12">
+                        <label class="text-muted small">Carrera</label>
+                        <p class="fw-bold">{{ userData.estudios_carrera || '-' }}</p>
+                      </div>
+                    </div>
+                    <!-- Trabajo -->
+                    <div class="row g-2 mt-1">
+                      <h5>Trabajo</h5>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Área de trabajo</label>
+                        <p class="fw-bold">{{ userData.trabajo_area || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Puesto de trabajo</label>
+                        <p class="fw-bold">{{ userData.trabajo_puesto || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Barrio donde trabaja</label>
+                        <p class="fw-bold">{{ userData.trabajo_barrio || '-' }}</p>
+                      </div>
+                    </div>
+                    <!-- Comunidad -->
+                    <div class="row g-2 mt-1">
+                      <h5>Comunidad</h5>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Actividad comunitaria</label>
+                        <p class="fw-bold">{{ userData.comunidad_actividad || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Rol comunitario</label>
+                        <p class="fw-bold">{{ userData.comunidad_rol || '-' }}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -359,7 +460,52 @@
                   :data-bs-parent="`#${accordionId}`"
                 >
                   <div class="accordion-body p-3">
-                    <p class="text-muted"><small>No hay datos en esta sección</small></p>
+                    <div class="row g-2">
+                      <h5>Familiar 1</h5>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Nombre</label>
+                        <p class="fw-bold">{{ userData.fam1_nombre || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Apellido</label>
+                        <p class="fw-bold">{{ userData.fam1_apelllido || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Vínculo</label>
+                        <p class="fw-bold">{{ userData.fam1_vinculo || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Celular</label>
+                        <p class="fw-bold">{{ userData.fam1_celular || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Dirección</label>
+                        <p class="fw-bold">{{ userData.fam1_direccion || '-' }}</p>
+                      </div>
+                    </div>
+                    <div class="row g-2 mt-1">
+                      <h5>Familiar 2</h5>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Nombre</label>
+                        <p class="fw-bold">{{ userData.fam2_nombre || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Apellido</label>
+                        <p class="fw-bold">{{ userData.fam2_apelllido || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Vínculo</label>
+                        <p class="fw-bold">{{ userData.fam2_vinculo || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Celular</label>
+                        <p class="fw-bold">{{ userData.fam2_celular || '-' }}</p>
+                      </div>
+                      <div class="col-md-6">
+                        <label class="text-muted small">Dirección</label>
+                        <p class="fw-bold">{{ userData.fam2_direccion || '-' }}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -384,6 +530,21 @@
                   <div class="accordion-body p-3">
                     <div class="row g-3">
                       <div class="col-md-6">
+                        <label class="text-muted small">ID JVR</label>
+                        <p class="fw-bold">{{ userData.ID_JVR || '-' }}</p>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="text-muted small">Telegram ID</label>
+                        <p class="fw-bold">{{ userData.telegram_id || '-' }}</p>
+                      </div>
+
+                      <div class="col-md-6">
+                        <label class="text-muted small">Última modificación</label>
+                        <p class="fw-bold">{{ userData.fecha_ult || '-' }}</p>
+                      </div>
+
+                      <div class="col-md-6">
                         <label class="text-muted small">Nivel IT</label>
                         <p class="fw-bold">
                           <span :class="getLevelBadgeClass(userData.it_level)">
@@ -403,6 +564,7 @@
             <button @click="openEditForm" class="btn btn-primary" :disabled="loading || !canEdit">
               <i class="bi bi-pencil"></i> Editar Datos
             </button>
+
             <!-- Eliminar usuario: deshabilitado por ahora, lógica backend en handleDelete() -->
             <!-- <button v-if="can(3)" class="btn btn-danger" :disabled="loading" @click="handleDelete">
               <i class="bi bi-trash"></i> Eliminar
@@ -418,34 +580,20 @@
       <div class="col-md-4">
         <div class="card shadow-sm bg-light mb-3">
           <div class="card-header bg-info text-white">
-            <h6 class="mb-0"><i class="bi bi-shield-check"></i> Permisos</h6>
+            <h6 class="mb-0"><i class="bi bi-shield-check"></i> ¿Necesitás ayuda?</h6>
           </div>
           <div class="card-body small">
             <p class="mb-2">
-              <i v-if="canEdit" class="bi bi-check-circle text-success"></i>
-              <i v-else class="bi bi-x-circle text-danger"></i>
-              Editar datos
+              <i class="bi bi-check-circle text-success"></i>
+              Puedes solicitar ayuda técnica comunicandote con el equipo de IT.
             </p>
-            <p class="mb-0">
-              <i v-if="canSeeTechnical" class="bi bi-check-circle text-success"></i>
-              <i v-else class="bi bi-x-circle text-danger"></i>
-              Ver datos técnicos
+            <p class="mb-0 icon-link">
+              <a
+                href="https://wa.me/5491158021867/?text=Hola!%20Necesitaba%20ayuda%20con%20la%20App%20de%20Javerim%20Baires"
+                >Tzaruj | 11 5802-1867</a
+              >
             </p>
             <!-- Eliminar usuarios: funcionalidad deshabilitada por ahora -->
-          </div>
-        </div>
-
-        <div class="card shadow-sm bg-light">
-          <div class="card-header bg-warning text-dark">
-            <h6 class="mb-0"><i class="bi bi-info-circle"></i> Nivel del Usuario</h6>
-          </div>
-          <div class="card-body small">
-            <p class="fw-bold mb-2">
-              <span :class="getLevelBadgeClass(userData.it_level)">
-                {{ getLevelName(userData.it_level) }}
-              </span>
-            </p>
-            <p class="mb-0">{{ getLevelDescription(userData.it_level) }}</p>
           </div>
         </div>
       </div>
@@ -470,6 +618,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { usePermissions } from '@/composables/usePermissions'
 import { getAll, remove } from '@/services/api'
+import { formatFecha } from '@/utils/forms_consts'
 import ProfileForm from '@/components/ProfileForm.vue'
 
 const router = useRouter()
@@ -565,6 +714,7 @@ const loadUserData = async () => {
 
     // Combinar datos de ambas tablas
     userData.value = {
+      // Personal
       dni: dni,
       DNI: dni,
       CUIL: mainRecord?.CUIL || '',
@@ -572,13 +722,16 @@ const loadUserData = async () => {
       apellido: mainRecord?.apellido || '',
       genero: mainRecord?.genero || '',
       nacimiento: mainRecord?.nacimiento || '',
+      // Contacto
       celular: mainRecord?.celular || userRecord?.cellphone || '',
       mail_operativo: mainRecord?.mail_operativo || '',
       mail_personal: mainRecord?.mail_personal || '',
+      // Domicilio
       direccion1: mainRecord?.direccion1 || '',
       barrio1: mainRecord?.barrio1 || '',
       direccion2: mainRecord?.direccion2 || '',
       barrio2: mainRecord?.barrio2 || '',
+      // Médicos
       foto_dni: mainRecord?.foto_dni || '',
       foto_rostro: mainRecord?.foto_rostro || '',
       obraSocial: mainRecord?.obraSocial || '',
@@ -592,35 +745,56 @@ const loadUserData = async () => {
       med_act: mainRecord?.med_act || '',
       med_actLesion: mainRecord?.med_actLesion || '',
       med_estudios: mainRecord?.med_estudios || '',
-      med_estudios_lab: mainRecord?.med_estudios_lab || '',
-      med_estudios_ergo: mainRecord?.med_estudios_ergo || '',
-      med_estudios_ecodoppler: mainRecord?.med_estudios_ecodoppler || '',
-      med_estudios_rx: mainRecord?.med_estudios_rx || '',
       med_estudios_extras: mainRecord?.med_estudios_extras || '',
       med_estudios_extraMotivo: mainRecord?.med_estudios_extraMotivo || '',
+      med_estudios_pdf: mainRecord?.med_estudios_pdf || '',
       med_estudios_certificado: mainRecord?.med_estudios_certificado || '',
-      med_estudios_fechaEst: mainRecord?.med_estudios_fechaEst || '',
-      med_aclararimg: mainRecord?.med_aclararimg || '',
-      med_estudios_img1: mainRecord?.med_estudios_img1 || '',
-      med_estudios_img2: mainRecord?.med_estudios_img2 || '',
-      med_estudios_img3: mainRecord?.med_estudios_img3 || '',
+      med_estudios_fecha: mainRecord?.med_estudios_fecha || '',
+      med_estudios_img: mainRecord?.med_estudios_img || '',
       med_estudios_otro: mainRecord?.med_estudios_otro || '',
+      // Organización
       organizacion: mainRecord?.organizacion || '',
       areas: mainRecord?.areas || '',
       areas_ref: mainRecord?.areas_ref || '',
-      apodoCBok: mainRecord?.apodoCBok || '',
+      apodo: mainRecord?.apodo || '',
       activo: mainRecord?.activo || false,
       nivel: mainRecord?.nivel || '',
       nivelHBTJ: mainRecord?.nivelHBTJ || '',
       fecha_ingresoOrg: mainRecord?.fecha_ingresoOrg || '',
       fecha_ingresoMilu: mainRecord?.fecha_ingresoMilu || '',
       areas_historicas: mainRecord?.areas_historicas || '',
+      CBok: mainRecord?.apodoCBok || '',
       curso_TL: mainRecord?.curso_TL || '',
       curso_AvH: mainRecord?.curso_AvH || '',
       curso_AvKM: mainRecord?.curso_AvKM || '',
       curso_IE: mainRecord?.curso_IE || '',
       curso_FND: mainRecord?.curso_FND || '',
+      // Vida y Desarrollo
+      estudios_grado: mainRecord?.estudios_grado || '',
+      estudios_area: mainRecord?.estudios_area || '',
+      estudios_carrera: mainRecord?.estudios_carrera || '',
+      estudios_barrio: mainRecord?.estudios_barrio || '',
+      trabajo_area: mainRecord?.trabajo_area || '',
+      trabajo_puesto: mainRecord?.trabajo_puesto || '',
+      trabajo_barrio: mainRecord?.trabajo_barrio || '',
+      comunidad_actividad: mainRecord?.comunidad_actividad || '',
+      comunidad_rol: mainRecord?.comunidad_rol || '',
+      // Familia
+      fam1_nombre: mainRecord?.fam1_nombre || '',
+      fam1_apellido: mainRecord?.fam1_apellido || '',
+      fam1_vinculo: mainRecord?.fam1_vinculo || '',
+      fam1_celular: mainRecord?.fam1_celular || '',
+      fam1_direccion: mainRecord?.fam1_direccion || '',
+      fam2_nombre: mainRecord?.fam2_nombre || '',
+      fam2_apellido: mainRecord?.fam2_apellido || '',
+      fam2_vinculo: mainRecord?.fam2_vinculo || '',
+      fam2_celular: mainRecord?.fam2_celular || '',
+      fam2_direccion: mainRecord?.fam2_direccion || '',
+      // Datos técnicos
+      ID_JVR: mainRecord?.ID_JVR || '',
       it_level: userRecord?.it_level || 0,
+      telegram_id: mainRecord?.telegram_id || '',
+      fecha_ult: mainRecord?.fecha_ult || '',
     }
   } catch (error) {
     console.error('Error loading user data:', error)

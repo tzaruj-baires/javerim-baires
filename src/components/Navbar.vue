@@ -36,9 +36,6 @@
           </li>
 
           <!-- Si está autenticado -->
-          <li class="nav-item" v-if="authStore.isAuthenticated">
-            <span class="badge bg-info me-3">{{ getLevelName(authStore.user?.it_level) }}</span>
-          </li>
 
           <li class="nav-item dropdown" v-if="authStore.isAuthenticated">
             <a

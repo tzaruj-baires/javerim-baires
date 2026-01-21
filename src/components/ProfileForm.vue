@@ -83,6 +83,7 @@
                     class="form-control"
                     id="nombre"
                     placeholder="Ingrese nombre"
+                    required
                     :disabled="isLoading || !canEditSection('personal')"
                   />
                 </div>
@@ -95,6 +96,7 @@
                     class="form-control"
                     id="apellido"
                     placeholder="Ingrese apellido"
+                    required
                     :disabled="isLoading || !canEditSection('personal')"
                   />
                 </div>
@@ -118,10 +120,9 @@
                     id="genero"
                     :disabled="isLoading || !canEditSection('personal')"
                   >
-                    <option value="">Seleccionar...</option>
-                    <option value="M">Masculino</option>
-                    <option value="F">Femenino</option>
-                    <option value="O">Otro</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                    <option value="Otro">Otro</option>
                   </select>
                 </div>
               </div>
@@ -341,62 +342,66 @@
 
                 <div class="mb-3">
                   <label for="med_sangre" class="form-label">Tipo de Sangre</label>
-                  <input
+                  <select
                     v-model="formData.med_sangre"
-                    type="text"
-                    class="form-control"
+                    class="form-select"
                     id="med_sangre"
-                    placeholder="Ej: O+, A-, etc"
                     :disabled="isLoading || !canEditSection('medicos')"
-                  />
+                  >
+                    <option value=""></option>
+                    <option v-for="tipo in tiposSangre" :key="tipo.value" :value="tipo.value">
+                      {{ tipo.label }}
+                    </option>
+                  </select>
                 </div>
 
                 <div class="mb-3">
                   <label for="med_historia" class="form-label">Historia Médica</label>
-                  <input
+                  <textarea
                     v-model="formData.med_historia"
                     type="text"
                     class="form-control"
                     id="med_historia"
                     placeholder="Ingrese antecedentes médicos"
                     :disabled="isLoading || !canEditSection('medicos')"
-                  />
+                  ></textarea>
                 </div>
 
                 <div class="mb-3">
                   <label for="med_problemas" class="form-label">Problemas de Salud</label>
-                  <input
+                  <textarea
                     v-model="formData.med_problemas"
                     type="text"
                     class="form-control"
                     id="med_problemas"
                     placeholder="Ingrese problemas actuales"
                     :disabled="isLoading || !canEditSection('medicos')"
-                  />
+                  ></textarea>
                 </div>
 
                 <div class="mb-3">
                   <label for="med_act" class="form-label">Actividad Física</label>
-                  <input
+                  <select
                     v-model="formData.med_act"
-                    type="text"
-                    class="form-control"
+                    class="form-select"
                     id="med_act"
-                    placeholder="Ingrese actividades realizadas"
                     :disabled="isLoading || !canEditSection('medicos')"
-                  />
+                  >
+                    <option value="Sí">Sí</option>
+                    <option value="No">No</option>
+                  </select>
                 </div>
 
                 <div class="mb-3">
                   <label for="med_actLesion" class="form-label">Lesiones Actuales</label>
-                  <input
+                  <textarea
                     v-model="formData.med_actLesion"
                     type="text"
                     class="form-control"
                     id="med_actLesion"
                     placeholder="Ingrese lesiones"
                     :disabled="isLoading || !canEditSection('medicos')"
-                  />
+                  ></textarea>
                 </div>
 
                 <div class="mb-3">
@@ -433,54 +438,56 @@
                     placeholder="Ingrese estudios"
                     :disabled="isLoading || !canEditSection('medicos')"
                   />
-                </div>
 
-                <div class="mb-3">
-                  <label for="med_estudios_lab" class="form-label">Estudios Laboratorio</label>
-                  <input
-                    v-model="formData.med_estudios_lab"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_lab"
-                    placeholder="Ingrese análisis"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_ergo" class="form-label">Estudios Ergonómico</label>
-                  <input
-                    v-model="formData.med_estudios_ergo"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_ergo"
-                    placeholder="Ingrese ergonomía"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_ecodoppler" class="form-label">Ecodoppler</label>
-                  <input
-                    v-model="formData.med_estudios_ecodoppler"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_ecodoppler"
-                    placeholder="Ingrese resultado"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_rx" class="form-label">Radiografías</label>
-                  <input
-                    v-model="formData.med_estudios_rx"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_rx"
-                    placeholder="Ingrese resultado"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value="Laboratorio completo"
+                      id="defaultCheck1"
+                    />
+                    <label class="form-check-label" for="defaultCheck1">Laboratorio completo</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value="Ergometría de 12 deriv."
+                      id="defaultCheck2"
+                    />
+                    <label class="form-check-label" for="defaultCheck2"
+                      >Ergometría de 12 deriv.</label
+                    >
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value="Ecodoppler"
+                      id="defaultCheck3"
+                    />
+                    <label class="form-check-label" for="defaultCheck3">Ecodoppler</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value="Radiografía de Tórax"
+                      id="defaultCheck4"
+                    />
+                    <label class="form-check-label" for="defaultCheck4">Radiografía de Tórax</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      class="form-check-input"
+                      type="checkbox"
+                      value="Ecoestress o Perfusión Miocárdica"
+                      id="defaultCheck5"
+                    />
+                    <label class="form-check-label" for="defaultCheck5"
+                      >Ecoestress o Perfusión Miocárdica</label
+                    >
+                  </div>
                 </div>
 
                 <div class="mb-3">
@@ -618,35 +625,63 @@
               <div class="accordion-body">
                 <div class="mb-3">
                   <label for="organizacion" class="form-label">Organización</label>
-                  <input
+                  <select
                     v-model="formData.organizacion"
-                    type="text"
-                    class="form-control"
+                    class="form-select"
                     id="organizacion"
-                    placeholder="Ingrese organización"
                     :disabled="isLoading || !canEditSection('organizacion')"
-                  />
+                  >
+                    <option :value="org" v-for="org in organizaciones" :key="org">{{ org }}</option>
+                  </select>
                 </div>
 
                 <div class="mb-3">
-                  <label for="areas" class="form-label">Áreas</label>
-                  <input
-                    v-model="formData.areas"
-                    type="text"
-                    class="form-control"
-                    id="areas"
-                    placeholder="Ingrese áreas"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
+                  <label for="areas_ref" class="form-label">Área de Referencia (Múltiples)</label>
+                  <select
+                    v-model="formData.areas_ref"
+                    multiple
+                    class="form-select"
+                    id="areas_ref"
+                    :disabled="
+                      isLoading || !canEditSection('organizacion') || !formData.organizacion
+                    "
+                    size="5"
+                  >
+                    <option :value="area" v-for="area in areasRefDisponibles" :key="area">
+                      {{ area }}
+                    </option>
+                  </select>
+                  <small class="text-muted">Selecciona una o más áreas (Ctrl/Cmd + clic)</small>
                 </div>
 
                 <div class="mb-3">
-                  <label for="apodoCBok" class="form-label">Apodo CBok</label>
+                  <label for="rol" class="form-label">Rol (Múltiples)</label>
+                  <select
+                    v-model="formData.rol"
+                    multiple
+                    class="form-select"
+                    id="rol"
+                    :disabled="
+                      isLoading ||
+                      !canEditSection('organizacion') ||
+                      formData.areas_ref.length === 0
+                    "
+                    size="5"
+                  >
+                    <option :value="rol" v-for="rol in rolesDisponibles" :key="rol">
+                      {{ rol }}
+                    </option>
+                  </select>
+                  <small class="text-muted">Selecciona uno o más roles (Ctrl/Cmd + clic)</small>
+                </div>
+
+                <div class="mb-3">
+                  <label for="apodo" class="form-label">Apodo</label>
                   <input
-                    v-model="formData.apodoCBok"
+                    v-model="formData.apodo"
                     type="text"
                     class="form-control"
-                    id="apodoCBok"
+                    id="apodo"
                     placeholder="Ingrese apodo"
                     :disabled="isLoading || !canEditSection('organizacion')"
                   />
@@ -667,7 +702,9 @@
                   <label for="nivel" class="form-label">Nivel</label>
                   <input
                     v-model="formData.nivel"
-                    type="text"
+                    type="number"
+                    min="1"
+                    max="5"
                     class="form-control"
                     id="nivel"
                     placeholder="Ingrese nivel"
@@ -677,14 +714,15 @@
 
                 <div class="mb-3">
                   <label for="nivelHBTJ" class="form-label">Nivel HBTJ</label>
-                  <input
+                  <select
                     v-model="formData.nivelHBTJ"
-                    type="text"
-                    class="form-control"
+                    class="form-select"
                     id="nivelHBTJ"
                     placeholder="Ingrese nivel HBTJ"
                     :disabled="isLoading || !canEditSection('organizacion')"
-                  />
+                  >
+                    <option :value="nvl" v-for="nvl in nivelesHBTJ" :key="nvl">{{ nvl }}</option>
+                  </select>
                 </div>
 
                 <div class="mb-3">
@@ -717,6 +755,18 @@
                     class="form-control"
                     id="areas_historicas"
                     placeholder="Ingrese áreas históricas"
+                    :disabled="isLoading || !canEditSection('organizacion')"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label for="CBok" class="form-label">Curso Básico</label>
+                  <input
+                    v-model="formData.CBok"
+                    type="text"
+                    class="form-control"
+                    id="CBok"
+                    placeholder="Ingrese datos del curso"
                     :disabled="isLoading || !canEditSection('organizacion')"
                   />
                 </div>
@@ -902,7 +952,14 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue'
-import { update } from '@/services/api'
+import { update, getAll } from '@/services/api'
+import {
+  tiposSangre,
+  organizaciones,
+  nivelesHBTJ,
+  formatFecha,
+  parseFechaToISO,
+} from '@/utils/forms_consts'
 
 // Props
 const props = defineProps({
@@ -937,6 +994,31 @@ const isLoading = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 const offcanvasId = computed(() => `profileForm-${Math.random().toString(36).substr(2, 9)}`)
+
+// Datos de mjlkt
+const mjlktData = ref([])
+const areasRefDisponibles = computed(() => {
+  const org = formData.value.organizacion
+  if (!org) return []
+  // Obtener areas_ref únicas para la organización
+  return [
+    ...new Set(mjlktData.value.filter((item) => item.org === org).map((item) => item.area)),
+  ].sort()
+})
+
+const rolesDisponibles = computed(() => {
+  const org = formData.value.organizacion
+  const areasRef = formData.value.areas_ref
+  if (!org || !Array.isArray(areasRef) || areasRef.length === 0) return []
+  // Obtener roles que coincidan con org y CUALQUIERA de las areas_ref seleccionadas
+  return [
+    ...new Set(
+      mjlktData.value
+        .filter((item) => item.org === org && areasRef.includes(item.area))
+        .map((item) => item.rol),
+    ),
+  ].sort()
+})
 
 // Computed: verificar si puede editar al menos una sección
 const canEditAny = computed(() => {
@@ -986,28 +1068,25 @@ const formData = ref({
   foto_dni: '',
   foto_rostro: '',
   med_estudios: '',
-  med_estudios_lab: '',
-  med_estudios_ergo: '',
-  med_estudios_ecodoppler: '',
-  med_estudios_rx: '',
   med_estudios_extras: '',
   med_estudios_extraMotivo: '',
+  med_estudios_pdf: '',
   med_estudios_certificado: '',
-  med_estudios_fechaEst: '',
-  med_aclararimg: '',
-  med_estudios_img1: '',
-  med_estudios_img2: '',
-  med_estudios_img3: '',
+  med_estudios_fecha: '',
+  med_estudios_img: '',
   med_estudios_otro: '',
   // Organización
   organizacion: '',
   areas: '',
-  apodoCBok: '',
-  activo: false,
+  areas_ref: [],
+  rol: [],
+  apodo: '',
+  activo: '',
   nivel: '',
   nivelHBTJ: '',
   fecha_ingresoOrg: '',
   fecha_ingresoMilu: '',
+  CBok: '',
   areas_historicas: '',
   curso_TL: '',
   curso_AvH: '',
@@ -1021,6 +1100,21 @@ watch(
   () => props.profileData,
   (newData) => {
     if (newData && Object.keys(newData).length > 0) {
+      // Función auxiliar para normalizar fechas
+      const normalizeFecha = (fecha) => {
+        if (!fecha) return ''
+        // Si ya es ISO format (YYYY-MM-DD), retornar como está
+        if (/^\d{4}-\d{2}-\d{2}/.test(fecha)) {
+          return fecha.split('T')[0]
+        }
+        // Si es dd/mm/yyyy, convertir a YYYY-MM-DD
+        if (/^\d{2}\/\d{2}\/\d{4}/.test(fecha)) {
+          const parts = fecha.split('/')
+          return `${parts[2]}-${parts[1]}-${parts[0]}`
+        }
+        return fecha
+      }
+
       formData.value = {
         // Información Personal
         DNI: newData.DNI || newData.dni,
@@ -1028,7 +1122,7 @@ watch(
         CUIL: newData.CUIL || '',
         nombre: newData.nombre || '',
         apellido: newData.apellido || '',
-        nacimiento: newData.nacimiento || '',
+        nacimiento: normalizeFecha(newData.nacimiento),
         genero: newData.genero || '',
         // Contacto
         celular: newData.celular || newData.cellphone || '',
@@ -1060,7 +1154,7 @@ watch(
         med_estudios_extras: newData.med_estudios_extras || '',
         med_estudios_extraMotivo: newData.med_estudios_extraMotivo || '',
         med_estudios_certificado: newData.med_estudios_certificado || '',
-        med_estudios_fechaEst: newData.med_estudios_fechaEst || '',
+        med_estudios_fechaEst: normalizeFecha(newData.med_estudios_fechaEst),
         med_aclararimg: newData.med_aclararimg || '',
         med_estudios_img1: newData.med_estudios_img1 || '',
         med_estudios_img2: newData.med_estudios_img2 || '',
@@ -1069,13 +1163,32 @@ watch(
         // Organización
         organizacion: newData.organizacion || '',
         areas: newData.areas || '',
-        apodoCBok: newData.apodoCBok || '',
-        activo: newData.activo || false,
+        areas_ref:
+          typeof newData.areas_ref === 'string'
+            ? (newData.areas_ref || '')
+                .split(',')
+                .map((a) => a.trim())
+                .filter(Boolean)
+            : Array.isArray(newData.areas_ref)
+              ? newData.areas_ref
+              : [],
+        rol:
+          typeof newData.rol === 'string'
+            ? (newData.rol || '')
+                .split(',')
+                .map((r) => r.trim())
+                .filter(Boolean)
+            : Array.isArray(newData.rol)
+              ? newData.rol
+              : [],
+        apodo: newData.apodo || '',
+        activo: Boolean(newData.activo),
         nivel: newData.nivel || '',
         nivelHBTJ: newData.nivelHBTJ || '',
-        fecha_ingresoOrg: newData.fecha_ingresoOrg || '',
-        fecha_ingresoMilu: newData.fecha_ingresoMilu || '',
+        fecha_ingresoOrg: normalizeFecha(newData.fecha_ingresoOrg),
+        fecha_ingresoMilu: normalizeFecha(newData.fecha_ingresoMilu),
         areas_historicas: newData.areas_historicas || '',
+        CBok: newData.CBok || '',
         curso_TL: newData.curso_TL || '',
         curso_AvH: newData.curso_AvH || '',
         curso_AvKM: newData.curso_AvKM || '',
@@ -1088,8 +1201,21 @@ watch(
 )
 
 // Métodos
-const open = () => {
+const loadMjlktData = async () => {
+  try {
+    const response = await getAll('mjlkt')
+    mjlktData.value = response.data || []
+  } catch (error) {
+    console.error('Error loading mjlkt data:', error)
+  }
+}
+
+const open = async () => {
   isOpen.value = true
+  // Cargar datos de mjlkt si no están cargados
+  if (mjlktData.value.length === 0) {
+    await loadMjlktData()
+  }
 }
 
 const close = () => {
@@ -1117,7 +1243,7 @@ const handleSubmit = async () => {
       CUIL: formData.value.CUIL,
       nombre: formData.value.nombre,
       apellido: formData.value.apellido,
-      nacimiento: formData.value.nacimiento,
+      nacimiento: parseFechaToISO(formData.value.nacimiento),
       genero: formData.value.genero,
       // Contacto
       celular: formData.value.celular,
@@ -1142,29 +1268,27 @@ const handleSubmit = async () => {
       foto_dni: formData.value.foto_dni,
       foto_rostro: formData.value.foto_rostro,
       med_estudios: formData.value.med_estudios,
-      med_estudios_lab: formData.value.med_estudios_lab,
-      med_estudios_ergo: formData.value.med_estudios_ergo,
-      med_estudios_ecodoppler: formData.value.med_estudios_ecodoppler,
-      med_estudios_rx: formData.value.med_estudios_rx,
       med_estudios_extras: formData.value.med_estudios_extras,
       med_estudios_extraMotivo: formData.value.med_estudios_extraMotivo,
+      med_estudios_pdf: formData.value.med_estudios_pdf,
       med_estudios_certificado: formData.value.med_estudios_certificado,
-      med_estudios_fechaEst: formData.value.med_estudios_fechaEst,
-      med_aclararimg: formData.value.med_aclararimg,
-      med_estudios_img1: formData.value.med_estudios_img1,
-      med_estudios_img2: formData.value.med_estudios_img2,
-      med_estudios_img3: formData.value.med_estudios_img3,
+      med_estudios_fecha: parseFechaToISO(formData.value.med_estudios_fecha),
+      med_estudios_img: formData.value.med_estudios_img,
       med_estudios_otro: formData.value.med_estudios_otro,
       // Organización
       organizacion: formData.value.organizacion,
-      areas: formData.value.areas,
-      apodoCBok: formData.value.apodoCBok,
-      activo: formData.value.activo,
+      areas: Array.isArray(formData.value.rol) ? formData.value.rol.join(',') : formData.value.rol,
+      areas_ref: Array.isArray(formData.value.areas_ref)
+        ? formData.value.areas_ref.join(',')
+        : formData.value.areas_ref,
+      apodo: formData.value.apodo,
+      activo: formData.value.activo === true ? 1 : 0,
       nivel: formData.value.nivel,
       nivelHBTJ: formData.value.nivelHBTJ,
-      fecha_ingresoOrg: formData.value.fecha_ingresoOrg,
-      fecha_ingresoMilu: formData.value.fecha_ingresoMilu,
+      fecha_ingresoOrg: parseFechaToISO(formData.value.fecha_ingresoOrg),
+      fecha_ingresoMilu: parseFechaToISO(formData.value.fecha_ingresoMilu),
       areas_historicas: formData.value.areas_historicas,
+      CBok: formData.value.CBok,
       curso_TL: formData.value.curso_TL,
       curso_AvH: formData.value.curso_AvH,
       curso_AvKM: formData.value.curso_AvKM,
