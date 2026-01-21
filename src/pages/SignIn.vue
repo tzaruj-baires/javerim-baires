@@ -8,11 +8,19 @@
           </div>
           <div class="card-body">
             <!-- Mensaje de éxito o error -->
-            <div v-if="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+            <div
+              v-if="successMessage"
+              class="alert alert-success alert-dismissible fade show"
+              role="alert"
+            >
               {{ successMessage }}
               <button type="button" class="btn-close" @click="successMessage = ''"></button>
             </div>
-            <div v-if="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div
+              v-if="errorMessage"
+              class="alert alert-danger alert-dismissible fade show"
+              role="alert"
+            >
               {{ errorMessage }}
               <button type="button" class="btn-close" @click="errorMessage = ''"></button>
             </div>
@@ -21,10 +29,10 @@
               <!-- DNI -->
               <div class="mb-3">
                 <label for="dni" class="form-label">DNI (8 dígitos)</label>
-                <input 
-                  v-model.number="formData.dni" 
-                  type="number" 
-                  class="form-control" 
+                <input
+                  v-model.number="formData.dni"
+                  type="number"
+                  class="form-control"
                   id="dni"
                   placeholder="12345678"
                   required
@@ -34,10 +42,10 @@
               <!-- Email -->
               <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input 
-                  v-model="formData.email" 
-                  type="email" 
-                  class="form-control" 
+                <input
+                  v-model="formData.email"
+                  type="email"
+                  class="form-control"
                   id="email"
                   placeholder="usuario@example.com"
                   required
@@ -47,10 +55,10 @@
               <!-- Teléfono -->
               <div class="mb-3">
                 <label for="cellphone" class="form-label">Teléfono</label>
-                <input 
-                  v-model.number="formData.cellphone" 
-                  type="tel" 
-                  class="form-control" 
+                <input
+                  v-model.number="formData.cellphone"
+                  type="tel"
+                  class="form-control"
                   id="cellphone"
                   placeholder="1123456789"
                   required
@@ -60,46 +68,69 @@
               <!-- Contraseña -->
               <div class="mb-3">
                 <label for="password" class="form-label">Contraseña</label>
-                <input 
-                  v-model="formData.password" 
-                  type="password" 
-                  class="form-control" 
-                  id="password"
-                  placeholder="••••••••"
-                  required
-                />
+                <div class="input-group">
+                  <input
+                    v-model="formData.password"
+                    :type="showPassword ? 'text' : 'password'"
+                    class="form-control"
+                    id="password"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    @click="showPassword = !showPassword"
+                  >
+                    <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                  </button>
+                </div>
               </div>
 
               <!-- Confirmar Contraseña -->
               <div class="mb-3">
                 <label for="confirmPassword" class="form-label">Confirmar Contraseña</label>
-                <input 
-                  v-model="formData.confirmPassword" 
-                  type="password" 
-                  class="form-control" 
-                  id="confirmPassword"
-                  placeholder="••••••••"
-                  required
-                />
+                <div class="input-group">
+                  <input
+                    v-model="formData.confirmPassword"
+                    :type="showConfirmPassword ? 'text' : 'password'"
+                    class="form-control"
+                    id="confirmPassword"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    @click="showConfirmPassword = !showConfirmPassword"
+                  >
+                    <i :class="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                  </button>
+                </div>
               </div>
 
               <!-- Botón Registrarse -->
-              <button 
-                type="submit" 
-                class="btn btn-primary w-100 mb-2"
-                :disabled="isLoading"
-              >
+              <button type="submit" class="btn btn-primary w-100 mb-2" :disabled="isLoading">
                 <span v-if="!isLoading">Registrarse</span>
                 <span v-else>
-                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    class="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Registrando...
                 </span>
               </button>
 
-              <!-- Link a Login -->
+              <!-- Links de navegación -->
               <p class="text-center mt-3">
-                ¿Ya tienes cuenta? 
+                ¿Ya tienes cuenta?
                 <router-link to="/login" class="text-primary">Inicia sesión</router-link>
+              </p>
+              <p class="text-center">
+                <router-link to="/forgot-password" class="text-muted text-decoration-none">
+                  <small>¿Olvidaste tu contraseña?</small>
+                </router-link>
               </p>
             </form>
           </div>
@@ -122,12 +153,14 @@ const formData = ref({
   email: '',
   cellphone: '',
   password: '',
-  confirmPassword: ''
+  confirmPassword: '',
 })
 
 const isLoading = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 
 const handleRegister = async () => {
   try {
@@ -135,7 +168,12 @@ const handleRegister = async () => {
     successMessage.value = ''
 
     // Validaciones
-    if (!formData.value.dni || !formData.value.email || !formData.value.cellphone || !formData.value.password) {
+    if (
+      !formData.value.dni ||
+      !formData.value.email ||
+      !formData.value.cellphone ||
+      !formData.value.password
+    ) {
       errorMessage.value = 'Por favor completa todos los campos'
       return
     }
@@ -162,7 +200,7 @@ const handleRegister = async () => {
       dni: formData.value.dni,
       email: formData.value.email,
       cellphone: formData.value.cellphone,
-      password: formData.value.password
+      password: formData.value.password,
     })
 
     successMessage.value = '¡Registro exitoso! Redirigiendo...'

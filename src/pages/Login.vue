@@ -8,11 +8,19 @@
           </div>
           <div class="card-body">
             <!-- Mensaje de éxito o error -->
-            <div v-if="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+            <div
+              v-if="successMessage"
+              class="alert alert-success alert-dismissible fade show"
+              role="alert"
+            >
               {{ successMessage }}
               <button type="button" class="btn-close" @click="successMessage = ''"></button>
             </div>
-            <div v-if="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <div
+              v-if="errorMessage"
+              class="alert alert-danger alert-dismissible fade show"
+              role="alert"
+            >
               {{ errorMessage }}
               <button type="button" class="btn-close" @click="errorMessage = ''"></button>
             </div>
@@ -21,10 +29,10 @@
               <!-- Email -->
               <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input 
-                  v-model="formData.email" 
-                  type="email" 
-                  class="form-control" 
+                <input
+                  v-model="formData.email"
+                  type="email"
+                  class="form-control"
                   id="email"
                   placeholder="usuario@example.com"
                   required
@@ -34,33 +42,47 @@
               <!-- Contraseña -->
               <div class="mb-3">
                 <label for="password" class="form-label">Contraseña</label>
-                <input 
-                  v-model="formData.password" 
-                  type="password" 
-                  class="form-control" 
-                  id="password"
-                  placeholder="••••••••"
-                  required
-                />
+                <div class="input-group">
+                  <input
+                    v-model="formData.password"
+                    :type="showPassword ? 'text' : 'password'"
+                    class="form-control"
+                    id="password"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary"
+                    @click="showPassword = !showPassword"
+                  >
+                    <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+                  </button>
+                </div>
               </div>
 
               <!-- Botón Iniciar Sesión -->
-              <button 
-                type="submit" 
-                class="btn btn-success w-100 mb-2"
-                :disabled="isLoading"
-              >
+              <button type="submit" class="btn btn-success w-100 mb-2" :disabled="isLoading">
                 <span v-if="!isLoading">Iniciar Sesión</span>
                 <span v-else>
-                  <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span
+                    class="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
                   Verificando...
                 </span>
               </button>
 
               <!-- Link a Registro -->
               <p class="text-center mt-3">
-                ¿No tienes cuenta? 
+                ¿No tienes cuenta?
                 <router-link to="/signin" class="text-success">Regístrate aquí</router-link>
+              </p>
+              <p class="text-center">
+                <router-link to="/forgot-password" class="text-muted text-decoration-none">
+                  <small>¿Olvidaste tu contraseña?</small>
+                </router-link>
               </p>
             </form>
           </div>
@@ -80,12 +102,13 @@ const authStore = useAuthStore()
 
 const formData = ref({
   email: '',
-  password: ''
+  password: '',
 })
 
 const isLoading = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
+const showPassword = ref(false)
 
 const handleLogin = async () => {
   try {

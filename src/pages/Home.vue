@@ -57,7 +57,7 @@
 
           <div class="card-body p-0">
             <div class="table-responsive">
-              <table class="table table-hover align-middle mb-0">
+              <table class="table table-hover table-striped align-middle mb-0">
                 <thead class="table-light">
                   <tr>
                     <th @click="sortBy('DNI')" class="cursor-pointer">
@@ -196,6 +196,13 @@ const loadUsers = async () => {
   }
 }
 
+const normalizeText = (text = '') =>
+  text
+    .toString()
+    .normalize('NFD') // separa letras y diacríticos
+    .replace(/[\u0300-\u036f]/g, '') // elimina los diacríticos
+    .toLowerCase()
+
 const filteredUsers = computed(() => {
   let filtered = users.value.filter((user) => {
     const mail = user.mail_operativo || user.mail_personal || ''
@@ -213,15 +220,17 @@ const filteredUsers = computed(() => {
     return filtered
   }
 
-  const query = searchQuery.value.toLowerCase()
+  const query = normalizeText(searchQuery.value)
+
   return filtered.filter((user) => {
     const mail = user.mail_operativo || user.mail_personal || ''
+
     return (
-      user.DNI.toString().toLowerCase().includes(query) ||
-      `${user.nombre} ${user.apellido}`.toLowerCase().includes(query) ||
-      user.apodo.toLowerCase().includes(query) ||
-      user.organizacion.toLowerCase().includes(query) ||
-      mail.toLowerCase().includes(query)
+      normalizeText(user.DNI).includes(query) ||
+      normalizeText(`${user.nombre} ${user.apellido}`).includes(query) ||
+      normalizeText(user.apodo).includes(query) ||
+      normalizeText(user.organizacion).includes(query) ||
+      normalizeText(mail).includes(query)
     )
   })
 })

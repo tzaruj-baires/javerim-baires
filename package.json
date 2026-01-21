@@ -18,6 +18,7 @@
     "bcryptjs": "^3.0.3",
     "bootstrap-icons": "^1.13.1",
     "gapi-script": "^1.2.0",
+    "libphonenumber-js": "^1.12.34",
     "pinia": "^3.0.4",
     "uuid": "^13.0.0",
     "vue": "^3.5.26",

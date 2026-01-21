@@ -2,6 +2,8 @@ import Home from '@/pages/Home.vue'
 import Login from '@/pages/Login.vue'
 import SignIn from '@/pages/SignIn.vue'
 import UserDetail from '@/pages/UserDetail.vue'
+import ForgotPassword from '@/pages/ForgotPassword.vue'
+import AdminUsers from '@/pages/AdminUsers.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -27,10 +29,22 @@ const router = createRouter({
       meta: { requiresAuth: false },
     },
     {
+      path: '/forgot-password',
+      name: 'forgotPassword',
+      component: ForgotPassword,
+      meta: { requiresAuth: false },
+    },
+    {
       path: '/javer/:dni',
       name: 'userDetail',
       component: UserDetail,
       meta: { requiresAuth: true, minLevel: 1 },
+    },
+    {
+      path: '/admin/users',
+      name: 'adminUsers',
+      component: AdminUsers,
+      meta: { requiresAuth: true, minLevel: 3 },
     },
   ],
 })

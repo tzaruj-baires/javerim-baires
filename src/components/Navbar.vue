@@ -84,13 +84,13 @@
                 <hr class="dropdown-divider" />
               </li>
               <li v-if="can(3)">
-                <a class="dropdown-item text-warning" href="#">
-                  <i class="bi bi-shield-lock"></i> Admin
-                </a>
+                <router-link to="/admin/users" class="dropdown-item text-warning">
+                  <i class="bi bi-shield-lock"></i> Administración de Usuarios
+                </router-link>
               </li>
               <li v-if="can(3)">
                 <a class="dropdown-item text-warning" href="#">
-                  <i class="bi bi-people"></i> Gestionar usuarios
+                  <i class="bi bi-graph-up"></i> Reportes
                 </a>
               </li>
               <li>

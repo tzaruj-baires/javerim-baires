@@ -154,7 +154,7 @@
                   <label for="celular" class="form-label">Celular</label>
                   <input
                     v-model="formData.celular"
-                    type="text"
+                    type="phone"
                     class="form-control"
                     id="celular"
                     placeholder="Ingrese celular"
@@ -961,6 +961,13 @@ import {
   parseFechaToISO,
 } from '@/utils/forms_consts'
 
+import {
+  COUNTRIES_CODES,
+  formatPhoneNumber,
+  extractCountryCode,
+  extractLocalNumber,
+} from '@/utils/phone'
+
 // Props
 const props = defineProps({
   profileData: {
@@ -1125,7 +1132,7 @@ watch(
         nacimiento: normalizeFecha(newData.nacimiento),
         genero: newData.genero || '',
         // Contacto
-        celular: newData.celular || newData.cellphone || '',
+        celular: newData.celular || '',
         mail_personal: newData.mail_personal || '',
         mail_operativo: newData.mail_operativo || '',
         // Domicilio
@@ -1147,18 +1154,13 @@ watch(
         foto_dni: newData.foto_dni || '',
         foto_rostro: newData.foto_rostro || '',
         med_estudios: newData.med_estudios || '',
-        med_estudios_lab: newData.med_estudios_lab || '',
-        med_estudios_ergo: newData.med_estudios_ergo || '',
-        med_estudios_ecodoppler: newData.med_estudios_ecodoppler || '',
-        med_estudios_rx: newData.med_estudios_rx || '',
         med_estudios_extras: newData.med_estudios_extras || '',
         med_estudios_extraMotivo: newData.med_estudios_extraMotivo || '',
+        med_estudios_pdf: newData.med_estudios_pdf || '',
         med_estudios_certificado: newData.med_estudios_certificado || '',
-        med_estudios_fechaEst: normalizeFecha(newData.med_estudios_fechaEst),
+        med_estudios_fecha: normalizeFecha(newData.med_estudios_fecha),
         med_aclararimg: newData.med_aclararimg || '',
-        med_estudios_img1: newData.med_estudios_img1 || '',
-        med_estudios_img2: newData.med_estudios_img2 || '',
-        med_estudios_img3: newData.med_estudios_img3 || '',
+        med_estudios_img: newData.med_estudios_img || '',
         med_estudios_otro: newData.med_estudios_otro || '',
         // Organización
         organizacion: newData.organizacion || '',
