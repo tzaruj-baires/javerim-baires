@@ -1,45 +1,43 @@
-#  Javerim Baires - Sistema de AutenticaciÛn
+#  Javerim Baires - Sistema de Autenticaci√≥n
 
 Sistema completo de login/registro con control de permisos por nivel IT.
 
 ---
 
-##  INICIO R¡PIDO
+##  INICIO R√ÅPIDO
 
-\\\ash
+```sh
 npm install
 npm run dev
 # Abre http://localhost:5173
-\\\
+```
 
-### Flujo B·sico:
-1. **Registrarse**  /signin (DNI, Email, TelÈfono, ContraseÒa)
-2. **Login**  /login (Email + ContraseÒa)
-3. **Acceso seg˙n Nivel:**
+### Flujo B√°sico:
+1. **Registrarse**  /signin (DNI, Email, Tel√©fono, Contrase√±a)
+2. **Login**  /login (Email + Contrase√±a)
+3. **Acceso seg√∫n Nivel:**
    - Nivel 1+  /mi-perfil (ver propio perfil)
    - Nivel 2+  /javer/:dni (ver/editar otros)
    - Nivel 3  Eliminar usuarios
 
 ---
 
-##  DOCUMENTACI”N ESENCIAL
+##  DOCUMENTACI√ìN ESENCIAL
 
-- **[ARQUITECTURA.md](./ARQUITECTURA.md)** - Estructura tÈcnica, componentes, API
+- **[ARQUITECTURA.md](./ARQUITECTURA.md)** - Estructura t√©cnica, componentes, API
 - **[CAMBIOS_LOG.md](./CAMBIOS_LOG.md)** - Historial de cambios y fixes
 
 ---
 
 ##  NIVELES DE PERMISO
 
-\\\
-Nivel 1 = B·sico (ver propio perfil)
-Nivel 2 = Intermedio (editar otros usuarios)
-Nivel 3 = Avanzado (admin - eliminar usuarios)
-\\\
+- Nivel 1 = B√°sico (ver propio perfil)
+- Nivel 2 = Intermedio (editar otros usuarios)
+- Nivel 3 = Avanzado (admin - eliminar usuarios)
 
 ---
 
-##  STACK T…CNICO
+##  STACK T√âCNICO
 
 - **Frontend:** Vue 3 + Pinia + Vue Router
 - **Backend:** Google Apps Script + Google Sheets
@@ -51,9 +49,9 @@ Nivel 3 = Avanzado (admin - eliminar usuarios)
 ##  ISSUES COMUNES
 
 ### Datos no persisten
- Verificar que \id\ se envÌa en updates
+ Verificar que \id\ se env√≠a en updates
 
-### TelÈfono no se muestra
+### Tel√©fono no se muestra
  Usar fallback \celular || cellphone || '-'\
 
 ### Sin acceso a rutas
@@ -61,4 +59,4 @@ Nivel 3 = Avanzado (admin - eliminar usuarios)
 
 ---
 
-*⁄ltima actualizaciÛn: Enero 2026*
+*√öltima actualizaci√≥n: Enero 2026*
