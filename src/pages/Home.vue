@@ -174,7 +174,7 @@ import { useAuthStore } from '@/stores/auth'
 import { usePermissions } from '@/composables/usePermissions'
 
 const authStore = useAuthStore()
-const { can, getLevelName } = usePermissions()
+const { can } = usePermissions()
 
 const users = ref([])
 const loading = ref(true)
@@ -184,6 +184,9 @@ const itemsPerPage = 10
 const sortKey = ref('')
 const sortOrder = ref('asc')
 
+/* =========================
+   CARGA DE USUARIOS
+========================= */
 const loadUsers = async () => {
   loading.value = true
   try {
@@ -196,13 +199,31 @@ const loadUsers = async () => {
   }
 }
 
+/* =========================
+   HELPERS
+========================= */
 const normalizeText = (text = '') =>
   text
     .toString()
-    .normalize('NFD') // separa letras y diacríticos
-    .replace(/[\u0300-\u036f]/g, '') // elimina los diacríticos
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
 
+const hasValue = (val) => val !== null && val !== undefined && val !== ''
+
+const getNombreCompleto = (u) => normalizeText(`${u.nombre || ''} ${u.apellido || ''}`)
+
+const getOrg = (u) => normalizeText(u.organizacion || '')
+
+const compareStrings = (a, b, order) => {
+  if (a < b) return order === 'asc' ? -1 : 1
+  if (a > b) return order === 'asc' ? 1 : -1
+  return 0
+}
+
+/* =========================
+   FILTRADO
+========================= */
 const filteredUsers = computed(() => {
   let filtered = users.value.filter((user) => {
     const mail = user.mail_operativo || user.mail_personal || ''
@@ -216,15 +237,12 @@ const filteredUsers = computed(() => {
     )
   })
 
-  if (!searchQuery.value.trim()) {
-    return filtered
-  }
+  if (!searchQuery.value.trim()) return filtered
 
   const query = normalizeText(searchQuery.value)
 
   return filtered.filter((user) => {
     const mail = user.mail_operativo || user.mail_personal || ''
-
     return (
       normalizeText(user.DNI).includes(query) ||
       normalizeText(`${user.nombre} ${user.apellido}`).includes(query) ||
@@ -235,34 +253,74 @@ const filteredUsers = computed(() => {
   })
 })
 
+/* =========================
+   COMPARATORS
+========================= */
+const getComparator = (key) => {
+  return (a, b) => {
+    const order = sortOrder.value
+
+    // 🔢 DNI (numérico puro)
+    if (key === 'DNI') {
+      return order === 'asc' ? Number(a.DNI) - Number(b.DNI) : Number(b.DNI) - Number(a.DNI)
+    }
+
+    // 🔤 Apodo / Áreas
+    if (key === 'apodo' || key === 'areas') {
+      // 1. Organización
+      const orgCompare = compareStrings(getOrg(a), getOrg(b), order)
+      if (orgCompare !== 0) return orgCompare
+
+      const aVal = normalizeText(a[key] || '')
+      const bVal = normalizeText(b[key] || '')
+
+      // 2. Con valor primero
+      if (hasValue(aVal) && !hasValue(bVal)) return -1
+      if (!hasValue(aVal) && hasValue(bVal)) return 1
+
+      // 3. Valor
+      const valCompare = compareStrings(aVal, bVal, order)
+      if (valCompare !== 0) return valCompare
+
+      // 4. Nombre
+      return compareStrings(getNombreCompleto(a), getNombreCompleto(b), order)
+    }
+
+    // 📞 Celular / Mail
+    if (key === 'celular' || key === 'mail') {
+      // 1. Organización
+      const orgCompare = compareStrings(getOrg(a), getOrg(b), order)
+      if (orgCompare !== 0) return orgCompare
+
+      const aVal = normalizeText(
+        key === 'mail' ? a.mail_operativo || a.mail_personal || '' : a.celular || '',
+      )
+
+      const bVal = normalizeText(
+        key === 'mail' ? b.mail_operativo || b.mail_personal || '' : b.celular || '',
+      )
+
+      // 2. Con valor primero
+      if (hasValue(aVal) && !hasValue(bVal)) return -1
+      if (!hasValue(aVal) && hasValue(bVal)) return 1
+
+      // 3. Nombre
+      return compareStrings(getNombreCompleto(a), getNombreCompleto(b), order)
+    }
+
+    // 🧩 Fallback simple
+    return compareStrings(normalizeText(a[key] || ''), normalizeText(b[key] || ''), order)
+  }
+}
+
+/* =========================
+   SORT + PAGINACIÓN
+========================= */
 const sortedAndPaginated = computed(() => {
-  let sorted = [...filteredUsers.value]
+  const sorted = [...filteredUsers.value]
 
   if (sortKey.value) {
-    sorted.sort((a, b) => {
-      let aVal, bVal
-
-      if (sortKey.value === 'nombre') {
-        aVal = `${a.nombre} ${a.apellido}`.toLowerCase()
-        bVal = `${b.nombre} ${b.apellido}`.toLowerCase()
-      } else if (sortKey.value === 'mail') {
-        aVal = (a.mail_operativo || a.mail_personal || '').toLowerCase()
-        bVal = (b.mail_operativo || b.mail_personal || '').toLowerCase()
-      } else {
-        aVal = a[sortKey.value]
-        bVal = b[sortKey.value]
-
-        if (!isNaN(aVal)) aVal = Number(aVal)
-        if (!isNaN(bVal)) bVal = Number(bVal)
-
-        if (typeof aVal === 'string') aVal = aVal.toLowerCase()
-        if (typeof bVal === 'string') bVal = bVal.toLowerCase()
-      }
-
-      if (aVal < bVal) return sortOrder.value === 'asc' ? -1 : 1
-      if (aVal > bVal) return sortOrder.value === 'asc' ? 1 : -1
-      return 0
-    })
+    sorted.sort(getComparator(sortKey.value))
   }
 
   return sorted.slice(0, displayedCount.value)
@@ -270,6 +328,9 @@ const sortedAndPaginated = computed(() => {
 
 const paginatedUsers = sortedAndPaginated
 
+/* =========================
+   ACCIONES
+========================= */
 const sortBy = (key) => {
   if (sortKey.value === key) {
     sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
