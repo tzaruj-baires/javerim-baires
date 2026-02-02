@@ -16,16 +16,6 @@
 
     <div class="offcanvas-body">
       <form @submit.prevent="handleSubmit">
-        <!-- Mensajes -->
-        <div v-if="successMessage" class="alert alert-success alert-dismissible fade show">
-          {{ successMessage }}
-          <button type="button" class="btn-close" @click="successMessage = ''"></button>
-        </div>
-        <div v-if="errorMessage" class="alert alert-danger alert-dismissible fade show">
-          {{ errorMessage }}
-          <button type="button" class="btn-close" @click="errorMessage = ''"></button>
-        </div>
-
         <!-- Campos de formulario (genéricos) -->
         <!-- Acordeones por temática -->
         <div class="accordion mb-4" id="formAccordion">
@@ -46,7 +36,7 @@
             </h2>
             <div
               id="formPersonal"
-              class="accordion-collapse collapse show"
+              class="accordion-collapse collapse"
               data-bs-parent="#formAccordion"
             >
               <div class="accordion-body">
@@ -636,7 +626,7 @@
                 </div>
 
                 <div class="mb-3">
-                  <label for="areas_ref" class="form-label">Área de Referencia (Múltiples)</label>
+                  <label for="areas_ref" class="form-label">Áreas de Referencia</label>
                   <select
                     v-model="formData.areas_ref"
                     multiple
@@ -655,12 +645,12 @@
                 </div>
 
                 <div class="mb-3">
-                  <label for="rol" class="form-label">Rol (Múltiples)</label>
+                  <label for="areas" class="form-label">Roles</label>
                   <select
-                    v-model="formData.rol"
+                    v-model="formData.areas"
                     multiple
                     class="form-select"
-                    id="rol"
+                    id="areas"
                     :disabled="
                       isLoading ||
                       !canEditSection('organizacion') ||
@@ -672,6 +662,7 @@
                       {{ rol }}
                     </option>
                   </select>
+
                   <small class="text-muted">Selecciona uno o más roles (Ctrl/Cmd + clic)</small>
                 </div>
 
@@ -855,11 +846,88 @@
               data-bs-parent="#formAccordion"
             >
               <div class="accordion-body">
-                <p class="text-muted">
-                  <small
-                    >Esta sección puede ampliarse con campos adicionales según sea necesario</small
+                <!-- Estudios -->
+                <h5>Estudios</h5>
+                <div class="mb-3">
+                  <label for="estudios_grado">Mayor grado de estudios alcanzado</label>
+                  <select id="estudios_grado" v-model="formData.estudios_grado" class="form-select">
+                    <option value="Primario">Primario</option>
+                    <option value="Secundario">Secundario</option>
+                    <option value="Terciario">Terciario</option>
+                    <option value="Universitario">Universitario</option>
+                    <option value="Posgrado">Posgrado</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="estudios_area">Área de Estudios</label>
+                  <select id="estudios_area" v-model="formData.estudios_area" class="form-select">
+                    <option value=""></option>
+                    <option v-for="carreer in Estudies" :value="carreer" :key="carreer">
+                      {{ carreer }}
+                    </option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="estudios_carrera" class="form-label">Nombre de la carrera</label>
+                  <input
+                    id="estudios_carrera"
+                    v-model="formData.estudios_carrera"
+                    class="form-control"
+                    type="text"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="estudios_barrio" class="form-label">Barrio donde estudia</label>
+                  <input
+                    id="estudios_barrio"
+                    v-model="formData.estudios_barrio"
+                    class="form-control"
+                    type="text"
+                  />
+                </div>
+
+                <!-- Trabajo -->
+                <h5 class="mt-1">Trabajo</h5>
+                <div class="mb-3">
+                  <label for="trabajo_area" class="form-label">Área del Trabajo</label>
+                  <select v-model="formData.trabajo_area" id="trabajo_area" class="form-select">
+                    <option value=""></option>
+                    <option v-for="work in Works" :value="work" :key="work">{{ work }}</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="trabajo_puesto" class="form-label">Puesto de trabajo</label>
+                  <input
+                    type="text"
+                    v-model="formData.trabajo_puesto"
+                    id="trabajo_puesto"
+                    class="form-control"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="trabajo_barrio" class="form-label">Barrio donde trabaja</label>
+                  <input
+                    type="text"
+                    v-model="formData.trabajo_barrio"
+                    class="form-control"
+                    id="trabajo_barrio"
+                  />
+                </div>
+
+                <!-- Comunidad -->
+                <h5 class="mt-1">Comunidad</h5>
+                <div class="mb-3">
+                  <label for="comunidad_rol" class="form-label"
+                    >¿Tenés actualmente algún rol en la Comunidad?</label
                   >
-                </p>
+                  <textarea
+                    class="form-control"
+                    v-model="formData.comunidad_rol"
+                    id="comunidad_rol"
+                    placeholder="CISSAB - Madrij&#10;Tarbut - Profesor"
+                  ></textarea>
+                  <div class="text-muted">Si es así, indique cuáles y dónde</div>
+                </div>
               </div>
             </div>
           </div>
@@ -885,17 +953,117 @@
               data-bs-parent="#formAccordion"
             >
               <div class="accordion-body">
-                <p class="text-muted">
-                  <small
-                    >Esta sección puede ampliarse con campos adicionales según sea necesario</small
-                  >
-                </p>
+                <!-- Familiar 1 -->
+                <div class="row mb-4">
+                  <h5>Familiar 1</h5>
+                  <div class="mb-3">
+                    <label for="fam1_nombre" class="form-label">Nombre</label>
+                    <input
+                      type="text"
+                      id="fam1_nombre"
+                      v-model="formData.fam1_nombre"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="fam1_apellido" class="form-label">Apellido</label>
+                    <input
+                      type="text"
+                      id="fam1_apellido"
+                      v-model="formData.fam1_apellido"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="fam1_vinculo" class="form-label">Vínculo con el Javer</label>
+                    <input
+                      type="text"
+                      id="fam1_vinculo"
+                      v-model="formData.fam1_vinculo"
+                      class="form-control"
+                      placeholder="Madre/Padre/Hermano"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="fam1_celular" class="form-label">Celular</label>
+                    <input
+                      type="phone"
+                      id="fam1_celular"
+                      v-model="formData.fam1_celular"
+                      class="form-control"
+                      placeholder="1100000000"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="fam1_direccion" class="form-label">Dirección</label>
+                    <input
+                      type="address"
+                      id="fam1_direccion"
+                      v-model="formData.fam1_direccion"
+                      class="form-control"
+                      placeholder="Av. Corrientes 123..."
+                    />
+                  </div>
+                </div>
+                <!-- Familiar 2 -->
+                <div class="row mb-4">
+                  <h5>Familiar 2</h5>
+                  <div class="mb-3">
+                    <label for="fam2_nombre" class="form-label">Nombre</label>
+                    <input
+                      type="text"
+                      id="fam2_nombre"
+                      v-model="formData.fam2_nombre"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="fam2_apellido" class="form-label">Apellido</label>
+                    <input
+                      type="text"
+                      id="fam2_apellido"
+                      v-model="formData.fam2_apellido"
+                      class="form-control"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="fam2_vinculo" class="form-label">Vínculo con el Javer</label>
+                    <input
+                      type="text"
+                      id="fam2_vinculo"
+                      v-model="formData.fam2_vinculo"
+                      class="form-control"
+                      placeholder="Madre/Padre/Hermano"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="fam2_celular" class="form-label">Celular</label>
+                    <input
+                      type="phone"
+                      id="fam2_celular"
+                      v-model="formData.fam2_celular"
+                      class="form-control"
+                      placeholder="1100000000"
+                    />
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="fam2_direccion" class="form-label">Dirección</label>
+                    <input
+                      type="address"
+                      id="fam2_direccion"
+                      v-model="formData.fam2_direccion"
+                      class="form-control"
+                      placeholder="Av. Corrientes 123..."
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- 8. Técnicos -->
-          <div v-if="canSeeTechnical" class="accordion-item">
+          <div v-if="canEditSection('tecnicos')" class="accordion-item">
             <h2 class="accordion-header">
               <button
                 class="accordion-button collapsed"
@@ -915,14 +1083,73 @@
               data-bs-parent="#formAccordion"
             >
               <div class="accordion-body">
-                <p class="text-muted">
-                  <small
-                    >Esta sección puede ampliarse con campos adicionales según sea necesario</small
-                  >
-                </p>
+                <div class="mb-3">
+                  <label for="ID_JVR" class="form-label">ID JVR</label>
+                  <div class="input-group mb-3">
+                    <select
+                      id="ID_JVR"
+                      v-model="formData.organizacion"
+                      class="form-select w-25"
+                      disabled="true"
+                    >
+                      <option value="JVR"></option>
+                      <option v-for="org in organizaciones" :key="org" :value="org">
+                        {{ org }}
+                      </option>
+                    </select>
+                    <span class="input-group-text">@</span>
+                    <input
+                      v-model="formData.DNI"
+                      type="number"
+                      class="form-control w-50"
+                      placeholder="DNI"
+                      min="1000000"
+                      max="99999999"
+                      aria-label="DNI"
+                      disabled="true"
+                    />
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="telegram_id" class="form-label">Telegram ID</label>
+                  <input
+                    type="number"
+                    id="telegram_id"
+                    v-model="formData.telegram_id"
+                    class="form-control"
+                    min="1000000"
+                    max="99999999999"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="it_level" class="form-label">Nivel IT App</label>
+                  <select id="it_level" class="form-select" disabled="true">
+                    <option value=""></option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="fecha_ult" class="form-label">Fecha de última modificación</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control"
+                    id="fecha_ult"
+                    v-model="formData.fecha_ult"
+                    disabled
+                  />
+                </div>
               </div>
             </div>
           </div>
+        </div>
+
+        <!-- Mensajes -->
+        <div v-if="successMessage" class="alert alert-success alert-dismissible fade show">
+          {{ successMessage }}
+          <button type="button" class="btn-close" @click="successMessage = ''"></button>
+        </div>
+        <div v-if="errorMessage" class="alert alert-danger alert-dismissible fade show">
+          {{ errorMessage }}
+          <button type="button" class="btn-close" @click="errorMessage = ''"></button>
         </div>
 
         <!-- Botones -->
@@ -953,13 +1180,20 @@
 <script setup>
 import { ref, watch, computed } from 'vue'
 import { update, getAll } from '@/services/api'
+import { useAuthStore } from '@/stores/auth'
+import { usePermissions } from '@/composables/usePermissions'
 import {
   tiposSangre,
   organizaciones,
   nivelesHBTJ,
+  Works,
+  Estudies,
   formatFecha,
   parseFechaToISO,
+  parseFechaEnteraToISO,
 } from '@/utils/forms_consts'
+
+import { capitalizarEsp } from '@/utils/strings'
 
 import {
   COUNTRIES_CODES,
@@ -1000,7 +1234,8 @@ const isOpen = ref(false)
 const isLoading = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
-const offcanvasId = computed(() => `profileForm-${Math.random().toString(36).substr(2, 9)}`)
+const offcanvasId = `profileForm-${Math.random().toString(36).slice(2, 9)}`
+const hasSaved = ref(false) // Para evitar múltiples fetches
 
 // Datos de mjlkt
 const mjlktData = ref([])
@@ -1012,7 +1247,6 @@ const areasRefDisponibles = computed(() => {
     ...new Set(mjlktData.value.filter((item) => item.org === org).map((item) => item.area)),
   ].sort()
 })
-
 const rolesDisponibles = computed(() => {
   const org = formData.value.organizacion
   const areasRef = formData.value.areas_ref
@@ -1084,9 +1318,8 @@ const formData = ref({
   med_estudios_otro: '',
   // Organización
   organizacion: '',
-  areas: '',
   areas_ref: [],
-  rol: [],
+  areas: '',
   apodo: '',
   activo: '',
   nivel: '',
@@ -1100,12 +1333,36 @@ const formData = ref({
   curso_AvKM: '',
   curso_IE: '',
   curso_FND: '',
+  // Vida y Desarrollo
+  estudios_grado: '',
+  estudios_area: '',
+  estudios_carrera: '',
+  estudios_barrio: '',
+  trabajo_area: '',
+  trabajo_puesto: '',
+  trabajo_barrio: '',
+  comunidad_rol: '',
+  fam1_nombre: '',
+  fam1_apellido: '',
+  fam1_vinculo: '',
+  fam1_celular: '',
+  fam1_direccion: '',
+  fam2_nombre: '',
+  fam2_apellido: '',
+  fam2_vinculo: '',
+  fam2_celular: '',
+  fam2_direccion: '',
+  // Técnicos
+  ID_JVR: '',
+  telegram_id: '',
+  it_level: '',
+  fecha_ult: '',
 })
 
-// Watchers
 watch(
   () => props.profileData,
   (newData) => {
+    if (hasSaved.value) return // Para evitar sobreescribir después de guardar
     if (newData && Object.keys(newData).length > 0) {
       // Función auxiliar para normalizar fechas
       const normalizeFecha = (fecha) => {
@@ -1164,7 +1421,6 @@ watch(
         med_estudios_otro: newData.med_estudios_otro || '',
         // Organización
         organizacion: newData.organizacion || '',
-        areas: newData.areas || '',
         areas_ref:
           typeof newData.areas_ref === 'string'
             ? (newData.areas_ref || '')
@@ -1174,14 +1430,14 @@ watch(
             : Array.isArray(newData.areas_ref)
               ? newData.areas_ref
               : [],
-        rol:
-          typeof newData.rol === 'string'
-            ? (newData.rol || '')
+        areas:
+          typeof newData.areas === 'string'
+            ? (newData.areas || '')
                 .split(',')
-                .map((r) => r.trim())
+                .map((a) => a.trim())
                 .filter(Boolean)
-            : Array.isArray(newData.rol)
-              ? newData.rol
+            : Array.isArray(newData.areas)
+              ? newData.areas
               : [],
         apodo: newData.apodo || '',
         activo: Boolean(newData.activo),
@@ -1196,6 +1452,30 @@ watch(
         curso_AvKM: newData.curso_AvKM || '',
         curso_IE: newData.curso_IE || '',
         curso_FND: newData.curso_FND || '',
+        // Vida y Desarrollo
+        estudios_grado: newData.estudios_grado || '',
+        estudios_area: newData.estudios_area || '',
+        estudios_carrera: capitalizarEsp(newData.estudios_carrera) || '',
+        estudios_barrio: capitalizarEsp(newData.estudios_barrio) || '',
+        trabajo_area: newData.trabajo_area || '',
+        trabajo_puesto: newData.trabajo_puesto || '',
+        trabajo_barrio: newData.trabajo_barrio || '',
+        comunidad_rol: newData.comunidad_rol || '',
+        // Familia
+        fam1_nombre: newData.fam1_nombre || '',
+        fam1_apellido: newData.fam1_apellido || '',
+        fam1_vinculo: newData.fam1_vinculo || '',
+        fam1_celular: newData.fam1_celular || '',
+        fam1_direccion: newData.fam1_direccion || '',
+        fam2_nombre: newData.fam2_nombre || '',
+        fam2_apellido: newData.fam2_apellido || '',
+        fam2_vinculo: newData.fam2_vinculo || '',
+        fam2_celular: newData.fam2_celular || '',
+        fam2_direccion: newData.fam2_direccion || '',
+        // Técnicos
+        ID_JVR: newData.DNI ? `${newData.organizacion || 'JVR'}@${newData.DNI}` : '',
+        telegram_id: newData.telegram_id || '',
+        fecha_ult: normalizeFecha(newData.fecha_ult) || '',
       }
     }
   },
@@ -1212,9 +1492,29 @@ const loadMjlktData = async () => {
   }
 }
 
+const getNowFormatted = () => {
+  const now = new Date()
+  const datePart = now
+    .toLocaleDateString('es-AR')
+    .split('/')
+    .map((p) => p.padStart(2, '0'))
+    .join('/')
+  const timePart = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
+
+  return {
+    display: `${datePart} ${timePart}`, // dd/mm/yyyy hh:mm
+    iso: new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16),
+  }
+}
+
 const open = async () => {
+  hasSaved.value = false // 🔥 ESTA LÍNEA FALTABA
   isOpen.value = true
-  // Cargar datos de mjlkt si no están cargados
+
+  if (!formData.value.fecha_ult) {
+    formData.value.fecha_ult = getNowFormatted().iso
+  }
+
   if (mjlktData.value.length === 0) {
     await loadMjlktData()
   }
@@ -1239,12 +1539,13 @@ const handleSubmit = async () => {
     isLoading.value = true
 
     // Actualizar en main con TODOS los campos
+    console.log(formData.value.areas)
     const mainData = {
       // Información Personal
       DNI: formData.value.DNI,
       CUIL: formData.value.CUIL,
-      nombre: formData.value.nombre,
-      apellido: formData.value.apellido,
+      nombre: capitalizarEsp(formData.value.nombre),
+      apellido: capitalizarEsp(formData.value.apellido),
       nacimiento: parseFechaToISO(formData.value.nacimiento),
       genero: formData.value.genero,
       // Contacto
@@ -1252,10 +1553,10 @@ const handleSubmit = async () => {
       mail_personal: formData.value.mail_personal,
       mail_operativo: formData.value.mail_operativo,
       // Domicilio
-      direccion1: formData.value.direccion1,
-      barrio1: formData.value.barrio1,
-      direccion2: formData.value.direccion2,
-      barrio2: formData.value.barrio2,
+      direccion1: capitalizarEsp(formData.value.direccion1),
+      barrio1: capitalizarEsp(formData.value.barrio1),
+      direccion2: capitalizarEsp(formData.value.direccion2),
+      barrio2: capitalizarEsp(formData.value.barrio2),
       // Médicos
       obraSocial: formData.value.obraSocial,
       obraSocial_Plan: formData.value.obraSocial_Plan,
@@ -1279,10 +1580,12 @@ const handleSubmit = async () => {
       med_estudios_otro: formData.value.med_estudios_otro,
       // Organización
       organizacion: formData.value.organizacion,
-      areas: Array.isArray(formData.value.rol) ? formData.value.rol.join(',') : formData.value.rol,
       areas_ref: Array.isArray(formData.value.areas_ref)
         ? formData.value.areas_ref.join(',')
         : formData.value.areas_ref,
+      areas: Array.isArray(formData.value.areas)
+        ? formData.value.areas.join(',')
+        : formData.value.areas,
       apodo: formData.value.apodo,
       activo: formData.value.activo === true ? 1 : 0,
       nivel: formData.value.nivel,
@@ -1296,6 +1599,29 @@ const handleSubmit = async () => {
       curso_AvKM: formData.value.curso_AvKM,
       curso_IE: formData.value.curso_IE,
       curso_FND: formData.value.curso_FND,
+      // Vida y Desarrollo
+      estudios_grado: formData.value.estudios_grado,
+      estudios_area: formData.value.estudios_area,
+      estudios_carrera: capitalizarEsp(formData.value.estudios_carrera),
+      estudios_barrio: capitalizarEsp(formData.value.estudios_barrio),
+      trabajo_area: formData.value.trabajo_area,
+      trabajo_puesto: capitalizarEsp(formData.value.trabajo_puesto),
+      trabajo_barrio: capitalizarEsp(formData.value.trabajo_barrio),
+      comunidad_rol: formData.value.comunidad_rol,
+      // Familia
+      fam1_nombre: capitalizarEsp(formData.value.fam1_nombre),
+      fam1_apellido: capitalizarEsp(formData.value.fam1_apellido),
+      fam1_vinculo: formData.value.fam1_vinculo,
+      fam1_celular: formData.value.fam1_celular,
+      fam1_direccion: capitalizarEsp(formData.value.fam1_direccion),
+      fam2_nombre: capitalizarEsp(formData.value.fam2_nombre),
+      fam2_apellido: capitalizarEsp(formData.value.fam2_apellido),
+      fam2_vinculo: formData.value.fam2_vinculo,
+      fam2_celular: formData.value.fam2_celular,
+      fam2_direccion: capitalizarEsp(formData.value.fam2_direccion),
+      ID_JVR: (formData.value.organizacion || 'JVR') + '@' + formData.value.dni || '',
+      telegram_id: formData.value.telegram_id,
+      fecha_ult: parseFechaEnteraToISO(formData.value.fecha_ult),
     }
 
     await update('main', mainData)
@@ -1311,8 +1637,17 @@ const handleSubmit = async () => {
       console.log('No se actualizó en users (puede no existir)')
     }
 
+    hasSaved.value = true
     successMessage.value = '✅ Datos actualizados correctamente'
-    emit('update', formData.value)
+    emit('update', {
+      ...formData.value,
+      areas: Array.isArray(formData.value.areas)
+        ? formData.value.areas.join(',')
+        : formData.value.areas,
+      areas_ref: Array.isArray(formData.value.areas_ref)
+        ? formData.value.areas_ref.join(',')
+        : formData.value.areas_ref,
+    })
 
     setTimeout(() => {
       close()

@@ -12,7 +12,39 @@ export const tiposSangre = [
 export const nivelesHBTJ = ['B', 'A', 'MFKD0', 'MFKD1', 'MFKD2']
 
 export const organizaciones = ['DAC', 'FJ', 'BH', 'LH', 'IONA']
-export const areas_ref = [{ ref: '', area: '' }]
+
+export const Works = [
+    'Tecnología',
+    'Ingeniería',
+    'Economía',
+    'Ciencias',
+    'Medicina/Veterinaria',
+    'Derecho',
+    'RRHH',
+    'Filosofía y Letras',
+    'Diseño/Arquitectura',
+    'Educación física',
+    'Educación',
+    'Gastronomía',
+    'Otro'
+]
+export const Estudies = [
+    'Estudios secundarios',
+    'Tecnología',
+    'Ingeniería',
+    'Economía',
+    'Ciencias',
+    'Medicina/Veterinaria',
+    'Derecho',
+    'RRHH',
+    'Filosofía y Letras',
+    'Diseño/Arquitectura',
+    'Educación física',
+    'Educación',
+    'Gastronomía',
+    'Otro'
+]
+
 
 /**
  * Convierte una fecha a formato dd/mm/yyyy
@@ -50,6 +82,32 @@ export const formatFecha = (fecha) => {
   return `${day}/${month}/${year}`
 }
 
+
+/**
+ * Convierte una fecha a formato dd/mm/yyyy
+ * Maneja correctamente la zona horaria local evitando desajustes UTC
+ * @param {string|Date} fecha - Fecha a convertir (ISO string o Date)
+ * @returns {string} Fecha formateada como dd/mm/yyyy
+ */
+export function formatFechaEntera(fecha) {
+  const d = new Date(fecha);
+  
+  // Usamos un objeto de opciones para definir el formato
+  const opciones = {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false // Forzamos formato 24h
+  };
+
+  return new Intl.DateTimeFormat('es-ES', opciones).format(d).replace(',', '');
+}
+
+
+
+
 /**
  * Convierte una fecha en formato dd/mm/yyyy a ISO string YYYY-MM-DD
  * Usado para enviar fechas al backend
@@ -69,6 +127,41 @@ export const parseFechaToISO = (fechaFormato) => {
   if (parts.length === 3) {
     const [day, month, year] = parts
     return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  }
+
+  return fechaFormato
+}
+
+/**
+ * Convierte dd/mm/yyyy [HH:mm] a ISO YYYY-MM-DD[THH:mm]
+ * @param {string} fechaFormato - Ej: "25/12/2024 15:30"
+ * @returns {string} - Ej: "2024-12-25T15:30"
+ */
+export const parseFechaEnteraToISO = (fechaFormato) => {
+  if (!fechaFormato) return ''
+
+  // 1. Si ya es ISO, extraemos hasta los minutos
+  if (/^\d{4}-\d{2}-\d{2}/.test(fechaFormato)) {
+    return fechaFormato.includes('T') 
+      ? fechaFormato.substring(0, 16) 
+      : fechaFormato
+  }
+
+  // 2. Separar fecha de hora
+  const [datePart, timePart] = fechaFormato.trim().split(/\s+/)
+  
+  // 3. Procesar dd/mm/yyyy
+  const parts = datePart.split('/')
+  if (parts.length === 3) {
+    const [day, month, year] = parts
+    const isoDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    
+    // 4. Retornar con hora (HH:mm) si existe
+    if (timePart && /^([01]\d|2[0-3]):([0-5]\d)/.test(timePart)) {
+      return `${isoDate}T${timePart}`
+    }
+    
+    return isoDate
   }
 
   return fechaFormato

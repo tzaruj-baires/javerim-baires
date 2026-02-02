@@ -429,11 +429,13 @@
                     <!-- Comunidad -->
                     <div class="row g-2 mt-1">
                       <h5>Comunidad</h5>
+                      <!--
                       <div class="col-md-6">
                         <label class="text-muted small">Actividad comunitaria</label>
                         <p class="fw-bold">{{ userData.comunidad_actividad || '-' }}</p>
                       </div>
-                      <div class="col-md-6">
+                      -->
+                      <div class="col-md-12">
                         <label class="text-muted small">Rol comunitario</label>
                         <p class="fw-bold">{{ userData.comunidad_rol || '-' }}</p>
                       </div>
@@ -468,7 +470,7 @@
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Apellido</label>
-                        <p class="fw-bold">{{ userData.fam1_apelllido || '-' }}</p>
+                        <p class="fw-bold">{{ userData.fam1_apellido || '-' }}</p>
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Vínculo</label>
@@ -491,7 +493,7 @@
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Apellido</label>
-                        <p class="fw-bold">{{ userData.fam2_apelllido || '-' }}</p>
+                        <p class="fw-bold">{{ userData.fam2_apellido || '-' }}</p>
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Vínculo</label>
@@ -511,7 +513,7 @@
               </div>
 
               <!-- 8. Técnicos (Solo visible para nivel 3) -->
-              <div v-if="canSeeTechnical" class="accordion-item">
+              <div v-if="canEditSection('tecnicos')" class="accordion-item">
                 <h2 class="accordion-header">
                   <button
                     class="accordion-button collapsed"
@@ -541,7 +543,7 @@
 
                       <div class="col-md-6">
                         <label class="text-muted small">Última modificación</label>
-                        <p class="fw-bold">{{ userData.fecha_ult || '-' }}</p>
+                        <p class="fw-bold">{{ formatFechaEntera(userData.fecha_ult) || '-' }}</p>
                       </div>
 
                       <div class="col-md-6">
@@ -618,7 +620,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { usePermissions } from '@/composables/usePermissions'
 import { getAll, remove } from '@/services/api'
-import { formatFecha } from '@/utils/forms_consts'
+import { formatFecha, formatFechaEntera } from '@/utils/forms_consts'
 import ProfileForm from '@/components/ProfileForm.vue'
 
 const router = useRouter()
