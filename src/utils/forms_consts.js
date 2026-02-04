@@ -84,26 +84,33 @@ export const formatFecha = (fecha) => {
 
 
 /**
- * Convierte una fecha a formato dd/mm/yyyy
- * Maneja correctamente la zona horaria local evitando desajustes UTC
- * @param {string|Date} fecha - Fecha a convertir (ISO string o Date)
- * @returns {string} Fecha formateada como dd/mm/yyyy
+ * Convierte una fecha a formato dd/mm/yyyy HH:mm
+ * Maneja correctamente valores inválidos
+ * @param {string|Date|null|undefined} fecha
+ * @returns {string|null} fecha formateada como dd/mm/yyyy HH:mm o null si es inválida
  */
 export function formatFechaEntera(fecha) {
+  if (!fecha) return null; // "", null, undefined
+
   const d = new Date(fecha);
-  
-  // Usamos un objeto de opciones para definir el formato
+
+  // Validación CLAVE
+  if (isNaN(d.getTime())) return null;
+
   const opciones = {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    hour12: false // Forzamos formato 24h
+    hour12: false
   };
 
-  return new Intl.DateTimeFormat('es-ES', opciones).format(d).replace(',', '');
+  return new Intl.DateTimeFormat('es-ES', opciones)
+    .format(d)
+    .replace(',', '');
 }
+
 
 
 
