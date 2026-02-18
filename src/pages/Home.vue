@@ -31,6 +31,10 @@
             acceder a las funcionalidades.
             <strong>Contacta con el administrador</strong> para que asigne tu nivel de acceso.
           </p>
+          <p>
+            <b>Nota</b>: Una vez aprobada tu cuenta, tendrás que
+            <strong><s>reiniciar sesión</s></strong> para acceder a las funcionalidades.
+          </p>
           <button
             type="button"
             class="btn-close"

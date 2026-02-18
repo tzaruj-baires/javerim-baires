@@ -35,8 +35,11 @@
                   class="form-control"
                   id="dni"
                   placeholder="12345678"
+                  min="1000000"
+                  max="100000000"
                   required
                 />
+                <small>Verificar dos veces</small>
               </div>
 
               <!-- Email -->
@@ -178,8 +181,8 @@ const handleRegister = async () => {
       return
     }
 
-    if (formData.value.dni.toString().length !== 8) {
-      errorMessage.value = 'DNI debe tener 8 dígitos'
+    if (!(formData.value.dni.toString().length >= 7 && formData.value.dni.toString().length <= 8)) {
+      errorMessage.value = 'DNI debe tener entre 7 u 8 dígitos'
       return
     }
 
