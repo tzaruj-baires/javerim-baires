@@ -99,17 +99,33 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error('Todos los campos son requeridos')
       }
 
-      if (userData.dni.toString().length !== 8) {
-        throw new Error('DNI debe tener 8 dígitos')
+      if ((userData.dni.toString().length >= 7 && userData.dni.toString().length <= 8) === false) {
+        throw new Error('DNI debe tener entre 7 y 8 dígitos')
       }
 
       if (![1, 2, 3].includes(parseInt(userData.it_level || 1))) {
         throw new Error('it_level debe ser entre 1 y 3')
       }
 
+      // Obtener datos de ambas tablas para validación de DNI y email
+      const mainResponse = await api.getAll('main')
+      const usersResponse = await api.getAll('users')
+      const mainRecords = mainResponse.data
+      const users = usersResponse.data
+
+      // Validar que el DNI exista en la tabla 'main'
+      const dniInMain = mainRecords.some((record) => parseInt(record.DNI) === parseInt(userData.dni))
+      if (!dniInMain) {
+        throw new Error('El DNI no está registrado en el sistema. No puedes completar el registro.')
+      }
+
+      // Validar que el DNI NO exista en la tabla 'users'
+      const dniInUsers = users.some((u) => parseInt(u.dni) === parseInt(userData.dni))
+      if (dniInUsers) {
+        throw new Error('Este DNI ya tiene una cuenta registrada. Por favor inicia sesión.')
+      }
+
       // Verificar si el email ya existe
-      const response = await api.getAll('users')
-      const users = response.data
       const emailExists = users.some((u) => u.email === userData.email)
       if (emailExists) {
         throw new Error('Este email ya está registrado. Por favor usa otro email o inicia sesión.')
