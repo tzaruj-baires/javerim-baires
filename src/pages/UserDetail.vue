@@ -111,7 +111,9 @@
                     <div class="row g-3">
                       <div class="col-md-6">
                         <label class="text-muted small">Celular</label>
-                        <p class="fw-bold">{{ userData.celular || '-' }}</p>
+                        <p class="fw-bold">
+                          {{ formatPhone(userData.celular, 'INTERNATIONAL') || '-' }}
+                        </p>
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Email Personal</label>
@@ -478,7 +480,9 @@
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Celular</label>
-                        <p class="fw-bold">{{ userData.fam1_celular || '-' }}</p>
+                        <p class="fw-bold">
+                          {{ formatPhone(userData.fam1_celular, 'INTERNATIONAL') || '-' }}
+                        </p>
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Dirección</label>
@@ -501,7 +505,9 @@
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Celular</label>
-                        <p class="fw-bold">{{ userData.fam2_celular || '-' }}</p>
+                        <p class="fw-bold">
+                          {{ formatPhone(userData.fam2_celular, 'INTERNATIONAL') || '-' }}
+                        </p>
                       </div>
                       <div class="col-md-6">
                         <label class="text-muted small">Dirección</label>
@@ -615,12 +621,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { usePermissions } from '@/composables/usePermissions'
 import { getAll, remove } from '@/services/api'
 import { formatFecha, formatFechaEntera } from '@/utils/forms_consts'
+import { formatPhone } from '@/utils/phone'
 import ProfileForm from '@/components/ProfileForm.vue'
 
 const router = useRouter()
@@ -806,9 +813,17 @@ const loadUserData = async () => {
   }
 }
 
-const openEditForm = () => {
+const openEditForm = async () => {
   if (canEdit.value) {
-    profileForm.value.open()
+    if (!profileForm.value) {
+      await nextTick()
+    }
+
+    if (profileForm.value?.open) {
+      profileForm.value.open()
+    } else {
+      console.warn('ProfileForm component is not available')
+    }
   }
 }
 
