@@ -229,8 +229,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import * as api from '@/services/api'
 import { organizaciones } from '@/utils/forms_consts'
+import { usePermissions } from '@/composables/usePermissions'
 
 const formData = ref({
   dni: '',
@@ -289,6 +291,15 @@ const loadMjlktData = async () => {
 
 // Montar componente
 onMounted(() => {
+  const router = useRouter()
+  const { can } = usePermissions()
+
+  // Verificar permisos: solo nivel IT 2 o superior
+  if (!can(2)) {
+    router.push('/')
+    return
+  }
+
   loadMjlktData()
 })
 
