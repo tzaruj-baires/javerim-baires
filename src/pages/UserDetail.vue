@@ -663,8 +663,11 @@ const canEdit = computed(() => {
       if (!sameOrganization) return false
 
       // CASO ESPECIAL: Si el usuario tiene "ROSH" en areas_ref, puede editar a TODOS de su organización
-      if (authStore.user.areas_ref && authStore.user.areas_ref.includes('ROSH')) {
-        return true
+      if (authStore.user.areas_ref) {
+        const userAreasArray = authStore.user.areas_ref.split(',').map((a) => a.trim())
+        if (userAreasArray.includes('ROSH')) {
+          return true
+        }
       }
 
       // CASO NORMAL: Verificar que compartan al menos una área

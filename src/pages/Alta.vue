@@ -46,6 +46,8 @@
                   class="form-control"
                   id="dni"
                   placeholder="Ej: 12345678"
+                  min="1000000"
+                  max="99999999"
                   required
                   @blur="validateDNI"
                 />
@@ -151,36 +153,45 @@
                   required
                 >
                   <option value="">Selecciona una organización</option>
-                  <option value="DAC">DAC</option>
-                  <option value="FJ">FJ</option>
-                  <option value="BH">BH</option>
-                  <option value="LH">LH</option>
-                  <option value="IONA">IONA</option>
+                  <option v-for="org in organizaciones" :key="org" :value="org">{{ org }}</option>
                 </select>
-              </div>
-
-              <!-- Áreas -->
-              <div class="mb-3">
-                <label for="areas" class="form-label fw-bold">Áreas</label>
-                <input
-                  v-model="formData.areas"
-                  type="text"
-                  class="form-control"
-                  id="areas"
-                  placeholder="Ej: Desarrollo, QA"
-                />
               </div>
 
               <!-- Áreas de Referencia -->
               <div class="mb-3">
-                <label for="areasRef" class="form-label fw-bold">Áreas de Referencia</label>
-                <input
+                <label for="areasRef" class="form-label fw-bold"> Áreas de Referencia </label>
+                <select
                   v-model="formData.areasRef"
-                  type="text"
-                  class="form-control"
+                  multiple
+                  class="form-select"
                   id="areasRef"
-                  placeholder="Ej: Supervisión"
-                />
+                  :disabled="!formData.organizacion"
+                  size="5"
+                >
+                  <option :value="area" v-for="area in areasRefDisponibles" :key="area">
+                    {{ area }}
+                  </option>
+                </select>
+                <small class="text-muted">Selecciona una o más áreas (Ctrl/Cmd + clic)</small>
+              </div>
+
+              <!-- Roles (Áreas) -->
+              <div class="mb-3">
+                <label for="areas" class="form-label fw-bold"> Roles </label>
+                <select
+                  v-model="formData.areas"
+                  multiple
+                  class="form-select"
+                  id="areas"
+                  :disabled="!formData.organizacion || formData.areasRef.length === 0"
+                  size="5"
+                >
+                  <option :value="rol" v-for="rol in rolesDisponibles" :key="rol">
+                    {{ rol }}
+                  </option>
+                </select>
+
+                <small class="text-muted">Selecciona uno o más roles (Ctrl/Cmd + clic)</small>
               </div>
 
               <!-- Botones -->
@@ -212,10 +223,7 @@
         <!-- Información adicional -->
         <div class="alert alert-info mt-4">
           <i class="bi bi-info-circle me-2"></i>
-          <small>
-            Al dar de alta, un usuario será registrado en el sistema con acceso limitado. Los
-            administradores podrán otorgar permisos adicionales.
-          </small>
+          <small> Al dar de alta, el javer se tendrá que registrar al sistema él mismo. </small>
         </div>
       </div>
     </div>
@@ -223,8 +231,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import * as api from '@/services/api'
+import { organizaciones } from '@/utils/forms_consts'
 
 const formData = ref({
   dni: '',
@@ -235,13 +244,56 @@ const formData = ref({
   mailPersonal: '',
   celular: '',
   organizacion: '',
-  areas: '',
-  areasRef: '',
+  areas: [],
+  areasRef: [],
+})
+
+// Datos de mjlkt para filtrar áreas y roles
+const mjlktData = ref([])
+
+// Computed: áreas de referencia disponibles basadas en la organización
+const areasRefDisponibles = computed(() => {
+  const org = formData.value.organizacion
+  if (!org) return []
+  // Obtener areas_ref únicas para la organización
+  return [
+    ...new Set(mjlktData.value.filter((item) => item.org === org).map((item) => item.area)),
+  ].sort()
+})
+
+// Computed: roles disponibles basados en la organización y áreas_ref seleccionadas
+const rolesDisponibles = computed(() => {
+  const org = formData.value.organizacion
+  const areasRef = formData.value.areasRef
+  if (!org || !Array.isArray(areasRef) || areasRef.length === 0) return []
+  // Obtener roles que coincidan con org y CUALQUIERA de las areas_ref seleccionadas
+  return [
+    ...new Set(
+      mjlktData.value
+        .filter((item) => item.org === org && areasRef.includes(item.area))
+        .map((item) => item.rol),
+    ),
+  ].sort()
 })
 
 const isLoading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+
+// Cargar datos de mjlkt
+const loadMjlktData = async () => {
+  try {
+    const response = await api.getAll('mjlkt')
+    mjlktData.value = response.data || []
+  } catch (error) {
+    console.error('Error loading mjlkt data:', error)
+  }
+}
+
+// Montar componente
+onMounted(() => {
+  loadMjlktData()
+})
 
 // Validar DNI
 const validateDNI = () => {
@@ -329,10 +381,6 @@ const handleSubmit = async () => {
     successMessage.value = ''
 
     // Preparar datos para API
-
-    /*
-variable ? variable : valor por defecto
-*/
     const newUser = {
       ID_JVR: `${formData.value.organizacion ? formData.value.organizacion : 'JVR'}@${parseInt(formData.value.dni)}`, // Se asignará automáticamente
       DNI: parseInt(formData.value.dni),
@@ -344,8 +392,12 @@ variable ? variable : valor por defecto
       mail_operativo: formData.value.mailOperativo,
       mail_personal: formData.value.mailPersonal,
       organizacion: formData.value.organizacion,
-      areas: formData.value.areas,
-      areas_ref: formData.value.areasRef,
+      areas: Array.isArray(formData.value.areas)
+        ? formData.value.areas.join(', ')
+        : formData.value.areas,
+      areas_ref: Array.isArray(formData.value.areasRef)
+        ? formData.value.areasRef.join(', ')
+        : formData.value.areasRef,
     }
 
     // Verificar que el DNI no esté duplicado
@@ -390,8 +442,8 @@ const resetForm = () => {
     mailPersonal: '',
     celular: '',
     organizacion: '',
-    areas: '',
-    areasRef: '',
+    areas: [],
+    areasRef: [],
   }
   errorMessage.value = ''
 }

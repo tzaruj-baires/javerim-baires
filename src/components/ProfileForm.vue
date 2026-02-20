@@ -1699,10 +1699,10 @@ const handleSubmit = async () => {
       // Organización
       organizacion: formData.value.organizacion,
       areas_ref: Array.isArray(formData.value.areas_ref)
-        ? formData.value.areas_ref.join(',')
+        ? formData.value.areas_ref.join(', ')
         : formData.value.areas_ref,
       areas: Array.isArray(formData.value.areas)
-        ? formData.value.areas.join(',')
+        ? formData.value.areas.join(', ')
         : formData.value.areas,
       apodo: formData.value.apodo,
       activo: formData.value.activo === true ? 1 : 0,
@@ -1766,10 +1766,10 @@ const handleSubmit = async () => {
     emit('update', {
       ...formData.value,
       areas: Array.isArray(formData.value.areas)
-        ? formData.value.areas.join(',')
+        ? formData.value.areas.join(', ')
         : formData.value.areas,
       areas_ref: Array.isArray(formData.value.areas_ref)
-        ? formData.value.areas_ref.join(',')
+        ? formData.value.areas_ref.join(', ')
         : formData.value.areas_ref,
     })
 
