@@ -1,7 +1,7 @@
 <template>
   <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
-      <div class="col-lg-6">
+      <div class="col-lg-7">
         <div class="card shadow-lg">
           <div class="card-header bg-primary text-white">
             <div class="d-flex align-items-center">
@@ -34,7 +34,7 @@
             </div>
 
             <!-- Formulario -->
-            <form @submit.prevent="handleSubmit">
+            <form @submit.prevent="handleSubmit" class="container">
               <!-- DNI -->
               <div class="mb-3">
                 <label for="dni" class="form-label fw-bold">
@@ -51,7 +51,7 @@
                   required
                   @blur="validateDNI"
                 />
-                <small class="text-muted">Entre 7 y 8 dígitos</small>
+                <small class="text-muted">Entre 7 y 8 dígitos. CHEQUEAR DOS VECES</small>
               </div>
 
               <!-- Nombre -->
@@ -86,31 +86,25 @@
 
               <!-- Apodo (Nickname) -->
               <div class="mb-3">
-                <label for="apodo" class="form-label fw-bold">
-                  Apodo <span class="text-danger">*</span>
-                </label>
+                <label for="apodo" class="form-label fw-bold"> Apodo </label>
                 <input
                   v-model="formData.apodo"
                   type="text"
                   class="form-control"
                   id="apodo"
-                  placeholder="Ej: usuario123"
-                  required
+                  placeholder="Ingrese su apodo (si aplica)"
                 />
               </div>
 
               <!-- Email Operativo -->
               <div class="mb-3">
-                <label for="mailOperativo" class="form-label fw-bold">
-                  Email Operativo <span class="text-danger">*</span>
-                </label>
+                <label for="mailOperativo" class="form-label fw-bold"> Email Operativo </label>
                 <input
                   v-model="formData.mailOperativo"
                   type="email"
                   class="form-control"
                   id="mailOperativo"
                   placeholder="usuario@example.com"
-                  required
                 />
               </div>
 
@@ -139,6 +133,7 @@
                   placeholder="Ej: 1123456789"
                   required
                 />
+                <small class="text-muted">CHEQUEAR DOS VECES</small>
               </div>
 
               <!-- Organización -->
@@ -223,7 +218,9 @@
         <!-- Información adicional -->
         <div class="alert alert-info mt-4">
           <i class="bi bi-info-circle me-2"></i>
-          <small> Al dar de alta, el javer se tendrá que registrar al sistema él mismo. </small>
+          <small>
+            Al dar de alta, el javer se tendrá que registrar al sistema como usuario él mismo.
+          </small>
         </div>
       </div>
     </div>
@@ -324,16 +321,6 @@ const validateForm = () => {
 
   if (!formData.value.apellido) {
     errorMessage.value = 'El apellido es requerido'
-    return false
-  }
-
-  if (!formData.value.apodo) {
-    errorMessage.value = 'El apodo es requerido'
-    return false
-  }
-
-  if (!formData.value.mailOperativo) {
-    errorMessage.value = 'El email operativo es requerido'
     return false
   }
 
