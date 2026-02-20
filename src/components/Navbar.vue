@@ -30,8 +30,13 @@
             </router-link>
           </li>
           <li class="nav-item" v-if="!authStore.isAuthenticated">
-            <router-link to="/signin" class="nav-link btn btn-light btn-sm">
+            <router-link to="/signin" class="nav-link btn btn-light btn-sm me-2">
               <i class="bi bi-person-plus"></i> Registrarse
+            </router-link>
+          </li>
+          <li class="nav-item" v-if="!authStore.isAuthenticated">
+            <router-link to="/alta" class="nav-link btn btn-info btn-sm">
+              <i class="bi bi-person-fill-add"></i> Dar de Alta
             </router-link>
           </li>
 

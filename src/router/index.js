@@ -4,6 +4,7 @@ import SignIn from '@/pages/SignIn.vue'
 import UserDetail from '@/pages/UserDetail.vue'
 import ForgotPassword from '@/pages/ForgotPassword.vue'
 import AdminUsers from '@/pages/AdminUsers.vue'
+import Alta from '@/pages/Alta.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -32,6 +33,12 @@ const router = createRouter({
       path: '/forgot-password',
       name: 'forgotPassword',
       component: ForgotPassword,
+      meta: { requiresAuth: false },
+    },
+    {
+      path: '/alta',
+      name: 'alta',
+      component: Alta,
       meta: { requiresAuth: false },
     },
     {

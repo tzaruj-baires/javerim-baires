@@ -44,7 +44,27 @@ function doPost(e) {
   // CREATE
   if (action === 'create') {
     const row = headers.map((h) => body[h] || '')
-    sheet.appendRow(row)
+    
+    // Buscar la primera fila vacía
+    let emptyRowIndex = -1
+    for (let i = 1; i < data.length; i++) {
+      // Verificar si la fila está completamente vacía
+      if (data[i].every(cell => cell === '')) {
+        emptyRowIndex = i
+        break
+      }
+    }
+    
+    if (emptyRowIndex !== -1) {
+      // Insertar en la fila vacía encontrada
+      headers.forEach((h, index) => {
+        sheet.getRange(emptyRowIndex + 1, index + 1).setValue(body[h] || '')
+      })
+    } else {
+      // Si no hay fila vacía, agregar al final
+      sheet.appendRow(row)
+    }
+    
     return json({ success: true })
   }
 
