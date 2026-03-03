@@ -438,65 +438,19 @@
                 </div>
 
                 <div class="mb-3">
-                  <label for="med_estudios" class="form-label">Estudios Realizados</label>
-                  <input
-                    v-model="formData.med_estudios"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios"
-                    placeholder="Ingrese estudios"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-
-                  <div class="form-check">
+                  <label class="form-label">Estudios Realizados</label>
+                  <div v-for="opt in estudiosOptions" :key="opt" class="form-check">
                     <input
                       class="form-check-input"
                       type="checkbox"
-                      value="Laboratorio completo"
-                      id="defaultCheck1"
+                      :id="'estudio-' + opt"
+                      :value="opt"
+                      v-model="selectedEstudios"
+                      :disabled="isLoading || !canEditSection('medicos')"
                     />
-                    <label class="form-check-label" for="defaultCheck1">Laboratorio completo</label>
+                    <label class="form-check-label" :for="'estudio-' + opt">{{ opt }}</label>
                   </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value="Ergometría de 12 deriv."
-                      id="defaultCheck2"
-                    />
-                    <label class="form-check-label" for="defaultCheck2"
-                      >Ergometría de 12 deriv.</label
-                    >
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value="Ecodoppler"
-                      id="defaultCheck3"
-                    />
-                    <label class="form-check-label" for="defaultCheck3">Ecodoppler</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value="Radiografía de Tórax"
-                      id="defaultCheck4"
-                    />
-                    <label class="form-check-label" for="defaultCheck4">Radiografía de Tórax</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value="Ecoestress o Perfusión Miocárdica"
-                      id="defaultCheck5"
-                    />
-                    <label class="form-check-label" for="defaultCheck5"
-                      >Ecoestress o Perfusión Miocárdica</label
-                    >
-                  </div>
+                  <small class="text-muted">Seleccionados: {{ formData.med_estudios }}</small>
                 </div>
 
                 <div class="mb-3">
@@ -549,51 +503,25 @@
                 </div>
 
                 <div class="mb-3">
-                  <label for="med_aclararimg" class="form-label">Aclaraciones Imágenes</label>
-                  <input
-                    v-model="formData.med_aclararimg"
-                    type="text"
-                    class="form-control"
-                    id="med_aclararimg"
-                    placeholder="Ingrese aclaraciones"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_img1" class="form-label">Imagen 1</label>
-                  <input
-                    v-model="formData.med_estudios_img1"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_img1"
-                    placeholder="Ruta o URL"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_img2" class="form-label">Imagen 2</label>
-                  <input
-                    v-model="formData.med_estudios_img2"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_img2"
-                    placeholder="Ruta o URL"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_img3" class="form-label">Imagen 3</label>
-                  <input
-                    v-model="formData.med_estudios_img3"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_img3"
-                    placeholder="Ruta o URL"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
+                  <label for="med_estudios_img" class="form-label">Imagen (ver en modal)</label>
+                  <div class="input-group">
+                    <textarea
+                      v-model="formData.med_estudios_img"
+                      class="form-control"
+                      id="med_estudios_img"
+                      placeholder="Ingrese observaciones / patologías"
+                      rows="3"
+                      :disabled="isLoading || !canEditSection('medicos')"
+                    ></textarea>
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      @click="showImageModal = true"
+                    >
+                      Ver imagen
+                    </button>
+                  </div>
+                  <small class="text-muted">La imagen mostrada es una referencia visual.</small>
                 </div>
 
                 <div class="mb-3">
@@ -1233,6 +1161,26 @@
   </div>
 
   <!-- Backdrop -->
+  <!-- Image preview modal -->
+  <div v-if="showImageModal" class="modal-backdrop d-block" @click.self="showImageModal = false">
+    <div class="modal d-block" tabindex="-1" style="background: transparent">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Imagen</h5>
+            <button type="button" class="btn-close" @click="showImageModal = false"></button>
+          </div>
+          <div class="modal-body text-center">
+            <img
+              src="https://picsum.photos/200/300"
+              alt="Imagen estudio"
+              style="max-width: 100%; max-height: 70vh"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div v-if="isOpen" class="offcanvas-backdrop fade show" @click="close"></div>
 </template>
 
@@ -1421,6 +1369,24 @@ const formData = ref({
   fecha_ult: '',
 })
 
+// Estudios (checkboxes) — se sincronizan con `formData.med_estudios` como lista separada por comas
+const estudiosOptions = [
+  'Laboratorio completo',
+  'Ergometría de 12 deriv.',
+  'Ecodoppler',
+  'Radiografía de Tórax',
+  'Ecoestress o Perfusión Miocárdica',
+]
+const selectedEstudios = ref([])
+
+// Modal para ver imagen
+const showImageModal = ref(false)
+
+// Mantener el string actualizado en formData
+watch(selectedEstudios, (newVal) => {
+  formData.value.med_estudios = newVal.join(', ')
+})
+
 watch(
   () => props.profileData,
   (newData) => {
@@ -1542,8 +1508,17 @@ watch(
           // Técnicos
           ID_JVR: newData.DNI ? `${newData.organizacion || 'JVR'}@${newData.DNI}` : '',
           telegram_id: newData.telegram_id || '',
-          fecha_ult: normalizeFecha(newData.fecha_ult) || '',
+          // Última modificación: convertimos a ISO compatible datetime-local.
+          // si viene sólo como fecha la función util añadirá T00:00
+          fecha_ult: parseFechaEnteraToISO(newData.fecha_ult) || '',
         }
+        // Inicializar checkboxes de estudios desde el string (si viene como "item1, item2")
+        selectedEstudios.value = formData.value.med_estudios
+          ? String(formData.value.med_estudios)
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : []
       }
     } catch (error) {
       console.error('Error processing profileData in watcher:', error)
@@ -1581,7 +1556,14 @@ const open = async () => {
   hasSaved.value = false
   isOpen.value = true
 
-  if (!formData.value.fecha_ult) {
+  // si el campo ya tenía sólo la fecha (p.e. 2024-02-02) ahora lo normalizamos a
+  // un formato aceptable para `<input type="datetime-local"` agregando
+  // hora cero. Si está vacío inicializamos con fecha/hora actual.
+  if (formData.value.fecha_ult) {
+    if (!formData.value.fecha_ult.includes('T')) {
+      formData.value.fecha_ult = `${formData.value.fecha_ult}T00:00`
+    }
+  } else {
     formData.value.fecha_ult = getNowFormatted().iso
   }
 
@@ -1655,6 +1637,9 @@ const handleSubmit = async () => {
     }
 
     isLoading.value = true
+
+    // forzamos la fecha de última modificación a ahora; no importan los cambios
+    formData.value.fecha_ult = getNowFormatted().iso
 
     // Actualizar en main con TODOS los campos
     console.log(formData.value.areas)

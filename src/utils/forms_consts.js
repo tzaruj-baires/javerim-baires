@@ -147,11 +147,11 @@ export const parseFechaToISO = (fechaFormato) => {
 export const parseFechaEnteraToISO = (fechaFormato) => {
   if (!fechaFormato) return ''
 
-  // 1. Si ya es ISO, extraemos hasta los minutos
+  // 1. Si ya es ISO, extraemos hasta los minutos y garantizamos formato datetime-local
   if (/^\d{4}-\d{2}-\d{2}/.test(fechaFormato)) {
-    return fechaFormato.includes('T') 
-      ? fechaFormato.substring(0, 16) 
-      : fechaFormato
+    const base = fechaFormato.includes('T') ? fechaFormato.substring(0, 16) : fechaFormato
+    // si no tiene la ``T`` ya sabemos que es solo la fecha, anexamos hora 00:00
+    return base.includes('T') ? base : `${base}T00:00`
   }
 
   // 2. Separar fecha de hora
@@ -167,8 +167,8 @@ export const parseFechaEnteraToISO = (fechaFormato) => {
     if (timePart && /^([01]\d|2[0-3]):([0-5]\d)/.test(timePart)) {
       return `${isoDate}T${timePart}`
     }
-    
-    return isoDate
+    // nunca retornamos solo la fecha: añadimos hora cero para compatibilidad con `datetime-local`
+    return `${isoDate}T00:00`
   }
 
   return fechaFormato
