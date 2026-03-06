@@ -15,6 +15,9 @@
               <router-link v-if="can(2)" to="/alta" class="btn btn-success me-2">
                 <i class="bi bi-person-fill-add"></i> Alta de Javer
               </router-link>
+              <router-link v-if="can(2)" to="/baja" class="btn btn-danger me-2">
+                <i class="bi bi-person-fill-add"></i> Baja de Javer
+              </router-link>
               <router-link v-if="can(1)" to="/mi-perfil" class="btn btn-light">
                 <i class="bi bi-person-circle"></i> Mi Perfil
               </router-link>

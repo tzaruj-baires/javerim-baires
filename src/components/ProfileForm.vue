@@ -1432,8 +1432,8 @@ watch(
           // Contacto
           celular: (() => {
             const extracted = extractLocalNumber(newData.celular)
-            console.log('CELULAR FROM DB:', newData.celular)
-            console.log('EXTRACTED LOCAL:', extracted)
+            //console.log('CELULAR FROM DB:', newData.celular)
+            //console.log('EXTRACTED LOCAL:', extracted)
             return extracted || ''
           })(),
           celular_countryCode: extractCountryCode(newData.celular) || 'AR',
