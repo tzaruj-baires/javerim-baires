@@ -82,7 +82,9 @@
                 <a class="dropdown-item" href="#"> <i class="bi bi-gear"></i> Configuración </a>
               </li>
               <li v-if="can(2)">
-                <a class="dropdown-item" href="#"> <i class="bi bi-graph-up"></i> Reportes </a>
+                <router-link to="/baja" class="dropdown-item">
+                  <i class="bi bi-person-dash"></i> Dar de Baja
+                </router-link>
               </li>
               <!-- Opciones solo para nivel 3 -->
               <li v-if="can(3)">

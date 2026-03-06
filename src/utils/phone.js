@@ -163,7 +163,7 @@ export function formatPhoneNumber(phoneNumber, countryCode) {
     if (parsedNumber && parsedNumber.isValid()) {
       // Retorna E.164 sin el "+"
       let num = parsedNumber.format('E.164').replace('+', '')
-      console.log(num)
+      //console.log(num)
       return num
     }
   } catch (error) {
@@ -256,7 +256,7 @@ export function extractCountryCode(fullPhoneNumber) {
  */
 export function extractLocalNumber(fullPhoneNumber) {
   if (!fullPhoneNumber) {
-    console.warn('extractLocalNumber recibió null/undefined:', fullPhoneNumber)
+    //console.warn('extractLocalNumber recibió null/undefined:', fullPhoneNumber)
     return fullPhoneNumber
   }
 
