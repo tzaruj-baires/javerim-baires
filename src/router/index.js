@@ -6,6 +6,7 @@ import ForgotPassword from '@/pages/ForgotPassword.vue'
 import AdminUsers from '@/pages/AdminUsers.vue'
 import Alta from '@/pages/Alta.vue'
 import Baja from '@/pages/Baja.vue'
+import MisAreas from '@/pages/MisAreas.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -46,6 +47,12 @@ const router = createRouter({
       path: '/baja',
       name: 'baja',
       component: Baja,
+      meta: { requiresAuth: true, minLevel: 2 },
+    },
+    {
+      path: '/mis-areas',
+      name: 'misAreas',
+      component: MisAreas,
       meta: { requiresAuth: true, minLevel: 2 },
     },
     {

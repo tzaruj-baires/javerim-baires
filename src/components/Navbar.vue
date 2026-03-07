@@ -82,8 +82,8 @@
                 <a class="dropdown-item" href="#"> <i class="bi bi-gear"></i> Configuración </a>
               </li>
               <li v-if="can(2)">
-                <router-link to="/baja" class="dropdown-item">
-                  <i class="bi bi-person-dash"></i> Dar de Baja
+                <router-link to="/mis-areas" class="dropdown-item">
+                  <i class="bi bi-diagram-3"></i> Mis Áreas
                 </router-link>
               </li>
               <!-- Opciones solo para nivel 3 -->
