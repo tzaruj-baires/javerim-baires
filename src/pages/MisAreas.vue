@@ -219,10 +219,8 @@ const groupedUsers = computed(() => {
         ),
       ]
     } else {
-      // Solo las subáreas que comiencen con los grupos de su areas_ref, incluyendo los grupos si no tienen subáreas
-      const grupos = user.areas_ref
-        ? user.areas_ref.split(',').map((a) => a.trim().split(' - ')[0])
-        : []
+      // Áreas que incluyen los strings de areas_ref
+      const refAreas = user.areas_ref ? user.areas_ref.split(',').map((a) => a.trim()) : []
       allowedAreas = [
         ...new Set(
           allUsers
@@ -232,7 +230,7 @@ const groupedUsers = computed(() => {
                 ? u.areas
                     .split(',')
                     .map((a) => a.trim())
-                    .filter((a) => grupos.some((g) => a.startsWith(g)))
+                    .filter((a) => refAreas.some((r) => a.includes(r)))
                 : [],
             ),
         ),
@@ -250,7 +248,6 @@ const groupedUsers = computed(() => {
       groups[org] = { areas: {} }
     }
     allowedAreas.forEach((area) => {
-      const grupo = area.split(' - ')[0] || area // Obtener el grupo de la área
       const areaUsers = allUsers.filter(
         (u) =>
           u.organizacion === org &&
