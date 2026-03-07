@@ -99,7 +99,7 @@
                       <div class="col-md-6">
                         <div class="card">
                           <div class="card-header">
-                            <h6 class="card-title mb-0">Resumen General</h6>
+                            <h6 class="card-title mb-0">Distribución Género / Edad</h6>
                           </div>
                           <div class="card-body">
                             <canvas
@@ -180,27 +180,25 @@ const authStore = useAuthStore()
 const loading = ref(true)
 const error = ref(null)
 const users = ref([])
-const chartInstances = ref({}) // Almacenar referencias de Charts
+const chartInstances = ref({})
 
-// Agrupar usuarios por organización y luego por área
+// ── Sin cambios: agrupación de usuarios por org/área ──────────────────────────
 const groupedUsers = computed(() => {
   const user = authStore.user
   if (!user) return {}
 
-  const allUsers = users.value // Quitado filtro de activo === 1
+  const allUsers = users.value
   const groups = {}
 
   let allowedOrgs = []
   let allowedAreas = []
 
   if (user.it_level === 3) {
-    // Nivel 3: todas las organizaciones y todas las áreas
     allowedOrgs = [...new Set(allUsers.map((u) => u.organizacion).filter(Boolean))]
     allowedAreas = [
       ...new Set(allUsers.flatMap((u) => (u.areas ? u.areas.split(',').map((a) => a.trim()) : []))),
     ]
   } else if (user.it_level >= 2) {
-    // Cambiado a >= 2 para excluir nivel 1
     allowedOrgs = [user.organizacion]
     console.log('user.areas:', user.areas)
     if (
@@ -210,7 +208,6 @@ const groupedUsers = computed(() => {
         .map((a) => a.trim())
         .includes('ROSH')
     ) {
-      // Si tiene ROSH: todas las áreas de su organización
       allowedAreas = [
         ...new Set(
           allUsers
@@ -219,7 +216,6 @@ const groupedUsers = computed(() => {
         ),
       ]
     } else {
-      // Áreas que incluyen los strings de areas_ref
       const refAreas = user.areas_ref ? user.areas_ref.split(',').map((a) => a.trim()) : []
       allowedAreas = [
         ...new Set(
@@ -240,7 +236,6 @@ const groupedUsers = computed(() => {
     return {}
   }
 
-  // Ordenar áreas alfabéticamente
   allowedAreas.sort((a, b) => a.localeCompare(b))
 
   allowedOrgs.forEach((org) => {
@@ -255,7 +250,7 @@ const groupedUsers = computed(() => {
           u.areas
             .split(',')
             .map((a) => a.trim())
-            .includes(area), // Usar 'areas' para determinar usuarios en el acordeón
+            .includes(area),
       )
       if (areaUsers.length > 0) {
         groups[org].areas[area] = {
@@ -264,7 +259,6 @@ const groupedUsers = computed(() => {
         }
       }
     })
-    // Ordenar las áreas en el objeto
     const sortedAreas = Object.fromEntries(
       Object.entries(groups[org].areas).sort(([a], [b]) => a.localeCompare(b)),
     )
@@ -274,336 +268,409 @@ const groupedUsers = computed(() => {
   return groups
 })
 
-// Calcular métricas para un área
-const calculateMetrics = (areaUsers) => {
-  const totalUsers = areaUsers.length
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-  // clasificar estudios médicos según fecha de vencimiento
+/**
+ * Parsea fechas en múltiples formatos:
+ *   - dd/mm/yyyy  (formato principal de la DB)
+ *   - yyyy-mm-dd  (ISO, también frecuente)
+ *   - d/m/yyyy, d/m/yy, etc.
+ * Retorna null si no puede parsear.
+ */
+const parseFecha = (str) => {
+  if (!str || typeof str !== 'string') return null
+  const s = str.trim()
+  if (!s) return null
+
+  // Formato dd/mm/yyyy o d/m/yyyy (con separador / o -)
+  const dmyMatch = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/)
+  if (dmyMatch) {
+    let [, day, month, year] = dmyMatch.map(Number)
+    if (year < 100) year += 2000
+    const d = new Date(year, month - 1, day)
+    if (!isNaN(d.getTime())) return d
+  }
+
+  // Formato yyyy-mm-dd (ISO)
+  const isoMatch = s.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/)
+  if (isoMatch) {
+    const [, year, month, day] = isoMatch.map(Number)
+    const d = new Date(year, month - 1, day)
+    if (!isNaN(d.getTime())) return d
+  }
+
+  // Fallback: dejar que Date lo intente
+  const d = new Date(s)
+  return isNaN(d.getTime()) ? null : d
+}
+
+/**
+ * Calcula la edad en años completos a partir de una fecha de nacimiento.
+ * Acepta cualquier formato que parseFecha entienda.
+ */
+const calcularEdad = (nacimiento) => {
+  if (!nacimiento) return null
+  const birth = parseFecha(String(nacimiento)) || new Date(nacimiento)
+  if (!birth || isNaN(birth.getTime())) return null
   const now = new Date()
-  const msInDay = 1000 * 60 * 60 * 24
-  const medStatus = { ok: 0, porVencer: 0, vencido: 0 }
+  let age = now.getFullYear() - birth.getFullYear()
+  const m = now.getMonth() - birth.getMonth()
+  if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) age -= 1
+  return age >= 0 ? age : null
+}
 
-  // distribución de edades por género
-  const ageDist = {}
+/**
+ * Devuelve true si el valor representa "no hizo el curso"
+ * (null, undefined, vacío, o variante de "no").
+ */
+const esNoCurso = (val) => {
+  if (val === null || val === undefined) return true
+  const s = val.toString().trim().toLowerCase()
+  return s === '' || s === 'no'
+}
+
+// ── Métricas ──────────────────────────────────────────────────────────────────
+
+const calculateMetrics = (areaUsers) => {
+  const now = new Date()
+  const MS_POR_DIA = 1000 * 60 * 60 * 24
+  const MS_30_DIAS = 30 * MS_POR_DIA
+
+  // 1. Estudios médicos ---------------------------------------------------------
+  const medStatus = { alDia: 0, porVencer: 0, vencido: 0 }
+
+  // DEBUG
+  if (areaUsers.length > 0) {
+    console.log(
+      '[Médicos debug] med_estudios_fecha del primer usuario:',
+      areaUsers[0].med_estudios_fecha,
+    )
+    console.log(
+      '[Médicos debug] Fecha parseada:',
+      parseFecha(String(areaUsers[0].med_estudios_fecha ?? '')),
+    )
+  }
 
   areaUsers.forEach((u) => {
-    // estudios médicos
-    const fechaStr = u.med_estudios_fecha
-    if (!fechaStr) {
+    const raw = u.med_estudios_fecha
+    // Sin fecha, vacío o null → vencido
+    if (!raw || String(raw).trim() === '') {
       medStatus.vencido += 1
-    } else {
-      const expiry = new Date(fechaStr)
-      const diff = expiry - now
-      if (diff < 0) {
-        medStatus.vencido += 1
-      } else if (diff <= 30 * msInDay) {
-        medStatus.porVencer += 1
-      } else {
-        medStatus.ok += 1
-      }
+      return
     }
-
-    // edad
-    if (u.nacimiento) {
-      const birth = new Date(u.nacimiento)
-      let age = now.getFullYear() - birth.getFullYear()
-      const m = now.getMonth() - birth.getMonth()
-      if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
-        age -= 1
-      }
-      const sex = u.genero === 'Masculino' ? 'M' : u.genero === 'Femenino' ? 'F' : 'Otro'
-      if (!ageDist[age]) ageDist[age] = {}
-      ageDist[age][sex] = (ageDist[age][sex] || 0) + 1
+    const fechaExamen = parseFecha(String(raw))
+    if (!fechaExamen) {
+      // Sin fecha → vencido
+      medStatus.vencido += 1
+      return
+    }
+    // Vencimiento = fecha del examen + 1 año exacto
+    const vencimiento = new Date(
+      fechaExamen.getFullYear() + 1,
+      fechaExamen.getMonth(),
+      fechaExamen.getDate(),
+    )
+    const msRestantes = vencimiento - now
+    if (msRestantes < 0) {
+      medStatus.vencido += 1
+    } else if (msRestantes <= MS_30_DIAS) {
+      medStatus.porVencer += 1
+    } else {
+      medStatus.alDia += 1
     }
   })
 
-  const cursosPorTipo = areaUsers.reduce((acc, u) => {
-    if (u.CBok) acc['CB'] = (acc['CB'] || 0) + 1
-    if (u.curso_TL) acc['TL'] = (acc['TL'] || 0) + 1
-    if (u.curso_AvH) acc['Av. H'] = (acc['Av. H'] || 0) + 1
-    if (u.curso_AvKM) acc['Av. KM'] = (acc['Av. KM'] || 0) + 1
-    if (u.curso_IE) acc['IE'] = (acc['IE'] || 0) + 1
-    if (u.curso_FND) acc['FND'] = (acc['FND'] || 0) + 1
-    return acc
-  }, {})
-
-  const nivelesHbtj = areaUsers.reduce((acc, u) => {
-    const nivel = u.nivelHBTJ || 'Sin definir'
-    acc[nivel] = (acc[nivel] || 0) + 1
-    return acc
-  }, {})
-
-  const metrics = {
-    totalUsers,
-    medStatus,
-    cursosPorTipo,
-    nivelesHbtj,
-    ageDist,
+  // 2. Cursos -------------------------------------------------------------------
+  // Mapeo label → nombre exacto de columna en la DB
+  const cursoColumnas = {
+    CB: 'CBok',
+    TL: 'curso_TL',
+    'Av. H': 'curso_AvH',
+    'Av. KM': 'curso_AvKM',
+    IE: 'curso_IE',
+    FND: 'curso_FND',
   }
-  console.log('Metrics for area:', metrics)
-  return metrics
+
+  // DEBUG: mostrar las claves reales que trae el primer usuario para verificar nombres de columna
+  if (areaUsers.length > 0) {
+    console.log('[Cursos debug] Claves del primer usuario:', Object.keys(areaUsers[0]))
+    console.log('[Cursos debug] Valores de curso del primer usuario:', {
+      CBok: areaUsers[0].CBok,
+      curso_TL: areaUsers[0].curso_TL,
+      curso_AvH: areaUsers[0].curso_AvH,
+      curso_AvKM: areaUsers[0].curso_AvKM,
+      curso_IE: areaUsers[0].curso_IE,
+      curso_FND: areaUsers[0].curso_FND,
+    })
+  }
+
+  const cursosPorTipo = {}
+  Object.entries(cursoColumnas).forEach(([label, col]) => {
+    const count = areaUsers.filter((u) => {
+      // Buscar la columna de forma exacta; si no existe en el objeto, tratar como vacío
+      const val = Object.prototype.hasOwnProperty.call(u, col) ? u[col] : undefined
+      return !esNoCurso(val)
+    }).length
+    if (count > 0) cursosPorTipo[label] = count
+  })
+
+  // 3. Niveles HBTJ -------------------------------------------------------------
+  const nivelesHbtj = {}
+  areaUsers.forEach((u) => {
+    const nivel = (u.nivelHBTJ && u.nivelHBTJ.toString().trim()) || 'Sin definir'
+    nivelesHbtj[nivel] = (nivelesHbtj[nivel] || 0) + 1
+  })
+
+  // 4. Distribución género/edad (pirámide) --------------------------------------
+  //    Estructura: { rangoLabel: { M: n, F: n } }
+  const ageDist = {}
+
+  areaUsers.forEach((u) => {
+    const edad = calcularEdad(u.nacimiento)
+    if (edad === null) return
+
+    const rangoInicio = Math.floor(edad / 5) * 5
+    const rangoLabel = `${rangoInicio}-${rangoInicio + 4}`
+
+    if (!ageDist[rangoLabel]) ageDist[rangoLabel] = { M: 0, F: 0, inicio: rangoInicio }
+
+    if (u.genero === 'Masculino') ageDist[rangoLabel].M += 1
+    else if (u.genero === 'Femenino') ageDist[rangoLabel].F += 1
+  })
+
+  return { medStatus, cursosPorTipo, nivelesHbtj, ageDist }
 }
 
-// Crear gráficos
+// ── Creación de gráficos ──────────────────────────────────────────────────────
+
+const destroyChart = (id) => {
+  if (chartInstances.value[id]) {
+    chartInstances.value[id].destroy()
+    delete chartInstances.value[id]
+  }
+}
+
+/**
+ * Crea los 4 gráficos de UN área específica.
+ * Solo debe llamarse cuando el acordeón ya está abierto y los canvas tienen ancho real.
+ */
+const createChartsForArea = (orgKey, areaKey) => {
+  const orgData = groupedUsers.value[orgKey]
+  if (!orgData) return
+  const areaData = orgData.areas[areaKey]
+  if (!areaData) return
+
+  const sOrg = orgKey.replace(/\s+/g, '_')
+  const sArea = areaKey.replace(/\s+/g, '_')
+  const metrics = calculateMetrics(areaData.users)
+
+  // ── 1. Estudios médicos (pie) ────────────────────────────────────────────
+  const idMed = `chartMedicos${sOrg}-${sArea}`
+  const ctxMed = document.getElementById(idMed)
+  if (ctxMed && ctxMed.offsetWidth > 0) {
+    destroyChart(idMed)
+    const { alDia, porVencer, vencido } = metrics.medStatus
+    chartInstances.value[idMed] = new ChartJS(ctxMed, {
+      type: 'pie',
+      data: {
+        labels: ['Al día', 'Por vencer', 'Vencido'],
+        datasets: [
+          {
+            data: [alDia, porVencer, vencido],
+            backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.parsed} personas` } },
+        },
+      },
+    })
+  }
+
+  // ── 2. Cursos (pie) ──────────────────────────────────────────────────────
+  const idCursos = `chartCursos${sOrg}-${sArea}`
+  const ctxCursos = document.getElementById(idCursos)
+  if (ctxCursos && ctxCursos.offsetWidth > 0) {
+    destroyChart(idCursos)
+    const labels = Object.keys(metrics.cursosPorTipo)
+    const data = Object.values(metrics.cursosPorTipo)
+
+    if (labels.length === 0) {
+      chartInstances.value[idCursos] = new ChartJS(ctxCursos, {
+        type: 'pie',
+        data: {
+          labels: ['Sin cursos registrados'],
+          datasets: [{ data: [1], backgroundColor: ['#dee2e6'] }],
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } },
+      })
+    } else {
+      chartInstances.value[idCursos] = new ChartJS(ctxCursos, {
+        type: 'pie',
+        data: {
+          labels,
+          datasets: [
+            {
+              data,
+              backgroundColor: ['#007bff', '#6610f2', '#6f42c1', '#e83e8c', '#fd7e14', '#20c997'],
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.parsed} personas` } },
+          },
+        },
+      })
+    }
+  }
+
+  // ── 3. Niveles HBTJ (pie) ────────────────────────────────────────────────
+  const idNiveles = `chartNiveles${sOrg}-${sArea}`
+  const ctxNiveles = document.getElementById(idNiveles)
+  if (ctxNiveles && ctxNiveles.offsetWidth > 0) {
+    destroyChart(idNiveles)
+    chartInstances.value[idNiveles] = new ChartJS(ctxNiveles, {
+      type: 'pie',
+      data: {
+        labels: Object.keys(metrics.nivelesHbtj),
+        datasets: [
+          {
+            data: Object.values(metrics.nivelesHbtj),
+            backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#ff9f40', '#4bc0c0'],
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${ctx.parsed} personas` } },
+        },
+      },
+    })
+  }
+
+  // ── 4. Pirámide poblacional (barras horizontales) ────────────────────────
+  const idGeneral = `chartGeneral${sOrg}-${sArea}`
+  const ctxGeneral = document.getElementById(idGeneral)
+  if (ctxGeneral && ctxGeneral.offsetWidth > 0) {
+    destroyChart(idGeneral)
+    const rangos = Object.values(metrics.ageDist)
+
+    if (rangos.length === 0) {
+      chartInstances.value[idGeneral] = new ChartJS(ctxGeneral, {
+        type: 'bar',
+        data: {
+          labels: ['Sin datos'],
+          datasets: [
+            { label: 'Hombres', data: [0], backgroundColor: '#36a2eb' },
+            { label: 'Mujeres', data: [0], backgroundColor: '#ff6384' },
+          ],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          plugins: { legend: { position: 'bottom' } },
+        },
+      })
+    } else {
+      // Ordenar ascendente y luego invertir → los más jóvenes quedan abajo en el gráfico
+      const rangos = Object.values(metrics.ageDist).sort((a, b) => b.inicio - a.inicio) // de mayor a menor (Chart.js dibuja de arriba a abajo)
+
+      const labels = rangos.map((r) => `${r.inicio}-${r.inicio + 4}`)
+      // Hombres negativos (izquierda), Mujeres positivos (derecha)
+      // Ambos datasets en el mismo eje Y con stack independiente por dataset
+      const hombres = rangos.map((r) => -r.M)
+      const mujeres = rangos.map((r) => r.F)
+      const maxVal = Math.max(...rangos.map((r) => Math.max(r.M, r.F)), 1)
+
+      chartInstances.value[idGeneral] = new ChartJS(ctxGeneral, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Hombres',
+              data: hombres,
+              backgroundColor: '#36a2eb',
+              borderWidth: 1,
+              // Stack propio → ocupa toda la altura de la fila, sin desplazarse
+              stack: 'hombres',
+              barPercentage: 0.9,
+              categoryPercentage: 1.0,
+            },
+            {
+              label: 'Mujeres',
+              data: mujeres,
+              backgroundColor: '#ff6384',
+              borderWidth: 1,
+              stack: 'mujeres',
+              barPercentage: 0.9,
+              categoryPercentage: 1.0,
+            },
+          ],
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          scales: {
+            x: {
+              stacked: true,
+              min: -(maxVal + 1),
+              max: maxVal + 1,
+              ticks: { callback: (v) => Math.abs(v) },
+              grid: {
+                color: (ctx) => (ctx.tick.value === 0 ? '#444' : '#e0e0e0'),
+                lineWidth: (ctx) => (ctx.tick.value === 0 ? 2 : 1),
+              },
+            },
+            y: { stacked: true },
+          },
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${ctx.dataset.label}: ${Math.abs(ctx.parsed.x)} personas`,
+              },
+            },
+          },
+        },
+      })
+    }
+  }
+}
+
+/**
+ * Recorre todos los acordeones y dibuja solo los que ya están abiertos (tienen clase 'show').
+ * Se llama al cargar datos y cuando cambia groupedUsers.
+ */
 const createCharts = async () => {
   await nextTick()
-
   Object.keys(groupedUsers.value).forEach((orgKey) => {
     const orgData = groupedUsers.value[orgKey]
-    const sanitizedOrgKey = orgKey.replace(/\s+/g, '_')
     Object.keys(orgData.areas).forEach((areaKey) => {
-      const areaData = orgData.areas[areaKey]
-      const sanitizedAreaKey = areaKey.replace(/\s+/g, '_')
-      const metrics = calculateMetrics(areaData.users)
-
-      // Gráfico de estudios médicos (pie color-coded)
-      const chartId = `chartMedicos${sanitizedOrgKey}-${sanitizedAreaKey}`
-      const ctxMedicos = document.getElementById(chartId)
-      console.log(
-        'Creating medicos chart:',
-        chartId,
-        'ctx:',
-        !!ctxMedicos,
-        'metrics:',
-        metrics.medStatus,
-      )
-      if (ctxMedicos) {
-        // Destruir chart anterior si existe
-        if (chartInstances.value[chartId]) {
-          chartInstances.value[chartId].destroy()
-        }
-        const { ok, porVencer, vencido } = metrics.medStatus
-        chartInstances.value[chartId] = new ChartJS(ctxMedicos, {
-          type: 'pie',
-          data: {
-            labels: ['Ok', 'Por vencer', 'Vencido'],
-            datasets: [
-              {
-                data: [ok, porVencer, vencido],
-                backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              title: {
-                display: true,
-                text: 'Estudios Médicos Certificado',
-              },
-            },
-          },
-        })
-        console.log('Medicos chart created successfully')
-      } else {
-        console.log('Medicos canvas not found:', chartId)
-      }
-
-      // Gráfico de cursos: pie por tipo
-      const chartIdCursos = `chartCursos${sanitizedOrgKey}-${sanitizedAreaKey}`
-      const ctxCursos = document.getElementById(chartIdCursos)
-      console.log(
-        'Creating cursos chart:',
-        chartIdCursos,
-        'ctx:',
-        !!ctxCursos,
-        'cursosPorTipo:',
-        metrics.cursosPorTipo,
-      )
-      if (ctxCursos) {
-        if (chartInstances.value[chartIdCursos]) {
-          chartInstances.value[chartIdCursos].destroy()
-        }
-        chartInstances.value[chartIdCursos] = new ChartJS(ctxCursos, {
-          type: 'pie',
-          data: {
-            labels: Object.keys(metrics.cursosPorTipo),
-            datasets: [
-              {
-                data: Object.values(metrics.cursosPorTipo),
-                backgroundColor: ['#007bff', '#6610f2', '#6f42c1', '#e83e8c', '#fd7e14', '#20c997'],
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              title: { display: true, text: 'Cursos por Tipo' },
-              legend: {
-                display: true,
-                position: 'bottom',
-              },
-            },
-          },
-        })
-        console.log('Cursos chart created successfully')
-      } else {
-        console.log('Cursos canvas not found:', chartIdCursos)
-      }
-
-      // Gráfico de niveles HBTJ
-      const chartIdNiveles = `chartNiveles${sanitizedOrgKey}-${sanitizedAreaKey}`
-      const ctxNiveles = document.getElementById(chartIdNiveles)
-      console.log(
-        'Creating niveles chart:',
-        chartIdNiveles,
-        'ctx:',
-        !!ctxNiveles,
-        'nivelesHbtj:',
-        metrics.nivelesHbtj,
-      )
-      if (ctxNiveles) {
-        // Destruir chart anterior si existe
-        if (chartInstances.value[chartIdNiveles]) {
-          chartInstances.value[chartIdNiveles].destroy()
-        }
-        const nivelesLabels = Object.keys(metrics.nivelesHbtj)
-        const nivelesData = Object.values(metrics.nivelesHbtj)
-        chartInstances.value[chartIdNiveles] = new ChartJS(ctxNiveles, {
-          type: 'pie',
-          data: {
-            labels: nivelesLabels,
-            datasets: [
-              {
-                data: nivelesData,
-                backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe', '#ffce56', '#ff9f40'],
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            plugins: {
-              title: {
-                display: true,
-                text: 'Niveles HBTJ',
-              },
-            },
-          },
-        })
-        console.log('Niveles chart created successfully')
-      } else {
-        console.log('Niveles canvas not found:', chartIdNiveles)
-      }
-
-      // Gráfico general: pirámide poblacional de edades por género
-      const chartIdGeneral = `chartGeneral${sanitizedOrgKey}-${sanitizedAreaKey}`
-      const ctxGeneral = document.getElementById(chartIdGeneral)
-      console.log(
-        'Creating general chart:',
-        chartIdGeneral,
-        'ctx:',
-        !!ctxGeneral,
-        'ageDist:',
-        metrics.ageDist,
-      )
-      console.log('ageDist data:', metrics.ageDist)
-      if (ctxGeneral) {
-        if (chartInstances.value[chartIdGeneral]) {
-          chartInstances.value[chartIdGeneral].destroy()
-        }
-        const ages = Object.keys(metrics.ageDist)
-          .map((a) => parseInt(a))
-          .sort((a, b) => a - b)
-
-        if (ages.length === 0) {
-          // No hay datos de edad, mostrar gráfico vacío
-          chartInstances.value[chartIdGeneral] = new ChartJS(ctxGeneral, {
-            type: 'bar',
-            indexAxis: 'y',
-            data: {
-              labels: ['Sin datos'],
-              datasets: [
-                {
-                  label: 'Male',
-                  data: [0],
-                  backgroundColor: '#007bff',
-                },
-                {
-                  label: 'Female',
-                  data: [0],
-                  backgroundColor: '#e83e8c',
-                },
-              ],
-            },
-            options: {
-              indexAxis: 'y',
-              responsive: true,
-              plugins: {
-                title: { display: true, text: 'Pirámide Poblacional - Sin datos de edad' },
-              },
-            },
-          })
-        } else {
-          // agrupar edades en rangos de 10 en 10
-          const ageRanges = []
-          const ageRangeLabels = []
-          const minAge = Math.min(...ages)
-          const maxAge = Math.max(...ages)
-
-          for (let i = minAge; i <= maxAge; i += 10) {
-            const rangeLabel = `${i}-${Math.min(i + 9, maxAge)}`
-            ageRangeLabels.push(rangeLabel)
-            let maleCount = 0
-            let femaleCount = 0
-            for (let j = i; j < i + 10 && j <= maxAge; j++) {
-              if (metrics.ageDist[j]) {
-                maleCount += metrics.ageDist[j]['M'] || 0
-                femaleCount += metrics.ageDist[j]['F'] || 0
-              }
-            }
-            ageRanges.push({ male: -maleCount, female: femaleCount })
-          }
-
-          console.log('ageRanges:', ageRanges)
-          console.log('ageRangeLabels:', ageRangeLabels)
-
-          chartInstances.value[chartIdGeneral] = new ChartJS(ctxGeneral, {
-            type: 'bar',
-            indexAxis: 'y', // horizontal bars
-            data: {
-              labels: ageRangeLabels,
-              datasets: [
-                {
-                  label: 'Hombres',
-                  data: ageRanges.map((r) => r.male),
-                  backgroundColor: '#007bff',
-                },
-                {
-                  label: 'Mujeres',
-                  data: ageRanges.map((r) => r.female),
-                  backgroundColor: '#e83e8c',
-                },
-              ],
-            },
-            options: {
-              indexAxis: 'y',
-              responsive: true,
-              scales: {
-                x: {
-                  stacked: false,
-                  ticks: {
-                    callback: function (value) {
-                      return Math.abs(value)
-                    },
-                  },
-                },
-              },
-              plugins: {
-                title: { display: true, text: 'Pirámide Poblacional' },
-                legend: {
-                  display: true,
-                  position: 'bottom',
-                },
-              },
-            },
-          })
-        }
+      const sOrg = orgKey.replace(/\s+/g, '_')
+      const sArea = areaKey.replace(/\s+/g, '_')
+      const collapseEl = document.getElementById(`collapse${sOrg}-${sArea}`)
+      if (collapseEl && collapseEl.classList.contains('show')) {
+        createChartsForArea(orgKey, areaKey)
       }
     })
   })
 }
 
-// Cargar datos
+// ── Carga de datos (sin cambios) ──────────────────────────────────────────────
+
 const loadData = async () => {
   try {
     loading.value = true
@@ -617,7 +684,6 @@ const loadData = async () => {
   }
 }
 
-// Refrescar datos del usuario y de usuarios
 const refreshData = async () => {
   try {
     await authStore.refreshUser()
@@ -628,9 +694,32 @@ const refreshData = async () => {
 }
 
 onMounted(async () => {
+  // Registrar el listener ANTES de cargar datos para no perder el primer evento
+  document.addEventListener('shown.bs.collapse', (event) => {
+    const collapseEl = event.target
+    if (!collapseEl) return
+
+    const id = collapseEl.id
+    if (!id.startsWith('collapse')) return
+
+    const rest = id.slice('collapse'.length)
+    const dashIdx = rest.indexOf('-')
+    if (dashIdx === -1) return
+    const sOrg = rest.slice(0, dashIdx)
+    const sArea = rest.slice(dashIdx + 1)
+
+    const orgKey = Object.keys(groupedUsers.value).find((k) => k.replace(/\s+/g, '_') === sOrg)
+    if (!orgKey) return
+    const orgData = groupedUsers.value[orgKey]
+    const areaKey = Object.keys(orgData.areas).find((k) => k.replace(/\s+/g, '_') === sArea)
+    if (!areaKey) return
+
+    // Sin setTimeout: shown.bs.collapse ya garantiza que el panel es visible
+    createChartsForArea(orgKey, areaKey)
+  })
+
   await loadData()
 
-  // Refrescar datos del usuario al cargar la página
   if (authStore.isAuthenticated) {
     try {
       await authStore.refreshUser()
@@ -638,17 +727,8 @@ onMounted(async () => {
       console.error('Error al refrescar usuario:', e)
     }
   }
-
-  // volver a dibujar cuando un acordeón se abre
-  document.addEventListener('shown.bs.collapse', () => {
-    // pequeño retraso para que el DOM tenga ancho final
-    setTimeout(() => {
-      createCharts()
-    }, 100)
-  })
 })
 
-// Watch para recrear gráficos cuando cambian los datos agrupados
 watch(groupedUsers, () => {
   createCharts()
 })
