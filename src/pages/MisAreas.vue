@@ -3,6 +3,7 @@
     <div class="row">
       <div class="col-12">
         <h1 class="mb-4"><i class="bi bi-diagram-3"></i> Mis Áreas</h1>
+        <button class="btn btn-secondary mb-3" @click="refreshPage">Actualizar datos</button>
 
         <!-- Loading -->
         <div v-if="loading" class="text-center py-5">
@@ -181,77 +182,96 @@ const error = ref(null)
 const users = ref([])
 const chartInstances = ref({}) // Almacenar referencias de Charts
 
-// Función para determinar qué áreas puede ver el usuario
-const getAllowedAreas = () => {
-  const user = authStore.user
-  console.log('Current user:', user)
-  if (!user) return []
-
-  if (user.it_level === 3) {
-    // Nivel 3: todas las áreas de todas las organizaciones
-    const allowed = users.value.filter((u) => u.activo === 1)
-    console.log('Nivel 3 - allowed users:', allowed.length)
-    return allowed
-  } else if (user.it_level === 2) {
-    if (user.areas_ref && user.areas_ref.includes('ROSH')) {
-      // Nivel 2 con ROSH: todas las áreas de su organización
-      const allowed = users.value.filter(
-        (u) => u.activo === 1 && u.organizacion === user.organizacion,
-      )
-      console.log('Nivel 2 con ROSH - allowed users:', allowed.length, 'org:', user.organizacion)
-      return allowed
-    } else {
-      // Nivel 2 normal: solo sus áreas de su organización
-      const userAreas = user.areas_ref ? user.areas_ref.split(',').map((a) => a.trim()) : []
-      console.log('Nivel 2 normal - user areas:', userAreas, 'user org:', user.organizacion)
-      const allowed = users.value.filter((u) => {
-        if (u.activo !== 1 || u.organizacion !== user.organizacion) return false
-        const userAreasRef = u.areas_ref ? u.areas_ref.split(',').map((a) => a.trim()) : []
-        const hasCommonArea = userAreas.some((area) => userAreasRef.includes(area))
-        if (hasCommonArea) {
-          console.log('Including user:', u.nombre, u.apellido, 'areas:', userAreasRef)
-        }
-        return hasCommonArea
-      })
-      console.log('Nivel 2 normal - allowed users:', allowed.length)
-      return allowed
-    }
-  }
-  console.log('Nivel no autorizado:', user.it_level)
-  return []
-}
-
 // Agrupar usuarios por organización y luego por área
 const groupedUsers = computed(() => {
-  const allowedUsers = getAllowedAreas()
+  const user = authStore.user
+  if (!user) return {}
+
+  const allUsers = users.value // Quitado filtro de activo === 1
   const groups = {}
 
-  // determinar filtro de áreas del usuario actual
-  let areaFilter = null
-  const me = authStore.user
-  if (me && me.it_level === 2 && !(me.areas_ref && me.areas_ref.includes('ROSH'))) {
-    areaFilter = me.areas_ref ? me.areas_ref.split(',').map((a) => a.trim()) : []
+  let allowedOrgs = []
+  let allowedAreas = []
+
+  if (user.it_level === 3) {
+    // Nivel 3: todas las organizaciones y todas las áreas
+    allowedOrgs = [...new Set(allUsers.map((u) => u.organizacion).filter(Boolean))]
+    allowedAreas = [
+      ...new Set(allUsers.flatMap((u) => (u.areas ? u.areas.split(',').map((a) => a.trim()) : []))),
+    ]
+  } else if (user.it_level >= 2) {
+    // Cambiado a >= 2 para excluir nivel 1
+    allowedOrgs = [user.organizacion]
+    console.log('user.areas:', user.areas)
+    if (
+      user.areas &&
+      user.areas
+        .split(',')
+        .map((a) => a.trim())
+        .includes('ROSH')
+    ) {
+      // Si tiene ROSH: todas las áreas de su organización
+      allowedAreas = [
+        ...new Set(
+          allUsers
+            .filter((u) => u.organizacion === user.organizacion)
+            .flatMap((u) => (u.areas ? u.areas.split(',').map((a) => a.trim()) : [])),
+        ),
+      ]
+    } else {
+      // Solo las subáreas que comiencen con los grupos de su areas_ref, incluyendo los grupos si no tienen subáreas
+      const grupos = user.areas_ref
+        ? user.areas_ref.split(',').map((a) => a.trim().split(' - ')[0])
+        : []
+      allowedAreas = [
+        ...new Set(
+          allUsers
+            .filter((u) => u.organizacion === user.organizacion)
+            .flatMap((u) =>
+              u.areas
+                ? u.areas
+                    .split(',')
+                    .map((a) => a.trim())
+                    .filter((a) => grupos.some((g) => a.startsWith(g)))
+                : [],
+            ),
+        ),
+      ]
+    }
+  } else {
+    return {}
   }
 
-  allowedUsers.forEach((user) => {
-    const org = user.organizacion || 'Sin Organización'
+  // Ordenar áreas alfabéticamente
+  allowedAreas.sort((a, b) => a.localeCompare(b))
+
+  allowedOrgs.forEach((org) => {
     if (!groups[org]) {
       groups[org] = { areas: {} }
     }
-
-    const areasRef = user.areas_ref ? user.areas_ref.split(',').map((a) => a.trim()) : []
-    areasRef.forEach((area) => {
-      // si hay filtro y el área no está en él, no crear acordeón para ese área
-      if (areaFilter && !areaFilter.includes(area)) return
-
-      if (!groups[org].areas[area]) {
+    allowedAreas.forEach((area) => {
+      const grupo = area.split(' - ')[0] || area // Obtener el grupo de la área
+      const areaUsers = allUsers.filter(
+        (u) =>
+          u.organizacion === org &&
+          u.areas &&
+          u.areas
+            .split(',')
+            .map((a) => a.trim())
+            .includes(area), // Usar 'areas' para determinar usuarios en el acordeón
+      )
+      if (areaUsers.length > 0) {
         groups[org].areas[area] = {
           area,
-          users: [],
+          users: areaUsers,
         }
       }
-      groups[org].areas[area].users.push(user)
     })
+    // Ordenar las áreas en el objeto
+    const sortedAreas = Object.fromEntries(
+      Object.entries(groups[org].areas).sort(([a], [b]) => a.localeCompare(b)),
+    )
+    groups[org].areas = sortedAreas
   })
 
   return groups
@@ -600,8 +620,27 @@ const loadData = async () => {
   }
 }
 
-onMounted(() => {
-  loadData()
+// Refrescar datos del usuario y de usuarios
+const refreshData = async () => {
+  try {
+    await authStore.refreshUser()
+    await loadData()
+  } catch (e) {
+    console.error('Error al actualizar datos:', e)
+  }
+}
+
+onMounted(async () => {
+  await loadData()
+
+  // Refrescar datos del usuario al cargar la página
+  if (authStore.isAuthenticated) {
+    try {
+      await authStore.refreshUser()
+    } catch (e) {
+      console.error('Error al refrescar usuario:', e)
+    }
+  }
 
   // volver a dibujar cuando un acordeón se abre
   document.addEventListener('shown.bs.collapse', () => {

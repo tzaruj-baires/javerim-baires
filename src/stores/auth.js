@@ -250,6 +250,35 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  // Refrescar datos del usuario desde la BD
+  const refreshUser = async () => {
+    try {
+      if (!user.value || !user.value.email) {
+        throw new Error('No hay usuario autenticado')
+      }
+
+      // Obtener datos adicionales de la tabla main
+      const mainResponse = await api.getAll('main')
+      const mainData = mainResponse.data
+      const mainRecord = mainData.find((m) => m.DNI === user.value.dni)
+
+      // Actualizar datos de main si existen
+      if (mainRecord) {
+        user.value.areas_ref = mainRecord.areas_ref || ''
+        user.value.areas = mainRecord.areas || ''
+        user.value.organizacion = mainRecord.organizacion || ''
+      }
+
+      // Guardar en localStorage
+      localStorage.setItem('user', JSON.stringify(user.value))
+
+      return { success: true, message: 'Datos actualizados correctamente' }
+    } catch (error) {
+      console.error('Error al refrescar usuario:', error)
+      throw error
+    }
+  }
+
   // Cerrar sesión
   const logout = () => {
     user.value = null
@@ -329,6 +358,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     register,
     login,
+    refreshUser,
     logout,
     verifyUserIdentity,
     resetPassword,
