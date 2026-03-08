@@ -132,11 +132,9 @@
                 <div class="input-group mb-3">
                   <select v-model="nuevoCurso.nombre" class="form-select" id="cursosSelect">
                     <option value="">Selecciona un curso</option>
-                    <option value="Capacitación">Capacitación</option>
-                    <option value="Técnico">Técnico</option>
-                    <option value="Liderazgo">Liderazgo</option>
-                    <option value="Comunicación">Comunicación</option>
-                    <option value="Otro">Otro</option>
+                    <option v-for="curso in cursosMis" :value="curso.value" :key="curso.value">
+                      {{ curso.label }}
+                    </option>
                   </select>
                   <input
                     v-model="nuevoCurso.detalle"
@@ -364,6 +362,8 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import * as api from '@/services/api'
 import { usePermissions } from '@/composables/usePermissions'
+import { v4 as uuidv4 } from 'uuid'
+import { cursosMis } from '@/utils/forms_consts'
 
 const searchDni = ref('')
 const userData = ref(null)
@@ -512,6 +512,7 @@ const handleSubmit = async () => {
 
     // Preparar datos para bajas_activo
     const bajaRecord = {
+      id_baja: uuidv4(),
       dni: userData.value.DNI,
       nombre: userData.value.nombre,
       apellido: userData.value.apellido,

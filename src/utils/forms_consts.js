@@ -45,6 +45,16 @@ export const Estudies = [
     'Otro'
 ]
 
+export const cursosMis = [
+  { value: 'CB', label: 'Curso Básico' },
+  { value: 'TL', label: 'Team Leader' },
+  { value: 'AvH', label: 'Avanzado de H' },
+  { value: 'AvKM', label: 'Avanzado de KM' },
+  { value: 'IE', label: 'Curso de Ieri' },
+  { value: 'IE - MDRJ', label: 'Curso de Instructor Ieri' },
+  { value: 'FND', label: 'Curso de Fondo' },
+]
+
 
 /**
  * Convierte una fecha a formato dd/mm/yyyy
