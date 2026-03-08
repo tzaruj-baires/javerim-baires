@@ -34,11 +34,6 @@
               <i class="bi bi-person-plus"></i> Registrarse
             </router-link>
           </li>
-          <li class="nav-item" v-if="!authStore.isAuthenticated">
-            <router-link to="/alta" class="nav-link btn btn-info btn-sm">
-              <i class="bi bi-person-fill-add"></i> Dar de Alta
-            </router-link>
-          </li>
 
           <!-- Si está autenticado -->
 
@@ -97,7 +92,7 @@
               </li>
               <li v-if="can(3)">
                 <a class="dropdown-item text-warning" href="#">
-                  <i class="bi bi-graph-up"></i> Reportes
+                  <i class="bi bi-stack"></i> Áreas y Roshim
                 </a>
               </li>
               <li>
