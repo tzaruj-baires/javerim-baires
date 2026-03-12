@@ -90,7 +90,7 @@
                   <i class="bi bi-shield-lock"></i> Administración de Usuarios
                 </router-link>
               </li>
-              <li v-if="can(3)">
+              <li v-if="can(3) || can(2)">
                 <a class="dropdown-item text-warning" href="#">
                   <i class="bi bi-stack"></i> Áreas y Roshim
                 </a>
