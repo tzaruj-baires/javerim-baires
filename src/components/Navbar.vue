@@ -30,7 +30,7 @@
             </router-link>
           </li>
           <li class="nav-item" v-if="!authStore.isAuthenticated">
-            <router-link to="/signin" class="nav-link btn btn-light btn-sm">
+            <router-link to="/signin" class="nav-link btn btn-light btn-sm me-2">
               <i class="bi bi-person-plus"></i> Registrarse
             </router-link>
           </li>
@@ -77,7 +77,9 @@
                 <a class="dropdown-item" href="#"> <i class="bi bi-gear"></i> Configuración </a>
               </li>
               <li v-if="can(2)">
-                <a class="dropdown-item" href="#"> <i class="bi bi-graph-up"></i> Reportes </a>
+                <router-link to="/mis-areas" class="dropdown-item">
+                  <i class="bi bi-diagram-3"></i> Mis Áreas
+                </router-link>
               </li>
               <!-- Opciones solo para nivel 3 -->
               <li v-if="can(3)">
@@ -89,9 +91,9 @@
                 </router-link>
               </li>
               <li v-if="can(3) || can(2)">
-                <router-link to="/areas-y-roshim" class="dropdown-item text-warning">
+                <a class="dropdown-item text-warning" href="#">
                   <i class="bi bi-stack"></i> Áreas y Roshim
-                </router-link>
+                </a>
               </li>
               <li>
                 <hr class="dropdown-divider" />

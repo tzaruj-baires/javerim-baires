@@ -142,14 +142,33 @@
               <div class="accordion-body">
                 <div class="mb-3">
                   <label for="celular" class="form-label">Celular</label>
-                  <input
-                    v-model="formData.celular"
-                    type="phone"
-                    class="form-control"
-                    id="celular"
-                    placeholder="Ingrese celular"
-                    :disabled="isLoading || !canEditSection('contacto')"
-                  />
+                  <div class="input-group">
+                    <select
+                      v-model="formData.celular_countryCode"
+                      class="form-select"
+                      style="max-width: 150px"
+                      :disabled="isLoading || !canEditSection('contacto')"
+                    >
+                      <option
+                        v-for="country in COUNTRIES_CODES"
+                        :key="country.code"
+                        :value="country.code"
+                      >
+                        +{{ country.dial_code }} {{ country.emoji }}
+                      </option>
+                    </select>
+                    <input
+                      v-model="formData.celular"
+                      type="tel"
+                      class="form-control"
+                      id="celular"
+                      placeholder="1155554444"
+                      :disabled="isLoading || !canEditSection('contacto')"
+                    />
+                  </div>
+                  <small class="text-muted"
+                    >Selecciona el país y luego ingresa el número sin el código de país</small
+                  >
                 </div>
 
                 <div class="mb-3">
@@ -419,65 +438,19 @@
                 </div>
 
                 <div class="mb-3">
-                  <label for="med_estudios" class="form-label">Estudios Realizados</label>
-                  <input
-                    v-model="formData.med_estudios"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios"
-                    placeholder="Ingrese estudios"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-
-                  <div class="form-check">
+                  <label class="form-label">Estudios Realizados</label>
+                  <div v-for="opt in estudiosOptions" :key="opt" class="form-check">
                     <input
                       class="form-check-input"
                       type="checkbox"
-                      value="Laboratorio completo"
-                      id="defaultCheck1"
+                      :id="'estudio-' + opt"
+                      :value="opt"
+                      v-model="selectedEstudios"
+                      :disabled="isLoading || !canEditSection('medicos')"
                     />
-                    <label class="form-check-label" for="defaultCheck1">Laboratorio completo</label>
+                    <label class="form-check-label" :for="'estudio-' + opt">{{ opt }}</label>
                   </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value="Ergometría de 12 deriv."
-                      id="defaultCheck2"
-                    />
-                    <label class="form-check-label" for="defaultCheck2"
-                      >Ergometría de 12 deriv.</label
-                    >
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value="Ecodoppler"
-                      id="defaultCheck3"
-                    />
-                    <label class="form-check-label" for="defaultCheck3">Ecodoppler</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value="Radiografía de Tórax"
-                      id="defaultCheck4"
-                    />
-                    <label class="form-check-label" for="defaultCheck4">Radiografía de Tórax</label>
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      value="Ecoestress o Perfusión Miocárdica"
-                      id="defaultCheck5"
-                    />
-                    <label class="form-check-label" for="defaultCheck5"
-                      >Ecoestress o Perfusión Miocárdica</label
-                    >
-                  </div>
+                  <small class="text-muted">Seleccionados: {{ formData.med_estudios }}</small>
                 </div>
 
                 <div class="mb-3">
@@ -530,51 +503,25 @@
                 </div>
 
                 <div class="mb-3">
-                  <label for="med_aclararimg" class="form-label">Aclaraciones Imágenes</label>
-                  <input
-                    v-model="formData.med_aclararimg"
-                    type="text"
-                    class="form-control"
-                    id="med_aclararimg"
-                    placeholder="Ingrese aclaraciones"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_img1" class="form-label">Imagen 1</label>
-                  <input
-                    v-model="formData.med_estudios_img1"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_img1"
-                    placeholder="Ruta o URL"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_img2" class="form-label">Imagen 2</label>
-                  <input
-                    v-model="formData.med_estudios_img2"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_img2"
-                    placeholder="Ruta o URL"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_img3" class="form-label">Imagen 3</label>
-                  <input
-                    v-model="formData.med_estudios_img3"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_img3"
-                    placeholder="Ruta o URL"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
+                  <label for="med_estudios_img" class="form-label">Imagen (ver en modal)</label>
+                  <div class="input-group">
+                    <textarea
+                      v-model="formData.med_estudios_img"
+                      class="form-control"
+                      id="med_estudios_img"
+                      placeholder="Ingrese observaciones / patologías"
+                      rows="3"
+                      :disabled="isLoading || !canEditSection('medicos')"
+                    ></textarea>
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      @click="showImageModal = true"
+                    >
+                      Ver imagen
+                    </button>
+                  </div>
+                  <small class="text-muted">La imagen mostrada es una referencia visual.</small>
                 </div>
 
                 <div class="mb-3">
@@ -986,13 +933,33 @@
                   </div>
                   <div class="mb-3">
                     <label for="fam1_celular" class="form-label">Celular</label>
-                    <input
-                      type="phone"
-                      id="fam1_celular"
-                      v-model="formData.fam1_celular"
-                      class="form-control"
-                      placeholder="1100000000"
-                    />
+                    <div class="input-group">
+                      <select
+                        v-model="formData.fam1_celular_countryCode"
+                        class="form-select"
+                        style="max-width: 150px"
+                        :disabled="isLoading || !canEditSection('familia')"
+                      >
+                        <option
+                          v-for="country in COUNTRIES_CODES"
+                          :key="country.code"
+                          :value="country.code"
+                        >
+                          +{{ country.dial_code }} {{ country.emoji }}
+                        </option>
+                      </select>
+                      <input
+                        type="tel"
+                        id="fam1_celular"
+                        v-model="formData.fam1_celular"
+                        class="form-control w-50"
+                        placeholder="1155554444"
+                        :disabled="isLoading || !canEditSection('familia')"
+                      />
+                    </div>
+                    <small class="text-muted"
+                      >Selecciona el país y luego ingresa el número sin el código de país</small
+                    >
                   </div>
                   <div class="mb-3">
                     <label for="fam1_direccion" class="form-label">Dirección</label>
@@ -1038,13 +1005,33 @@
                   </div>
                   <div class="mb-3">
                     <label for="fam2_celular" class="form-label">Celular</label>
-                    <input
-                      type="phone"
-                      id="fam2_celular"
-                      v-model="formData.fam2_celular"
-                      class="form-control"
-                      placeholder="1100000000"
-                    />
+                    <div class="input-group">
+                      <select
+                        v-model="formData.fam2_celular_countryCode"
+                        class="form-select"
+                        style="max-width: 150px"
+                        :disabled="isLoading || !canEditSection('familia')"
+                      >
+                        <option
+                          v-for="country in COUNTRIES_CODES"
+                          :key="country.code"
+                          :value="country.code"
+                        >
+                          +{{ country.dial_code }} {{ country.emoji }}
+                        </option>
+                      </select>
+                      <input
+                        type="tel"
+                        id="fam2_celular"
+                        v-model="formData.fam2_celular"
+                        class="form-control w-50"
+                        placeholder="1155554444"
+                        :disabled="isLoading || !canEditSection('familia')"
+                      />
+                    </div>
+                    <small class="text-muted"
+                      >Selecciona el país y luego ingresa el número sin el código de país</small
+                    >
                   </div>
 
                   <div class="mb-3">
@@ -1174,6 +1161,26 @@
   </div>
 
   <!-- Backdrop -->
+  <!-- Image preview modal -->
+  <div v-if="showImageModal" class="modal-backdrop d-block" @click.self="showImageModal = false">
+    <div class="modal d-block" tabindex="-1" style="background: transparent">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Imagen</h5>
+            <button type="button" class="btn-close" @click="showImageModal = false"></button>
+          </div>
+          <div class="modal-body text-center">
+            <img
+              src="https://picsum.photos/200/300"
+              alt="Imagen estudio"
+              style="max-width: 100%; max-height: 70vh"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   <div v-if="isOpen" class="offcanvas-backdrop fade show" @click="close"></div>
 </template>
 
@@ -1288,6 +1295,7 @@ const formData = ref({
   genero: '',
   // Contacto
   celular: '',
+  celular_countryCode: 'AR', // País del celular
   mail_personal: '',
   mail_operativo: '',
   // Domicilio
@@ -1319,7 +1327,7 @@ const formData = ref({
   // Organización
   organizacion: '',
   areas_ref: [],
-  areas: '',
+  areas: [],
   apodo: '',
   activo: '',
   nivel: '',
@@ -1346,11 +1354,13 @@ const formData = ref({
   fam1_apellido: '',
   fam1_vinculo: '',
   fam1_celular: '',
+  fam1_celular_countryCode: 'AR', // País del celular familiar 1
   fam1_direccion: '',
   fam2_nombre: '',
   fam2_apellido: '',
   fam2_vinculo: '',
   fam2_celular: '',
+  fam2_celular_countryCode: 'AR', // País del celular familiar 2
   fam2_direccion: '',
   // Técnicos
   ID_JVR: '',
@@ -1359,124 +1369,159 @@ const formData = ref({
   fecha_ult: '',
 })
 
+// Estudios (checkboxes) — se sincronizan con `formData.med_estudios` como lista separada por comas
+const estudiosOptions = [
+  'Laboratorio completo',
+  'Ergometría de 12 deriv.',
+  'Ecodoppler',
+  'Radiografía de Tórax',
+  'Ecoestress o Perfusión Miocárdica',
+]
+const selectedEstudios = ref([])
+
+// Modal para ver imagen
+const showImageModal = ref(false)
+
+// Mantener el string actualizado en formData
+watch(selectedEstudios, (newVal) => {
+  formData.value.med_estudios = newVal.join(', ')
+})
+
 watch(
   () => props.profileData,
   (newData) => {
-    if (hasSaved.value) return // Para evitar sobreescribir después de guardar
-    if (newData && Object.keys(newData).length > 0) {
-      // Función auxiliar para normalizar fechas
-      const normalizeFecha = (fecha) => {
-        if (!fecha) return ''
-        // Si ya es ISO format (YYYY-MM-DD), retornar como está
-        if (/^\d{4}-\d{2}-\d{2}/.test(fecha)) {
-          return fecha.split('T')[0]
+    try {
+      if (hasSaved.value) return // Para evitar sobreescribir después de guardar
+      if (newData && Object.keys(newData).length > 0) {
+        // Función auxiliar para normalizar fechas
+        const normalizeFecha = (fecha) => {
+          if (!fecha) return ''
+          // Si ya es ISO format (YYYY-MM-DD), retornar como está
+          if (/^\d{4}-\d{2}-\d{2}/.test(fecha)) {
+            return fecha.split('T')[0]
+          }
+          // Si es dd/mm/yyyy, convertir a YYYY-MM-DD
+          if (/^\d{2}\/\d{2}\/\d{4}/.test(fecha)) {
+            const parts = fecha.split('/')
+            return `${parts[2]}-${parts[1]}-${parts[0]}`
+          }
+          return fecha
         }
-        // Si es dd/mm/yyyy, convertir a YYYY-MM-DD
-        if (/^\d{2}\/\d{2}\/\d{4}/.test(fecha)) {
-          const parts = fecha.split('/')
-          return `${parts[2]}-${parts[1]}-${parts[0]}`
-        }
-        return fecha
-      }
 
-      formData.value = {
-        // Información Personal
-        DNI: newData.DNI || newData.dni,
-        dni: newData.dni || newData.DNI,
-        CUIL: newData.CUIL || '',
-        nombre: newData.nombre || '',
-        apellido: newData.apellido || '',
-        nacimiento: normalizeFecha(newData.nacimiento),
-        genero: newData.genero || '',
-        // Contacto
-        celular: newData.celular || '',
-        mail_personal: newData.mail_personal || '',
-        mail_operativo: newData.mail_operativo || '',
-        // Domicilio
-        direccion1: newData.direccion1 || '',
-        barrio1: newData.barrio1 || '',
-        direccion2: newData.direccion2 || '',
-        barrio2: newData.barrio2 || '',
-        // Médicos
-        obraSocial: newData.obraSocial || '',
-        obraSocial_Plan: newData.obraSocial_Plan || '',
-        obraSocial_id: newData.obraSocial_id || '',
-        obraSocial_Carnet: newData.obraSocial_Carnet || '',
-        med_dieta: newData.med_dieta || '',
-        med_sangre: newData.med_sangre || '',
-        med_historia: newData.med_historia || '',
-        med_problemas: newData.med_problemas || '',
-        med_act: newData.med_act || '',
-        med_actLesion: newData.med_actLesion || '',
-        foto_dni: newData.foto_dni || '',
-        foto_rostro: newData.foto_rostro || '',
-        med_estudios: newData.med_estudios || '',
-        med_estudios_extras: newData.med_estudios_extras || '',
-        med_estudios_extraMotivo: newData.med_estudios_extraMotivo || '',
-        med_estudios_pdf: newData.med_estudios_pdf || '',
-        med_estudios_certificado: newData.med_estudios_certificado || '',
-        med_estudios_fecha: normalizeFecha(newData.med_estudios_fecha),
-        med_aclararimg: newData.med_aclararimg || '',
-        med_estudios_img: newData.med_estudios_img || '',
-        med_estudios_otro: newData.med_estudios_otro || '',
-        // Organización
-        organizacion: newData.organizacion || '',
-        areas_ref:
-          typeof newData.areas_ref === 'string'
-            ? (newData.areas_ref || '')
-                .split(',')
-                .map((a) => a.trim())
-                .filter(Boolean)
-            : Array.isArray(newData.areas_ref)
-              ? newData.areas_ref
-              : [],
-        areas:
-          typeof newData.areas === 'string'
-            ? (newData.areas || '')
-                .split(',')
-                .map((a) => a.trim())
-                .filter(Boolean)
-            : Array.isArray(newData.areas)
-              ? newData.areas
-              : [],
-        apodo: newData.apodo || '',
-        activo: Boolean(newData.activo),
-        nivel: newData.nivel || '',
-        nivelHBTJ: newData.nivelHBTJ || '',
-        fecha_ingresoOrg: normalizeFecha(newData.fecha_ingresoOrg),
-        fecha_ingresoMilu: normalizeFecha(newData.fecha_ingresoMilu),
-        areas_historicas: newData.areas_historicas || '',
-        CBok: newData.CBok || '',
-        curso_TL: newData.curso_TL || '',
-        curso_AvH: newData.curso_AvH || '',
-        curso_AvKM: newData.curso_AvKM || '',
-        curso_IE: newData.curso_IE || '',
-        curso_FND: newData.curso_FND || '',
-        // Vida y Desarrollo
-        estudios_grado: newData.estudios_grado || '',
-        estudios_area: newData.estudios_area || '',
-        estudios_carrera: capitalizarEsp(newData.estudios_carrera) || '',
-        estudios_barrio: capitalizarEsp(newData.estudios_barrio) || '',
-        trabajo_area: newData.trabajo_area || '',
-        trabajo_puesto: newData.trabajo_puesto || '',
-        trabajo_barrio: newData.trabajo_barrio || '',
-        comunidad_rol: newData.comunidad_rol || '',
-        // Familia
-        fam1_nombre: newData.fam1_nombre || '',
-        fam1_apellido: newData.fam1_apellido || '',
-        fam1_vinculo: newData.fam1_vinculo || '',
-        fam1_celular: newData.fam1_celular || '',
-        fam1_direccion: newData.fam1_direccion || '',
-        fam2_nombre: newData.fam2_nombre || '',
-        fam2_apellido: newData.fam2_apellido || '',
-        fam2_vinculo: newData.fam2_vinculo || '',
-        fam2_celular: newData.fam2_celular || '',
-        fam2_direccion: newData.fam2_direccion || '',
-        // Técnicos
-        ID_JVR: newData.DNI ? `${newData.organizacion || 'JVR'}@${newData.DNI}` : '',
-        telegram_id: newData.telegram_id || '',
-        fecha_ult: normalizeFecha(newData.fecha_ult) || '',
+        // Convertir áreas a array de forma segura
+        const parseAreas = (areasData) => {
+          if (Array.isArray(areasData)) return areasData
+          if (typeof areasData === 'string' && areasData.trim()) {
+            return areasData
+              .split(',')
+              .map((a) => a.trim())
+              .filter(Boolean)
+          }
+          return []
+        }
+
+        formData.value = {
+          // Información Personal
+          DNI: newData.DNI || newData.dni,
+          dni: newData.dni || newData.DNI,
+          CUIL: newData.CUIL || '',
+          nombre: newData.nombre || '',
+          apellido: newData.apellido || '',
+          nacimiento: normalizeFecha(newData.nacimiento),
+          genero: newData.genero || '',
+          // Contacto
+          celular: (() => {
+            const extracted = extractLocalNumber(newData.celular)
+            //console.log('CELULAR FROM DB:', newData.celular)
+            //console.log('EXTRACTED LOCAL:', extracted)
+            return extracted || ''
+          })(),
+          celular_countryCode: extractCountryCode(newData.celular) || 'AR',
+          mail_personal: newData.mail_personal || '',
+          mail_operativo: newData.mail_operativo || '',
+          // Domicilio
+          direccion1: newData.direccion1 || '',
+          barrio1: newData.barrio1 || '',
+          direccion2: newData.direccion2 || '',
+          barrio2: newData.barrio2 || '',
+          // Médicos
+          obraSocial: newData.obraSocial || '',
+          obraSocial_Plan: newData.obraSocial_Plan || '',
+          obraSocial_id: newData.obraSocial_id || '',
+          obraSocial_Carnet: newData.obraSocial_Carnet || '',
+          med_dieta: newData.med_dieta || '',
+          med_sangre: newData.med_sangre || '',
+          med_historia: newData.med_historia || '',
+          med_problemas: newData.med_problemas || '',
+          med_act: newData.med_act || '',
+          med_actLesion: newData.med_actLesion || '',
+          foto_dni: newData.foto_dni || '',
+          foto_rostro: newData.foto_rostro || '',
+          med_estudios: newData.med_estudios || '',
+          med_estudios_extras: newData.med_estudios_extras || '',
+          med_estudios_extraMotivo: newData.med_estudios_extraMotivo || '',
+          med_estudios_pdf: newData.med_estudios_pdf || '',
+          med_estudios_certificado: newData.med_estudios_certificado || '',
+          med_estudios_fecha: normalizeFecha(newData.med_estudios_fecha),
+          med_aclararimg: newData.med_aclararimg || '',
+          med_estudios_img: newData.med_estudios_img || '',
+          med_estudios_otro: newData.med_estudios_otro || '',
+          // Organización
+          organizacion: newData.organizacion || '',
+          areas_ref: parseAreas(newData.areas_ref),
+          areas: parseAreas(newData.areas),
+          apodo: newData.apodo || '',
+          activo: Boolean(newData.activo),
+          nivel: newData.nivel || '',
+          nivelHBTJ: newData.nivelHBTJ || '',
+          fecha_ingresoOrg: normalizeFecha(newData.fecha_ingresoOrg),
+          fecha_ingresoMilu: normalizeFecha(newData.fecha_ingresoMilu),
+          areas_historicas: newData.areas_historicas || '',
+          CBok: newData.CBok || '',
+          curso_TL: newData.curso_TL || '',
+          curso_AvH: newData.curso_AvH || '',
+          curso_AvKM: newData.curso_AvKM || '',
+          curso_IE: newData.curso_IE || '',
+          curso_FND: newData.curso_FND || '',
+          // Vida y Desarrollo
+          estudios_grado: newData.estudios_grado || '',
+          estudios_area: newData.estudios_area || '',
+          estudios_carrera: capitalizarEsp(newData.estudios_carrera) || '',
+          estudios_barrio: capitalizarEsp(newData.estudios_barrio) || '',
+          trabajo_area: newData.trabajo_area || '',
+          trabajo_puesto: newData.trabajo_puesto || '',
+          trabajo_barrio: newData.trabajo_barrio || '',
+          comunidad_rol: newData.comunidad_rol || '',
+          // Familia
+          fam1_nombre: newData.fam1_nombre || '',
+          fam1_apellido: newData.fam1_apellido || '',
+          fam1_vinculo: newData.fam1_vinculo || '',
+          fam1_celular: extractLocalNumber(newData.fam1_celular) || '',
+          fam1_celular_countryCode: extractCountryCode(newData.fam1_celular) || 'AR',
+          fam1_direccion: newData.fam1_direccion || '',
+          fam2_nombre: newData.fam2_nombre || '',
+          fam2_apellido: newData.fam2_apellido || '',
+          fam2_vinculo: newData.fam2_vinculo || '',
+          fam2_celular: extractLocalNumber(newData.fam2_celular) || '',
+          fam2_celular_countryCode: extractCountryCode(newData.fam2_celular) || 'AR',
+          fam2_direccion: newData.fam2_direccion || '',
+          // Técnicos
+          ID_JVR: newData.DNI ? `${newData.organizacion || 'JVR'}@${newData.DNI}` : '',
+          telegram_id: newData.telegram_id || '',
+          // Última modificación: convertimos a ISO compatible datetime-local.
+          // si viene sólo como fecha la función util añadirá T00:00
+          fecha_ult: parseFechaEnteraToISO(newData.fecha_ult) || '',
+        }
+        // Inicializar checkboxes de estudios desde el string (si viene como "item1, item2")
+        selectedEstudios.value = formData.value.med_estudios
+          ? String(formData.value.med_estudios)
+              .split(',')
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : []
       }
+    } catch (error) {
+      console.error('Error processing profileData in watcher:', error)
     }
   },
   { deep: true, immediate: true },
@@ -1508,10 +1553,17 @@ const getNowFormatted = () => {
 }
 
 const open = async () => {
-  hasSaved.value = false // 🔥 ESTA LÍNEA FALTABA
+  hasSaved.value = false
   isOpen.value = true
 
-  if (!formData.value.fecha_ult) {
+  // si el campo ya tenía sólo la fecha (p.e. 2024-02-02) ahora lo normalizamos a
+  // un formato aceptable para `<input type="datetime-local"` agregando
+  // hora cero. Si está vacío inicializamos con fecha/hora actual.
+  if (formData.value.fecha_ult) {
+    if (!formData.value.fecha_ult.includes('T')) {
+      formData.value.fecha_ult = `${formData.value.fecha_ult}T00:00`
+    }
+  } else {
     formData.value.fecha_ult = getNowFormatted().iso
   }
 
@@ -1526,6 +1578,38 @@ const close = () => {
   errorMessage.value = ''
 }
 
+const normalizePhoneNumber = (phoneNumber, countryCode) => {
+  // Convertir a string si no lo es, manejando arrays y otros tipos
+  if (!phoneNumber) {
+    return ''
+  }
+
+  let phoneStr = phoneNumber
+
+  // Si es array, tomar el primer elemento
+  if (Array.isArray(phoneNumber)) {
+    phoneStr = phoneNumber[0] || ''
+  }
+
+  // Convertir a string si es outro tipo (como número)
+  if (typeof phoneStr !== 'string') {
+    phoneStr = String(phoneStr)
+  }
+
+  const trimmed = phoneStr.trim()
+  if (!trimmed) {
+    return ''
+  }
+
+  try {
+    const formatted = formatPhoneNumber(trimmed, countryCode)
+    return formatted || ''
+  } catch (error) {
+    console.error(`Error formatting phone number: ${error}`)
+    return ''
+  }
+}
+
 const handleSubmit = async () => {
   try {
     errorMessage.value = ''
@@ -1536,7 +1620,26 @@ const handleSubmit = async () => {
       return
     }
 
+    // Validar números telefónicos
+    if (formData.value.celular && !formData.value.celular_countryCode) {
+      errorMessage.value = 'Por favor selecciona un país para el celular'
+      return
+    }
+
+    if (formData.value.fam1_celular && !formData.value.fam1_celular_countryCode) {
+      errorMessage.value = 'Por favor selecciona un país para el celular del familiar 1'
+      return
+    }
+
+    if (formData.value.fam2_celular && !formData.value.fam2_celular_countryCode) {
+      errorMessage.value = 'Por favor selecciona un país para el celular del familiar 2'
+      return
+    }
+
     isLoading.value = true
+
+    // forzamos la fecha de última modificación a ahora; no importan los cambios
+    formData.value.fecha_ult = getNowFormatted().iso
 
     // Actualizar en main con TODOS los campos
     console.log(formData.value.areas)
@@ -1549,7 +1652,7 @@ const handleSubmit = async () => {
       nacimiento: parseFechaToISO(formData.value.nacimiento),
       genero: formData.value.genero,
       // Contacto
-      celular: formData.value.celular,
+      celular: normalizePhoneNumber(formData.value.celular, formData.value.celular_countryCode),
       mail_personal: formData.value.mail_personal,
       mail_operativo: formData.value.mail_operativo,
       // Domicilio
@@ -1581,10 +1684,10 @@ const handleSubmit = async () => {
       // Organización
       organizacion: formData.value.organizacion,
       areas_ref: Array.isArray(formData.value.areas_ref)
-        ? formData.value.areas_ref.join(',')
+        ? formData.value.areas_ref.join(', ')
         : formData.value.areas_ref,
       areas: Array.isArray(formData.value.areas)
-        ? formData.value.areas.join(',')
+        ? formData.value.areas.join(', ')
         : formData.value.areas,
       apodo: formData.value.apodo,
       activo: formData.value.activo === true ? 1 : 0,
@@ -1612,12 +1715,18 @@ const handleSubmit = async () => {
       fam1_nombre: capitalizarEsp(formData.value.fam1_nombre),
       fam1_apellido: capitalizarEsp(formData.value.fam1_apellido),
       fam1_vinculo: formData.value.fam1_vinculo,
-      fam1_celular: formData.value.fam1_celular,
+      fam1_celular: normalizePhoneNumber(
+        formData.value.fam1_celular,
+        formData.value.fam1_celular_countryCode,
+      ),
       fam1_direccion: capitalizarEsp(formData.value.fam1_direccion),
       fam2_nombre: capitalizarEsp(formData.value.fam2_nombre),
       fam2_apellido: capitalizarEsp(formData.value.fam2_apellido),
       fam2_vinculo: formData.value.fam2_vinculo,
-      fam2_celular: formData.value.fam2_celular,
+      fam2_celular: normalizePhoneNumber(
+        formData.value.fam2_celular,
+        formData.value.fam2_celular_countryCode,
+      ),
       fam2_direccion: capitalizarEsp(formData.value.fam2_direccion),
       ID_JVR: (formData.value.organizacion || 'JVR') + '@' + formData.value.dni || '',
       telegram_id: formData.value.telegram_id,
@@ -1631,7 +1740,7 @@ const handleSubmit = async () => {
       await update('users', {
         dni: formData.value.dni,
         email: formData.value.mail_operativo || formData.value.mail_personal,
-        cellphone: formData.value.celular,
+        cellphone: normalizePhoneNumber(formData.value.celular, formData.value.celular_countryCode),
       })
     } catch (err) {
       console.log('No se actualizó en users (puede no existir)')
@@ -1642,10 +1751,10 @@ const handleSubmit = async () => {
     emit('update', {
       ...formData.value,
       areas: Array.isArray(formData.value.areas)
-        ? formData.value.areas.join(',')
+        ? formData.value.areas.join(', ')
         : formData.value.areas,
       areas_ref: Array.isArray(formData.value.areas_ref)
-        ? formData.value.areas_ref.join(',')
+        ? formData.value.areas_ref.join(', ')
         : formData.value.areas_ref,
     })
 

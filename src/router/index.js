@@ -39,6 +39,24 @@ const router = createRouter({
       meta: { requiresAuth: false },
     },
     {
+      path: '/alta',
+      name: 'alta',
+      component: Alta,
+      meta: { requiresAuth: false },
+    },
+    {
+      path: '/baja',
+      name: 'baja',
+      component: Baja,
+      meta: { requiresAuth: true, minLevel: 2 },
+    },
+    {
+      path: '/mis-areas',
+      name: 'misAreas',
+      component: MisAreas,
+      meta: { requiresAuth: true, minLevel: 2 },
+    },
+    {
       path: '/javer/:dni',
       name: 'userDetail',
       component: UserDetail,
