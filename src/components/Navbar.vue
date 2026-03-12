@@ -88,10 +88,10 @@
                   <i class="bi bi-shield-lock"></i> Administración de Usuarios
                 </router-link>
               </li>
-              <li v-if="can(3)">
-                <a class="dropdown-item text-warning" href="#">
-                  <i class="bi bi-graph-up"></i> Reportes
-                </a>
+              <li v-if="can(3) || can(2)">
+                <router-link to="/areas-y-roshim" class="dropdown-item text-warning">
+                  <i class="bi bi-stack"></i> Áreas y Roshim
+                </router-link>
               </li>
               <li>
                 <hr class="dropdown-divider" />

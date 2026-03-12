@@ -4,6 +4,10 @@ import SignIn from '@/pages/SignIn.vue'
 import UserDetail from '@/pages/UserDetail.vue'
 import ForgotPassword from '@/pages/ForgotPassword.vue'
 import AdminUsers from '@/pages/AdminUsers.vue'
+import Alta from '@/pages/Alta.vue'
+import Baja from '@/pages/Baja.vue'
+import MisAreas from '@/pages/MisAreas.vue'
+import AreasYRoshim from '@/pages/AreasYRoshim.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -45,6 +49,12 @@ const router = createRouter({
       name: 'adminUsers',
       component: AdminUsers,
       meta: { requiresAuth: true, minLevel: 3 },
+    },
+    {
+      path: '/areas-y-roshim',
+      name: 'areasYRoshim',
+      component: AreasYRoshim,
+      meta: { requiresAuth: true, minLevel: 2 },
     },
   ],
 })

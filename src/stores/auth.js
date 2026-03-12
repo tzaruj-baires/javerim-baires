@@ -4,82 +4,108 @@ import bcryptjs from 'bcryptjs'
 import * as api from '@/services/api'
 import { v4 as uuidv4 } from 'uuid'
 
-// Función auxiliar para enviar notificación de registro
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+
+const formatDate = () =>
+  new Date().toLocaleDateString('es-AR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+// ─── Notificaciones ────────────────────────────────────────────────────────────
+
+/**
+ * Email a cada dirección de la lista de admins avisando que se registró un nuevo usuario.
+ */
 const sendRegistrationNotification = async (newUser) => {
   try {
     const notificationEmailsStr = localStorage.getItem('notificationEmails') || ''
     const notificationEmails = notificationEmailsStr
       .split('\n')
-      .map((email) => email.trim())
-      .filter((email) => email.length > 0)
+      .map((e) => e.trim())
+      .filter((e) => e.length > 0)
 
     if (notificationEmails.length === 0) {
       console.log('No hay correos de notificación configurados')
       return
     }
 
-    // Preparar contenido del email
-    const emailContent = {
-      to: notificationEmails.join(','),
-      subject: `Nuevo usuario registrado - ${newUser.nickname}`,
-      body: `
-Un nuevo usuario se ha registrado en la plataforma:
-
-Datos del usuario:
-- DNI: ${newUser.dni}
-- Email: ${newUser.email}
-- Nickname: ${newUser.nickname}
-- Teléfono: ${newUser.cellphone}
-- Nivel actual: Sin acceso (requiere aprobación)
-
-Accede a la plataforma para otorgarle acceso.
-      `,
-    }
-
-    // Log del email que se enviaría (aquí se integrará con servicio de emails real)
-    console.log('Notificación de registro (simulated):', emailContent)
+    await Promise.allSettled(
+      notificationEmails.map((to) =>
+        api.sendEmail('NewUser-Admin', to, `[Registro] Nuevo usuario: ${newUser.nickname}`, {
+          nickname: newUser.nickname,
+          email: newUser.email,
+          dni: newUser.dni,
+          cellphone: newUser.cellphone || '-',
+          fecha: formatDate(),
+        }),
+      ),
+    )
   } catch (error) {
-    console.error('Error al enviar notificación de registro:', error)
-    // No lanzamos error para no interrumpir el registro del usuario
+    console.error('Error al enviar notificación de registro a administradores:', error)
   }
 }
 
-// Función para notificar cambio de nivel de acceso
+/**
+ * Email de bienvenida al usuario recién registrado.
+ * Le avisa que su acceso está pendiente y que debe reiniciar sesión una vez aprobado.
+ */
+const sendWelcomeEmail = async (newUser) => {
+  try {
+    await api.sendEmail(
+      'NewUser-User',
+      newUser.email,
+      '¡Bienvenido/a! Tu registro fue exitoso — acceso pendiente de aprobación',
+      {
+        nickname: newUser.nickname,
+        email: newUser.email,
+        dni: newUser.dni,
+        fecha: formatDate(),
+      },
+    )
+  } catch (error) {
+    console.error('Error al enviar email de bienvenida:', error)
+  }
+}
+
+/**
+ * Email al usuario avisándole que su nivel de acceso fue cambiado.
+ * Se exporta para usarse desde AdminUsers.vue.
+ *
+ * @param {{ email: string, nickname: string }} user
+ * @param {number} newLevel
+ * @param {Object} levelNames  - ej: { 0: 'Sin acceso', 1: 'Usuario Básico', ... }
+ */
 const sendAccessLevelNotification = async (user, newLevel, levelNames) => {
   try {
-    const levelName = levelNames[newLevel] || 'Desconocido'
-    const emailContent = {
-      to: user.email,
-      subject: `Tu nivel de acceso ha sido actualizado - ${levelName}`,
-      body: `
-Hola ${user.nickname},
+    const nivelNombre = levelNames[newLevel] ?? 'Desconocido'
 
-Tu nivel de acceso en la plataforma ha sido actualizado.
-
-Detalles:
-- Usuario: ${user.email}
-- Nuevo nivel: ${levelName}
-- Fecha: ${new Date().toLocaleDateString('es-AR')}
-
-Por favor, inicia sesión nuevamente para que los cambios tengan efecto.
-
-Si tienes dudas, contacta al administrador.
-      `,
-    }
-
-    // Log del email que se enviaría (aquí se integrará con servicio de emails real)
-    console.log('Notificación de cambio de nivel (simulated):', emailContent)
+    await api.sendEmail(
+      'accessLevelChanged',
+      user.email,
+      `Tu nivel de acceso fue actualizado: ${nivelNombre}`,
+      {
+        nickname: user.nickname,
+        email: user.email,
+        nivelNombre,
+        nivelNumero: newLevel,
+        fecha: formatDate(),
+      },
+    )
   } catch (error) {
     console.error('Error al enviar notificación de cambio de nivel:', error)
-    // No lanzamos error para no interrumpir la actualización
   }
 }
+
+// ─── Store ─────────────────────────────────────────────────────────────────────
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const isAuthenticated = computed(() => user.value !== null)
 
-  // Cargar usuario del localStorage al iniciar
   const loadUserFromStorage = () => {
     const stored = localStorage.getItem('user')
     if (stored) {
@@ -91,10 +117,8 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Registrar nuevo usuario
   const register = async (userData) => {
     try {
-      // Validaciones
       if (!userData.email || !userData.password || !userData.cellphone || !userData.dni) {
         throw new Error('Todos los campos son requeridos')
       }
@@ -107,55 +131,48 @@ export const useAuthStore = defineStore('auth', () => {
         throw new Error('it_level debe ser entre 1 y 3')
       }
 
-      // Obtener datos de ambas tablas para validación de DNI y email
       const mainResponse = await api.getAll('main')
       const usersResponse = await api.getAll('users')
       const mainRecords = mainResponse.data
       const users = usersResponse.data
 
-      // Validar que el DNI exista en la tabla 'main'
       const dniInMain = mainRecords.some((record) => parseInt(record.DNI) === parseInt(userData.dni))
       if (!dniInMain) {
         throw new Error('El DNI no está registrado en el sistema. No puedes completar el registro.')
       }
 
-      // Validar que el DNI NO exista en la tabla 'users'
       const dniInUsers = users.some((u) => parseInt(u.dni) === parseInt(userData.dni))
       if (dniInUsers) {
         throw new Error('Este DNI ya tiene una cuenta registrada. Por favor inicia sesión.')
       }
 
-      // Verificar si el email ya existe
       const emailExists = users.some((u) => u.email === userData.email)
       if (emailExists) {
         throw new Error('Este email ya está registrado. Por favor usa otro email o inicia sesión.')
       }
 
-      // Generar nickname (email sin dominio)
       const nickname = userData.email.split('@')[0]
-
-      // Hash de la contraseña
       const salt = await bcryptjs.genSalt(10)
       const hash_pwd = await bcryptjs.hash(userData.password, salt)
 
-      // Preparar datos del usuario
       const newUser = {
         id: uuidv4(),
         dni: parseInt(userData.dni),
         nickname,
         email: userData.email,
         cellphone: parseInt(userData.cellphone),
-        it_level: 0, // Por defecto sin acceso, solo admin puede asignar nivel
+        it_level: 0,
         hash_pwd,
       }
 
-      // Enviar a API
       await api.create('users', newUser)
 
-      // Enviar notificación por email a los administradores
+      // Email 1 → admins: aviso de nuevo registro
       await sendRegistrationNotification(newUser)
 
-      // Guardar en sesión (sin la contraseña)
+      // Email 2 → usuario: bienvenida + acceso pendiente
+      await sendWelcomeEmail(newUser)
+
       const userSession = { ...newUser }
       delete userSession.hash_pwd
       user.value = userSession
@@ -168,46 +185,33 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Iniciar sesión
   const login = async (email, password) => {
     try {
       if (!email || !password) {
         throw new Error('Email y contraseña requeridos')
       }
 
-      // Obtener todos los usuarios
       const response = await api.getAll('users')
       const users = response.data
 
-      // Buscar usuario por email
       const foundUser = users.find((u) => u.email === email)
-      if (!foundUser) {
-        throw new Error('Usuario no encontrado')
-      }
+      if (!foundUser) throw new Error('Usuario no encontrado')
 
-      // Comparar contraseña con hash
       const isValidPassword = await bcryptjs.compare(password, foundUser.hash_pwd)
-      if (!isValidPassword) {
-        throw new Error('Contraseña incorrecta')
-      }
+      if (!isValidPassword) throw new Error('Contraseña incorrecta')
 
-      // Obtener datos adicionales de la tabla main (areas_ref, organizacion, etc.)
       const mainResponse = await api.getAll('main')
       const mainData = mainResponse.data
       const mainRecord = mainData.find((m) => m.DNI === foundUser.dni)
 
-      // Si no existe registro en 'main', crear uno nuevo
       if (!mainRecord) {
-        // Verificar si existe algún registro con el mismo email o celular
         const existingByEmailOrPhone = mainData.some(
           (m) =>
             m.email === foundUser.email ||
             (foundUser.cellphone && m.celular === foundUser.cellphone.toString()),
         )
-
-        // Si no existe por dni, email o celular, crear nuevo registro en main
         if (!existingByEmailOrPhone) {
-          const newMainRecord = {
+          await api.create('main', {
             DNI: foundUser.dni,
             email: foundUser.email,
             celular: foundUser.cellphone.toString(),
@@ -219,21 +223,16 @@ export const useAuthStore = defineStore('auth', () => {
             areas_ref: '',
             mail_operativo: foundUser.email,
             mail_personal: '',
-          }
-          await api.create('main', newMainRecord)
+          })
         }
       }
 
-      // Guardar sesión (sin contraseña) + datos de main
       const userSession = { ...foundUser }
       delete userSession.hash_pwd
 
-      // Obtener registro actualizado de main (por si se acaba de crear)
       const mainResponseUpdated = await api.getAll('main')
-      const mainDataUpdated = mainResponseUpdated.data
-      const mainRecordUpdated = mainDataUpdated.find((m) => m.DNI === foundUser.dni)
+      const mainRecordUpdated = mainResponseUpdated.data.find((m) => m.DNI === foundUser.dni)
 
-      // Agregar datos de main si existen
       if (mainRecordUpdated) {
         userSession.areas_ref = mainRecordUpdated.areas_ref || ''
         userSession.areas = mainRecordUpdated.areas || ''
@@ -250,34 +249,42 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Cerrar sesión
+  const refreshUser = async () => {
+    try {
+      if (!user.value || !user.value.email) throw new Error('No hay usuario autenticado')
+
+      const mainResponse = await api.getAll('main')
+      const mainRecord = mainResponse.data.find((m) => m.DNI === user.value.dni)
+
+      if (mainRecord) {
+        user.value.areas_ref = mainRecord.areas_ref || ''
+        user.value.areas = mainRecord.areas || ''
+        user.value.organizacion = mainRecord.organizacion || ''
+      }
+
+      localStorage.setItem('user', JSON.stringify(user.value))
+      return { success: true, message: 'Datos actualizados correctamente' }
+    } catch (error) {
+      console.error('Error al refrescar usuario:', error)
+      throw error
+    }
+  }
+
   const logout = () => {
     user.value = null
     localStorage.removeItem('user')
   }
 
-  // Verificar identidad del usuario para recuperar contraseña
   const verifyUserIdentity = async (data) => {
     try {
       const { dni, email } = data
+      if (!dni || !email) throw new Error('DNI y email requeridos')
 
-      if (!dni || !email) {
-        throw new Error('DNI y email requeridos')
-      }
-
-      // Obtener todos los usuarios
       const response = await api.getAll('users')
-      const users = response.data
+      const foundUser = response.data.find((u) => u.dni === parseInt(dni) && u.email === email)
+      if (!foundUser) throw new Error('Usuario no encontrado. Verifica que tu DNI y email sean correctos')
 
-      // Buscar usuario por DNI y email
-      const foundUser = users.find((u) => u.dni === parseInt(dni) && u.email === email)
-      if (!foundUser) {
-        throw new Error('Usuario no encontrado. Verifica que tu DNI y email sean correctos')
-      }
-
-      // Guardar datos temporalmente para el reset
       sessionStorage.setItem('resetUserData', JSON.stringify({ dni, email }))
-
       return { success: true, message: 'Identidad verificada' }
     } catch (error) {
       console.error('Error al verificar identidad:', error)
@@ -285,36 +292,19 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  // Resetear contraseña del usuario
   const resetPassword = async (data) => {
     try {
       const { dni, email, newPassword } = data
+      if (!dni || !email || !newPassword) throw new Error('Todos los campos son requeridos')
 
-      if (!dni || !email || !newPassword) {
-        throw new Error('Todos los campos son requeridos')
-      }
-
-      // Obtener todos los usuarios
       const response = await api.getAll('users')
-      const users = response.data
+      const foundUser = response.data.find((u) => u.dni === parseInt(dni) && u.email === email)
+      if (!foundUser) throw new Error('Usuario no encontrado')
 
-      // Buscar usuario por DNI y email
-      const foundUser = users.find((u) => u.dni === parseInt(dni) && u.email === email)
-      if (!foundUser) {
-        throw new Error('Usuario no encontrado')
-      }
-
-      // Hash de la nueva contraseña
       const salt = await bcryptjs.genSalt(10)
       const hash_pwd = await bcryptjs.hash(newPassword, salt)
 
-      // Actualizar la contraseña
-      await api.update('users', {
-        id: foundUser.id,
-        hash_pwd,
-      })
-
-      // Limpiar datos temporales
+      await api.update('users', { id: foundUser.id, hash_pwd })
       sessionStorage.removeItem('resetUserData')
 
       return { success: true, message: 'Contraseña actualizada correctamente' }
@@ -329,6 +319,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     register,
     login,
+    refreshUser,
     logout,
     verifyUserIdentity,
     resetPassword,
@@ -336,5 +327,5 @@ export const useAuthStore = defineStore('auth', () => {
   }
 })
 
-// Exportar función para notificar cambio de nivel (no es parte del store)
+// Exportar para AdminUsers.vue
 export { sendAccessLevelNotification }
