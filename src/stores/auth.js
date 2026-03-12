@@ -260,9 +260,16 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       if (!user.value || !user.value.email) throw new Error('No hay usuario autenticado')
 
+      // ✅ Sincronizar it_level (puede haberlo cambiado un admin)
+      const usersResponse = await api.getAll('users')
+      const freshUser = usersResponse.data.find((u) => u.email === user.value.email)
+      if (freshUser) {
+        user.value.it_level = freshUser.it_level ?? 0
+      }
+
+      // Sincronizar datos de main
       const mainResponse = await api.getAll('main')
       const mainRecord = mainResponse.data.find((m) => m.DNI === user.value.dni)
-
       if (mainRecord) {
         user.value.areas_ref = mainRecord.areas_ref || ''
         user.value.areas = mainRecord.areas || ''
