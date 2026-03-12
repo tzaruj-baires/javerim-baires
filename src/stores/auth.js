@@ -23,10 +23,7 @@ const formatDate = () =>
 const sendRegistrationNotification = async (newUser) => {
   try {
     const notificationEmailsStr = localStorage.getItem('notificationEmails') || ''
-    const notificationEmails = notificationEmailsStr
-      .split('\n')
-      .map((e) => e.trim())
-      .filter((e) => e.length > 0)
+    const notificationEmails = ['tzaruj.baires@gmail.com']
 
     if (notificationEmails.length === 0) {
       console.log('No hay correos de notificación configurados')
@@ -34,15 +31,18 @@ const sendRegistrationNotification = async (newUser) => {
     }
 
     await Promise.allSettled(
-      notificationEmails.map((to) =>
-        api.sendEmail('NewUser-Admin', to, `[Registro] Nuevo usuario: ${newUser.nickname}`, {
+      notificationEmails.map((to) => {
+        let res = api.sendEmail('alta_admin', to, `[Registro] Nuevo usuario: ${newUser.nickname}`, {
           nickname: newUser.nickname,
           email: newUser.email,
           dni: newUser.dni,
           cellphone: newUser.cellphone || '-',
           fecha: formatDate(),
-        }),
-      ),
+        })
+        res.catch((error) => {
+          console.error(`Error al enviar notificación a ${to}:`, error)
+        })
+      }),
     )
   } catch (error) {
     console.error('Error al enviar notificación de registro a administradores:', error)
@@ -56,7 +56,7 @@ const sendRegistrationNotification = async (newUser) => {
 const sendWelcomeEmail = async (newUser) => {
   try {
     await api.sendEmail(
-      'NewUser-User',
+      'alta_user',
       newUser.email,
       '¡Bienvenido/a! Tu registro fue exitoso — acceso pendiente de aprobación',
       {
@@ -66,6 +66,10 @@ const sendWelcomeEmail = async (newUser) => {
         fecha: formatDate(),
       },
     )
+
+    /*const res = await api.sendEmail('test', 'matiasp.baires@gmail.com', 'prueba', {
+      msj: 'holiwis',
+    })*/
   } catch (error) {
     console.error('Error al enviar email de bienvenida:', error)
   }
@@ -84,7 +88,7 @@ const sendAccessLevelNotification = async (user, newLevel, levelNames) => {
     const nivelNombre = levelNames[newLevel] ?? 'Desconocido'
 
     await api.sendEmail(
-      'accessLevelChanged',
+      'itlevel_changed',
       user.email,
       `Tu nivel de acceso fue actualizado: ${nivelNombre}`,
       {
@@ -136,7 +140,9 @@ export const useAuthStore = defineStore('auth', () => {
       const mainRecords = mainResponse.data
       const users = usersResponse.data
 
-      const dniInMain = mainRecords.some((record) => parseInt(record.DNI) === parseInt(userData.dni))
+      const dniInMain = mainRecords.some(
+        (record) => parseInt(record.DNI) === parseInt(userData.dni),
+      )
       if (!dniInMain) {
         throw new Error('El DNI no está registrado en el sistema. No puedes completar el registro.')
       }
@@ -282,7 +288,8 @@ export const useAuthStore = defineStore('auth', () => {
 
       const response = await api.getAll('users')
       const foundUser = response.data.find((u) => u.dni === parseInt(dni) && u.email === email)
-      if (!foundUser) throw new Error('Usuario no encontrado. Verifica que tu DNI y email sean correctos')
+      if (!foundUser)
+        throw new Error('Usuario no encontrado. Verifica que tu DNI y email sean correctos')
 
       sessionStorage.setItem('resetUserData', JSON.stringify({ dni, email }))
       return { success: true, message: 'Identidad verificada' }
