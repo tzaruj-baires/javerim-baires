@@ -22,23 +22,29 @@ const formatDate = () =>
  */
 const sendRegistrationNotification = async (newUser) => {
   try {
-    const notificationEmailsStr = localStorage.getItem('notificationEmails') || ''
-    const notificationEmails = ['tzaruj.baires@gmail.com']
+    const notificationEmails = import.meta.env.VITE_ADMIN_USERS
+      ? JSON.parse(import.meta.env.VITE_ADMIN_USERS)
+      : []
 
     if (notificationEmails.length === 0) {
-      console.log('No hay correos de notificación configurados')
+      console.error('No hay correos de notificación configurados')
       return
     }
 
     await Promise.allSettled(
       notificationEmails.map((to) => {
-        let res = api.sendEmail('alta_admin', to, `[Registro] Nuevo usuario: ${newUser.nickname}`, {
-          nickname: newUser.nickname,
-          email: newUser.email,
-          dni: newUser.dni,
-          cellphone: newUser.cellphone || '-',
-          fecha: formatDate(),
-        })
+        let res = api.sendEmail(
+          'alta_admin',
+          to,
+          `JaverimBaires [Nuevo Registro]: ${newUser.nickname}`,
+          {
+            nickname: newUser.nickname,
+            email: newUser.email,
+            dni: newUser.dni,
+            cellphone: newUser.cellphone || '-',
+            fecha: formatDate(),
+          },
+        )
         res.catch((error) => {
           console.error(`Error al enviar notificación a ${to}:`, error)
         })
@@ -55,17 +61,12 @@ const sendRegistrationNotification = async (newUser) => {
  */
 const sendWelcomeEmail = async (newUser) => {
   try {
-    await api.sendEmail(
-      'alta_user',
-      newUser.email,
-      '¡Bienvenido/a! Tu registro fue exitoso — acceso pendiente de aprobación',
-      {
-        nickname: newUser.nickname,
-        email: newUser.email,
-        dni: newUser.dni,
-        fecha: formatDate(),
-      },
-    )
+    await api.sendEmail('alta_user', newUser.email, 'Javerim Baires | Bienvenido', {
+      nickname: newUser.nickname,
+      email: newUser.email,
+      dni: newUser.dni,
+      fecha: formatDate(),
+    })
 
     /*const res = await api.sendEmail('test', 'matiasp.baires@gmail.com', 'prueba', {
       msj: 'holiwis',
@@ -90,7 +91,7 @@ const sendAccessLevelNotification = async (user, newLevel, levelNames) => {
     await api.sendEmail(
       'itlevel_changed',
       user.email,
-      `Tu nivel de acceso fue actualizado: ${nivelNombre}`,
+      'Javerim Baires | Cambio en tu nivel de acceso',
       {
         nickname: user.nickname,
         email: user.email,
