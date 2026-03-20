@@ -197,6 +197,11 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
   animation: pulse 3s ease-in-out infinite;
 }
 
+.navbar__brand-icon img {
+  position: relative;
+  bottom: 2px;
+}
+
 @keyframes pulse {
   0%,
   100% {
