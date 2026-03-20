@@ -38,10 +38,8 @@
         <strong>Acceso Restringido</strong>
         <p>
           Tu cuenta fue creada correctamente, pero requiere aprobación del administrador.
-          <strong>Contactá al administrador</strong> para que asigne tu nivel de acceso.
-        </p>
-        <p class="home__alert-note">
-          Una vez aprobada tu cuenta, tendrás que <s>reiniciar sesión</s> para acceder.
+          <strong>Contactá al administrador o tu referente</strong> para que asigne tu nivel de
+          acceso.
         </p>
       </div>
       <button class="home__alert-close" @click="alertVisible = false" aria-label="Cerrar">
@@ -351,11 +349,13 @@ const visibleUsers = computed(() => {
 
     // ── Nivel 1 ───────────────────────────────────────────────────────
     if (level === 1) {
-      // Si areas contiene "JNJ": filtra por org + areas (no areas_ref)
-      const isJnj = myAreas.some((a) => normalizeText(a) === 'jnj')
+      // Si algún ítem de areas contiene la palabra "JNJ" (ej: "HDRJ - JNJ RGL K4")
+      // filtra por org + coincidencia exacta de ítem de areas (no areas_ref)
+      const isJnj = myAreas.some((a) => normalizeText(a).split(/\s+/).includes('jnj'))
       if (isJnj) {
         if (normalizeText(u.organizacion || '') !== myOrg) return false
         const uAreas = splitAreas(u.areas || '')
+        // Compara ítems completos exactos (no sub-strings)
         return myAreas.some((area) =>
           uAreas.some((uArea) => normalizeText(uArea) === normalizeText(area)),
         )
