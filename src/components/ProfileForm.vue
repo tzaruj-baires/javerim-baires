@@ -1,1158 +1,1158 @@
 <template>
-  <!-- Offcanvas lateral/bottom para formulario -->
-  <div
-    class="offcanvas offcanvas-end"
-    :class="{ show: isOpen }"
-    tabindex="-1"
-    :id="offcanvasId"
-    aria-labelledby="profileFormLabel"
-  >
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title" id="profileFormLabel">
-        {{ isEditing ? '✏️ Editar Perfil' : '👤 Mi Perfil' }}
-      </h5>
-      <button type="button" class="btn-close" @click="close" aria-label="Close"></button>
+  <!-- Offcanvas lateral -->
+  <div class="pf-backdrop" v-if="isOpen" @click="close"></div>
+
+  <div class="pf" :class="{ 'pf--open': isOpen }">
+    <!-- Header del offcanvas -->
+    <div class="pf__header">
+      <div class="pf__header-left">
+        <span class="pf__header-icon"><i class="bi bi-pencil-square"></i></span>
+        <h2 class="pf__header-title">{{ isEditing ? 'Editar Perfil' : 'Mi Perfil' }}</h2>
+      </div>
+      <button class="pf__close" @click="close" aria-label="Cerrar">
+        <i class="bi bi-x-lg"></i>
+      </button>
     </div>
 
-    <div class="offcanvas-body">
+    <!-- Body -->
+    <div class="pf__body">
       <form @submit.prevent="handleSubmit">
-        <!-- Campos de formulario (genéricos) -->
-        <!-- Acordeones por temática -->
-        <div class="accordion mb-4" id="formAccordion">
+        <!-- Acordeones del formulario -->
+        <div class="pf__accordion">
           <!-- 1. Información Personal -->
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#formPersonal"
-              >
-                <i class="bi bi-person me-2"></i> Información personal
-                <span v-if="!canEditSection('personal')" class="badge bg-secondary ms-auto"
+          <div class="pf__acc-item">
+            <button
+              type="button"
+              class="pf__acc-trigger"
+              @click="toggleSection('personal')"
+              :class="{ open: openSections.personal }"
+            >
+              <span class="pf__acc-left">
+                <span class="pf__acc-icon pf__acc-icon--blue"><i class="bi bi-person"></i></span>
+                Información Personal
+                <span v-if="!canEditSection('personal')" class="pf__readonly-tag"
                   >Solo lectura</span
                 >
-              </button>
-            </h2>
-            <div
-              id="formPersonal"
-              class="accordion-collapse collapse"
-              data-bs-parent="#formAccordion"
-            >
-              <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="dni" class="form-label">DNI</label>
-                  <input
-                    v-model.number="formData.DNI"
-                    type="number"
-                    class="form-control"
-                    id="dni"
-                    :disabled="true"
-                    readonly
-                  />
-                  <small class="text-muted">No se puede cambiar</small>
-                </div>
-
-                <div class="mb-3">
-                  <label for="cuil" class="form-label">CUIL</label>
-                  <input
-                    v-model="formData.CUIL"
-                    type="text"
-                    class="form-control"
-                    id="cuil"
-                    placeholder="Ej: 20-12345678-9"
-                    :disabled="isLoading || !canEditSection('personal')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="nombre" class="form-label">Nombre</label>
-                  <input
-                    v-model="formData.nombre"
-                    type="text"
-                    class="form-control"
-                    id="nombre"
-                    placeholder="Ingrese nombre"
-                    required
-                    :disabled="isLoading || !canEditSection('personal')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="apellido" class="form-label">Apellido</label>
-                  <input
-                    v-model="formData.apellido"
-                    type="text"
-                    class="form-control"
-                    id="apellido"
-                    placeholder="Ingrese apellido"
-                    required
-                    :disabled="isLoading || !canEditSection('personal')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="nacimiento" class="form-label">Nacimiento</label>
-                  <input
-                    v-model="formData.nacimiento"
-                    type="date"
-                    class="form-control"
-                    id="nacimiento"
-                    :disabled="isLoading || !canEditSection('personal')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="genero" class="form-label">Género</label>
-                  <select
-                    v-model="formData.genero"
-                    class="form-select"
-                    id="genero"
-                    :disabled="isLoading || !canEditSection('personal')"
-                  >
-                    <option value="Masculino">Masculino</option>
-                    <option value="Femenino">Femenino</option>
-                    <option value="Otro">Otro</option>
-                  </select>
-                </div>
+              </span>
+              <i
+                class="bi bi-chevron-down pf__chevron"
+                :class="{ rotated: openSections.personal }"
+              ></i>
+            </button>
+            <div class="pf__acc-body" v-show="openSections.personal">
+              <div class="pf__field">
+                <label class="pf__label" for="dni">DNI</label>
+                <input
+                  v-model.number="formData.DNI"
+                  type="number"
+                  class="pf__input pf__input--disabled"
+                  id="dni"
+                  :disabled="true"
+                  readonly
+                />
+                <small class="pf__hint">No se puede cambiar</small>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="cuil">CUIL</label>
+                <input
+                  v-model="formData.CUIL"
+                  type="text"
+                  class="pf__input"
+                  id="cuil"
+                  placeholder="Ej: 20-12345678-9"
+                  :disabled="isLoading || !canEditSection('personal')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('personal') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="nombre">Nombre</label>
+                <input
+                  v-model="formData.nombre"
+                  type="text"
+                  class="pf__input"
+                  id="nombre"
+                  placeholder="Ingrese nombre"
+                  required
+                  :disabled="isLoading || !canEditSection('personal')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('personal') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="apellido">Apellido</label>
+                <input
+                  v-model="formData.apellido"
+                  type="text"
+                  class="pf__input"
+                  id="apellido"
+                  placeholder="Ingrese apellido"
+                  required
+                  :disabled="isLoading || !canEditSection('personal')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('personal') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="nacimiento">Nacimiento</label>
+                <input
+                  v-model="formData.nacimiento"
+                  type="date"
+                  class="pf__input"
+                  id="nacimiento"
+                  :disabled="isLoading || !canEditSection('personal')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('personal') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="genero">Género</label>
+                <select
+                  v-model="formData.genero"
+                  class="pf__input pf__select"
+                  id="genero"
+                  :disabled="isLoading || !canEditSection('personal')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('personal') }"
+                >
+                  <option value="Masculino">Masculino</option>
+                  <option value="Femenino">Femenino</option>
+                  <option value="Otro">Otro</option>
+                </select>
               </div>
             </div>
           </div>
 
           <!-- 2. Contacto -->
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#formContacto"
-              >
-                <i class="bi bi-telephone me-2"></i> Contacto
-                <span v-if="!canEditSection('contacto')" class="badge bg-secondary ms-auto"
+          <div class="pf__acc-item">
+            <button
+              type="button"
+              class="pf__acc-trigger"
+              @click="toggleSection('contacto')"
+              :class="{ open: openSections.contacto }"
+            >
+              <span class="pf__acc-left">
+                <span class="pf__acc-icon pf__acc-icon--green"
+                  ><i class="bi bi-telephone"></i
+                ></span>
+                Contacto
+                <span v-if="!canEditSection('contacto')" class="pf__readonly-tag"
                   >Solo lectura</span
                 >
-              </button>
-            </h2>
-            <div
-              id="formContacto"
-              class="accordion-collapse collapse"
-              data-bs-parent="#formAccordion"
-            >
-              <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="celular" class="form-label">Celular</label>
-                  <div class="input-group">
-                    <select
-                      v-model="formData.celular_countryCode"
-                      class="form-select"
-                      style="max-width: 150px"
-                      :disabled="isLoading || !canEditSection('contacto')"
-                    >
-                      <option
-                        v-for="country in COUNTRIES_CODES"
-                        :key="country.code"
-                        :value="country.code"
-                      >
-                        +{{ country.dial_code }} {{ country.emoji }}
-                      </option>
-                    </select>
-                    <input
-                      v-model="formData.celular"
-                      type="tel"
-                      class="form-control"
-                      id="celular"
-                      placeholder="1155554444"
-                      :disabled="isLoading || !canEditSection('contacto')"
-                    />
-                  </div>
-                  <small class="text-muted"
-                    >Selecciona el país y luego ingresa el número sin el código de país</small
+              </span>
+              <i
+                class="bi bi-chevron-down pf__chevron"
+                :class="{ rotated: openSections.contacto }"
+              ></i>
+            </button>
+            <div class="pf__acc-body" v-show="openSections.contacto">
+              <div class="pf__field">
+                <label class="pf__label" for="celular">Celular</label>
+                <div class="pf__input-group">
+                  <select
+                    v-model="formData.celular_countryCode"
+                    class="pf__input pf__select pf__input-group-select"
+                    :disabled="isLoading || !canEditSection('contacto')"
+                    :class="{ 'pf__input--disabled': isLoading || !canEditSection('contacto') }"
                   >
-                </div>
-
-                <div class="mb-3">
-                  <label for="mail_personal" class="form-label">Email Personal</label>
+                    <option
+                      v-for="country in COUNTRIES_CODES"
+                      :key="country.code"
+                      :value="country.code"
+                    >
+                      +{{ country.dial_code }} {{ country.emoji }}
+                    </option>
+                  </select>
                   <input
-                    v-model="formData.mail_personal"
-                    type="email"
-                    class="form-control"
-                    id="mail_personal"
-                    placeholder="Ingrese email personal"
+                    v-model="formData.celular"
+                    type="tel"
+                    class="pf__input pf__input-group-main"
+                    id="celular"
+                    placeholder="1155554444"
                     :disabled="isLoading || !canEditSection('contacto')"
+                    :class="{ 'pf__input--disabled': isLoading || !canEditSection('contacto') }"
                   />
                 </div>
-
-                <div class="mb-3">
-                  <label for="mail_operativo" class="form-label">Email Operativo</label>
-                  <input
-                    v-model="formData.mail_operativo"
-                    type="email"
-                    class="form-control"
-                    id="mail_operativo"
-                    placeholder="Ingrese email operativo"
-                    :disabled="isLoading || !canEditSection('contacto')"
-                  />
-                </div>
+                <small class="pf__hint"
+                  >Seleccioná el país y luego ingresá el número sin código de país</small
+                >
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="mail_personal">Email Personal</label>
+                <input
+                  v-model="formData.mail_personal"
+                  type="email"
+                  class="pf__input"
+                  id="mail_personal"
+                  placeholder="Ingrese email personal"
+                  :disabled="isLoading || !canEditSection('contacto')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('contacto') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="mail_operativo">Email Operativo</label>
+                <input
+                  v-model="formData.mail_operativo"
+                  type="email"
+                  class="pf__input"
+                  id="mail_operativo"
+                  placeholder="Ingrese email operativo"
+                  :disabled="isLoading || !canEditSection('contacto')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('contacto') }"
+                />
               </div>
             </div>
           </div>
 
           <!-- 3. Domicilio -->
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#formDomicilio"
-              >
-                <i class="bi bi-houses me-2"></i> Domicilio
-                <span v-if="!canEditSection('domicilio')" class="badge bg-secondary ms-auto"
+          <div class="pf__acc-item">
+            <button
+              type="button"
+              class="pf__acc-trigger"
+              @click="toggleSection('domicilio')"
+              :class="{ open: openSections.domicilio }"
+            >
+              <span class="pf__acc-left">
+                <span class="pf__acc-icon pf__acc-icon--orange"><i class="bi bi-houses"></i></span>
+                Domicilio
+                <span v-if="!canEditSection('domicilio')" class="pf__readonly-tag"
                   >Solo lectura</span
                 >
-              </button>
-            </h2>
-            <div
-              id="formDomicilio"
-              class="accordion-collapse collapse"
-              data-bs-parent="#formAccordion"
-            >
-              <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="direccion1" class="form-label">Dirección 1</label>
-                  <input
-                    v-model="formData.direccion1"
-                    type="text"
-                    class="form-control"
-                    id="direccion1"
-                    placeholder="Ingrese dirección"
-                    :disabled="isLoading || !canEditSection('domicilio')"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="barrio1" class="form-label">Barrio 1</label>
-                  <input
-                    v-model="formData.barrio1"
-                    type="text"
-                    class="form-control"
-                    id="barrio1"
-                    placeholder="Ingrese barrio"
-                    :disabled="isLoading || !canEditSection('domicilio')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="direccion2" class="form-label">Dirección 2</label>
-                  <input
-                    v-model="formData.direccion2"
-                    type="text"
-                    class="form-control"
-                    id="direccion2"
-                    placeholder="Ingrese dirección"
-                    :disabled="isLoading || !canEditSection('domicilio')"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="barrio2" class="form-label">Barrio 2</label>
-                  <input
-                    v-model="formData.barrio2"
-                    type="text"
-                    class="form-control"
-                    id="barrio2"
-                    placeholder="Ingrese barrio"
-                    :disabled="isLoading || !canEditSection('domicilio')"
-                  />
-                </div>
+              </span>
+              <i
+                class="bi bi-chevron-down pf__chevron"
+                :class="{ rotated: openSections.domicilio }"
+              ></i>
+            </button>
+            <div class="pf__acc-body" v-show="openSections.domicilio">
+              <div class="pf__field">
+                <label class="pf__label" for="direccion1">Dirección 1</label>
+                <input
+                  v-model="formData.direccion1"
+                  type="text"
+                  class="pf__input"
+                  id="direccion1"
+                  placeholder="Ingrese dirección"
+                  :disabled="isLoading || !canEditSection('domicilio')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('domicilio') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="barrio1">Barrio 1</label>
+                <input
+                  v-model="formData.barrio1"
+                  type="text"
+                  class="pf__input"
+                  id="barrio1"
+                  placeholder="Ingrese barrio"
+                  :disabled="isLoading || !canEditSection('domicilio')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('domicilio') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="direccion2">Dirección 2</label>
+                <input
+                  v-model="formData.direccion2"
+                  type="text"
+                  class="pf__input"
+                  id="direccion2"
+                  placeholder="Ingrese dirección"
+                  :disabled="isLoading || !canEditSection('domicilio')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('domicilio') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="barrio2">Barrio 2</label>
+                <input
+                  v-model="formData.barrio2"
+                  type="text"
+                  class="pf__input"
+                  id="barrio2"
+                  placeholder="Ingrese barrio"
+                  :disabled="isLoading || !canEditSection('domicilio')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('domicilio') }"
+                />
               </div>
             </div>
           </div>
 
           <!-- 4. Médicos -->
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#formMedicos"
-              >
-                <i class="bi bi-heart-pulse me-2"></i> Médicos
-                <span v-if="!canEditSection('medicos')" class="badge bg-secondary ms-auto"
-                  >Solo lectura</span
-                >
-              </button>
-            </h2>
-            <div
-              id="formMedicos"
-              class="accordion-collapse collapse"
-              data-bs-parent="#formAccordion"
+          <div class="pf__acc-item">
+            <button
+              type="button"
+              class="pf__acc-trigger"
+              @click="toggleSection('medicos')"
+              :class="{ open: openSections.medicos }"
             >
-              <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="obraSocial" class="form-label">Obra Social</label>
-                  <input
-                    v-model="formData.obraSocial"
-                    type="text"
-                    class="form-control"
-                    id="obraSocial"
-                    placeholder="Ingrese obra social"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
+              <span class="pf__acc-left">
+                <span class="pf__acc-icon pf__acc-icon--red"
+                  ><i class="bi bi-heart-pulse"></i
+                ></span>
+                Médicos
+                <span v-if="!canEditSection('medicos')" class="pf__readonly-tag">Solo lectura</span>
+              </span>
+              <i
+                class="bi bi-chevron-down pf__chevron"
+                :class="{ rotated: openSections.medicos }"
+              ></i>
+            </button>
+            <div class="pf__acc-body" v-show="openSections.medicos">
+              <div class="pf__field">
+                <label class="pf__label" for="obraSocial">Obra Social</label>
+                <input
+                  v-model="formData.obraSocial"
+                  type="text"
+                  class="pf__input"
+                  id="obraSocial"
+                  placeholder="Ingrese obra social"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="obraSocial_Plan">Plan Obra Social</label>
+                <input
+                  v-model="formData.obraSocial_Plan"
+                  type="text"
+                  class="pf__input"
+                  id="obraSocial_Plan"
+                  placeholder="Ingrese plan"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="obraSocial_id">ID Obra Social</label>
+                <input
+                  v-model="formData.obraSocial_id"
+                  type="text"
+                  class="pf__input"
+                  id="obraSocial_id"
+                  placeholder="Ingrese ID"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="obraSocial_Carnet">Carnet Obra Social</label>
+                <input
+                  v-model="formData.obraSocial_Carnet"
+                  type="text"
+                  class="pf__input"
+                  id="obraSocial_Carnet"
+                  placeholder="Ingrese carnet"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_dieta">Dieta</label>
+                <input
+                  v-model="formData.med_dieta"
+                  type="text"
+                  class="pf__input"
+                  id="med_dieta"
+                  placeholder="Restricciones dietarias"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_sangre">Tipo de Sangre</label>
+                <select
+                  v-model="formData.med_sangre"
+                  class="pf__input pf__select"
+                  id="med_sangre"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                >
+                  <option value=""></option>
+                  <option v-for="tipo in tiposSangre" :key="tipo.value" :value="tipo.value">
+                    {{ tipo.label }}
+                  </option>
+                </select>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_historia">Historia Médica</label>
+                <textarea
+                  v-model="formData.med_historia"
+                  class="pf__input pf__textarea"
+                  id="med_historia"
+                  placeholder="Antecedentes médicos"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                ></textarea>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_problemas">Problemas de Salud</label>
+                <textarea
+                  v-model="formData.med_problemas"
+                  class="pf__input pf__textarea"
+                  id="med_problemas"
+                  placeholder="Problemas actuales"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                ></textarea>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_act">Actividad Física</label>
+                <select
+                  v-model="formData.med_act"
+                  class="pf__input pf__select"
+                  id="med_act"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                >
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_actLesion">Lesiones Actuales</label>
+                <textarea
+                  v-model="formData.med_actLesion"
+                  class="pf__input pf__textarea"
+                  id="med_actLesion"
+                  placeholder="Ingrese lesiones"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                ></textarea>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="foto_dni">Foto DNI</label>
+                <input
+                  v-model="formData.foto_dni"
+                  type="text"
+                  class="pf__input"
+                  id="foto_dni"
+                  placeholder="Ruta o URL de foto"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="foto_rostro">Foto Rostro</label>
+                <input
+                  v-model="formData.foto_rostro"
+                  type="text"
+                  class="pf__input"
+                  id="foto_rostro"
+                  placeholder="Ruta o URL de foto"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
 
-                <div class="mb-3">
-                  <label for="obraSocial_Plan" class="form-label">Plan Obra Social</label>
-                  <input
-                    v-model="formData.obraSocial_Plan"
-                    type="text"
-                    class="form-control"
-                    id="obraSocial_Plan"
-                    placeholder="Ingrese plan"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
+              <div class="pf__subsection">Estudios Médicos</div>
 
-                <div class="mb-3">
-                  <label for="obraSocial_id" class="form-label">ID Obra Social</label>
-                  <input
-                    v-model="formData.obraSocial_id"
-                    type="text"
-                    class="form-control"
-                    id="obraSocial_id"
-                    placeholder="Ingrese ID"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="obraSocial_Carnet" class="form-label">Carnet Obra Social</label>
-                  <input
-                    v-model="formData.obraSocial_Carnet"
-                    type="text"
-                    class="form-control"
-                    id="obraSocial_Carnet"
-                    placeholder="Ingrese carnet"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_dieta" class="form-label">Dieta</label>
-                  <input
-                    v-model="formData.med_dieta"
-                    type="text"
-                    class="form-control"
-                    id="med_dieta"
-                    placeholder="Ingrese restricciones dietarias"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_sangre" class="form-label">Tipo de Sangre</label>
-                  <select
-                    v-model="formData.med_sangre"
-                    class="form-select"
-                    id="med_sangre"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  >
-                    <option value=""></option>
-                    <option v-for="tipo in tiposSangre" :key="tipo.value" :value="tipo.value">
-                      {{ tipo.label }}
-                    </option>
-                  </select>
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_historia" class="form-label">Historia Médica</label>
-                  <textarea
-                    v-model="formData.med_historia"
-                    type="text"
-                    class="form-control"
-                    id="med_historia"
-                    placeholder="Ingrese antecedentes médicos"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  ></textarea>
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_problemas" class="form-label">Problemas de Salud</label>
-                  <textarea
-                    v-model="formData.med_problemas"
-                    type="text"
-                    class="form-control"
-                    id="med_problemas"
-                    placeholder="Ingrese problemas actuales"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  ></textarea>
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_act" class="form-label">Actividad Física</label>
-                  <select
-                    v-model="formData.med_act"
-                    class="form-select"
-                    id="med_act"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  >
-                    <option value="Sí">Sí</option>
-                    <option value="No">No</option>
-                  </select>
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_actLesion" class="form-label">Lesiones Actuales</label>
-                  <textarea
-                    v-model="formData.med_actLesion"
-                    type="text"
-                    class="form-control"
-                    id="med_actLesion"
-                    placeholder="Ingrese lesiones"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  ></textarea>
-                </div>
-
-                <div class="mb-3">
-                  <label for="foto_dni" class="form-label">Foto DNI</label>
-                  <input
-                    v-model="formData.foto_dni"
-                    type="text"
-                    class="form-control"
-                    id="foto_dni"
-                    placeholder="Ruta o URL de foto"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="foto_rostro" class="form-label">Foto Rostro</label>
-                  <input
-                    v-model="formData.foto_rostro"
-                    type="text"
-                    class="form-control"
-                    id="foto_rostro"
-                    placeholder="Ruta o URL de foto"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label class="form-label">Estudios Realizados</label>
-                  <div v-for="opt in estudiosOptions" :key="opt" class="form-check">
+              <div class="pf__field">
+                <label class="pf__label">Estudios Realizados</label>
+                <div class="pf__checkboxes">
+                  <label v-for="opt in estudiosOptions" :key="opt" class="pf__checkbox-label">
                     <input
-                      class="form-check-input"
                       type="checkbox"
-                      :id="'estudio-' + opt"
                       :value="opt"
                       v-model="selectedEstudios"
+                      class="pf__checkbox"
                       :disabled="isLoading || !canEditSection('medicos')"
                     />
-                    <label class="form-check-label" :for="'estudio-' + opt">{{ opt }}</label>
-                  </div>
-                  <small class="text-muted">Seleccionados: {{ formData.med_estudios }}</small>
+                    <span>{{ opt }}</span>
+                  </label>
                 </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_extras" class="form-label">Otros Estudios</label>
-                  <input
-                    v-model="formData.med_estudios_extras"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_extras"
-                    placeholder="Ingrese otros"
+                <small class="pf__hint">Seleccionados: {{ formData.med_estudios }}</small>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_estudios_extras">Otros Estudios</label>
+                <input
+                  v-model="formData.med_estudios_extras"
+                  type="text"
+                  class="pf__input"
+                  id="med_estudios_extras"
+                  placeholder="Ingrese otros"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_estudios_extraMotivo"
+                  >Motivo Otros Estudios</label
+                >
+                <input
+                  v-model="formData.med_estudios_extraMotivo"
+                  type="text"
+                  class="pf__input"
+                  id="med_estudios_extraMotivo"
+                  placeholder="Ingrese motivo"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_estudios_certificado">Certificado</label>
+                <input
+                  v-model="formData.med_estudios_certificado"
+                  type="text"
+                  class="pf__input"
+                  id="med_estudios_certificado"
+                  placeholder="Ingrese certificado"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_estudios_fechaEst">Fecha Estudio</label>
+                <input
+                  v-model="formData.med_estudios_fechaEst"
+                  type="date"
+                  class="pf__input"
+                  id="med_estudios_fechaEst"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_estudios_img">Imagen (historia clínica)</label>
+                <div class="pf__input-group">
+                  <textarea
+                    v-model="formData.med_estudios_img"
+                    class="pf__input pf__textarea"
+                    id="med_estudios_img"
+                    placeholder="Ingrese observaciones / patologías"
+                    rows="3"
                     :disabled="isLoading || !canEditSection('medicos')"
-                  />
+                    :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                  ></textarea>
+                  <button type="button" class="pf__img-preview-btn" @click="showImageModal = true">
+                    <i class="bi bi-eye"></i>
+                  </button>
                 </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_extraMotivo" class="form-label"
-                    >Motivo Otros Estudios</label
-                  >
-                  <input
-                    v-model="formData.med_estudios_extraMotivo"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_extraMotivo"
-                    placeholder="Ingrese motivo"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_certificado" class="form-label">Certificado</label>
-                  <input
-                    v-model="formData.med_estudios_certificado"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_certificado"
-                    placeholder="Ingrese certificado"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_fechaEst" class="form-label">Fecha Estudio</label>
-                  <input
-                    v-model="formData.med_estudios_fechaEst"
-                    type="date"
-                    class="form-control"
-                    id="med_estudios_fechaEst"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_img" class="form-label">Imagen (ver en modal)</label>
-                  <div class="input-group">
-                    <textarea
-                      v-model="formData.med_estudios_img"
-                      class="form-control"
-                      id="med_estudios_img"
-                      placeholder="Ingrese observaciones / patologías"
-                      rows="3"
-                      :disabled="isLoading || !canEditSection('medicos')"
-                    ></textarea>
-                    <button
-                      class="btn btn-outline-secondary"
-                      type="button"
-                      @click="showImageModal = true"
-                    >
-                      Ver imagen
-                    </button>
-                  </div>
-                  <small class="text-muted">La imagen mostrada es una referencia visual.</small>
-                </div>
-
-                <div class="mb-3">
-                  <label for="med_estudios_otro" class="form-label">Otro</label>
-                  <input
-                    v-model="formData.med_estudios_otro"
-                    type="text"
-                    class="form-control"
-                    id="med_estudios_otro"
-                    placeholder="Ingrese otros datos"
-                    :disabled="isLoading || !canEditSection('medicos')"
-                  />
-                </div>
+                <small class="pf__hint">La imagen mostrada es una referencia visual.</small>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_estudios_otro">Comentarios</label>
+                <input
+                  v-model="formData.med_estudios_otro"
+                  type="text"
+                  class="pf__input"
+                  id="med_estudios_otro"
+                  placeholder="Ingrese otros datos"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
               </div>
             </div>
           </div>
 
           <!-- 5. Organización -->
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#formOrganizacion"
-              >
-                <i class="bi bi-building me-2"></i> Organización
-                <span v-if="!canEditSection('organizacion')" class="badge bg-secondary ms-auto"
+          <div class="pf__acc-item">
+            <button
+              type="button"
+              class="pf__acc-trigger"
+              @click="toggleSection('organizacion')"
+              :class="{ open: openSections.organizacion }"
+            >
+              <span class="pf__acc-left">
+                <span class="pf__acc-icon pf__acc-icon--purple"
+                  ><i class="bi bi-building"></i
+                ></span>
+                Organización
+                <span v-if="!canEditSection('organizacion')" class="pf__readonly-tag"
                   >Solo lectura</span
                 >
-              </button>
-            </h2>
-            <div
-              id="formOrganizacion"
-              class="accordion-collapse collapse"
-              data-bs-parent="#formAccordion"
-            >
-              <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="organizacion" class="form-label">Organización</label>
-                  <select
-                    v-model="formData.organizacion"
-                    class="form-select"
-                    id="organizacion"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  >
-                    <option :value="org" v-for="org in organizaciones" :key="org">{{ org }}</option>
-                  </select>
-                </div>
-
-                <div class="mb-3">
-                  <label for="areas_ref" class="form-label">Áreas de Referencia</label>
-                  <select
-                    v-model="formData.areas_ref"
-                    multiple
-                    class="form-select"
-                    id="areas_ref"
-                    :disabled="
-                      isLoading || !canEditSection('organizacion') || !formData.organizacion
-                    "
-                    size="5"
-                  >
-                    <option :value="area" v-for="area in areasRefDisponibles" :key="area">
-                      {{ area }}
-                    </option>
-                  </select>
-                  <small class="text-muted">Selecciona una o más áreas (Ctrl/Cmd + clic)</small>
-                </div>
-
-                <div class="mb-3">
-                  <label for="areas" class="form-label">Roles</label>
-                  <select
-                    v-model="formData.areas"
-                    multiple
-                    class="form-select"
-                    id="areas"
-                    :disabled="
+              </span>
+              <i
+                class="bi bi-chevron-down pf__chevron"
+                :class="{ rotated: openSections.organizacion }"
+              ></i>
+            </button>
+            <div class="pf__acc-body" v-show="openSections.organizacion">
+              <div class="pf__field">
+                <label class="pf__label" for="organizacion">Organización</label>
+                <select
+                  v-model="formData.organizacion"
+                  class="pf__input pf__select"
+                  id="organizacion"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                >
+                  <option :value="org" v-for="org in organizaciones" :key="org">{{ org }}</option>
+                </select>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="areas_ref">Áreas de Referencia</label>
+                <select
+                  v-model="formData.areas_ref"
+                  multiple
+                  class="pf__input pf__select pf__select--multi"
+                  id="areas_ref"
+                  :disabled="isLoading || !canEditSection('organizacion') || !formData.organizacion"
+                  :class="{
+                    'pf__input--disabled':
+                      isLoading || !canEditSection('organizacion') || !formData.organizacion,
+                  }"
+                  size="5"
+                >
+                  <option :value="area" v-for="area in areasRefDisponibles" :key="area">
+                    {{ area }}
+                  </option>
+                </select>
+                <small class="pf__hint">Seleccioná una o más áreas (Ctrl/Cmd + clic)</small>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="areas">Roles</label>
+                <select
+                  v-model="formData.areas"
+                  multiple
+                  class="pf__input pf__select pf__select--multi"
+                  id="areas"
+                  :disabled="
+                    isLoading || !canEditSection('organizacion') || formData.areas_ref.length === 0
+                  "
+                  :class="{
+                    'pf__input--disabled':
                       isLoading ||
                       !canEditSection('organizacion') ||
-                      formData.areas_ref.length === 0
-                    "
-                    size="5"
-                  >
-                    <option :value="rol" v-for="rol in rolesDisponibles" :key="rol">
-                      {{ rol }}
-                    </option>
-                  </select>
+                      formData.areas_ref.length === 0,
+                  }"
+                  size="5"
+                >
+                  <option :value="rol" v-for="rol in rolesDisponibles" :key="rol">{{ rol }}</option>
+                </select>
+                <small class="pf__hint">Seleccioná uno o más roles (Ctrl/Cmd + clic)</small>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="apodo">Apodo</label>
+                <input
+                  v-model="formData.apodo"
+                  type="text"
+                  class="pf__input"
+                  id="apodo"
+                  placeholder="Ingrese apodo"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field pf__field--checkbox">
+                <label class="pf__label" for="activo">¿Activo?</label>
+                <input
+                  v-model="formData.activo"
+                  type="checkbox"
+                  class="pf__toggle"
+                  id="activo"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="nivel">Nivel</label>
+                <input
+                  v-model="formData.nivel"
+                  type="number"
+                  min="1"
+                  max="5"
+                  class="pf__input"
+                  id="nivel"
+                  placeholder="Ingrese nivel"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="nivelHBTJ">Nivel HBTJ</label>
+                <select
+                  v-model="formData.nivelHBTJ"
+                  class="pf__input pf__select"
+                  id="nivelHBTJ"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                >
+                  <option :value="nvl" v-for="nvl in nivelesHBTJ" :key="nvl">{{ nvl }}</option>
+                </select>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fecha_ingresoOrg">Fecha de Ingreso a Org</label>
+                <input
+                  v-model="formData.fecha_ingresoOrg"
+                  type="date"
+                  class="pf__input"
+                  id="fecha_ingresoOrg"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fecha_ingresoMilu">Fecha de Ingreso a Milu</label>
+                <input
+                  v-model="formData.fecha_ingresoMilu"
+                  type="date"
+                  class="pf__input"
+                  id="fecha_ingresoMilu"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="areas_historicas">Áreas Históricas</label>
+                <input
+                  v-model="formData.areas_historicas"
+                  type="text"
+                  class="pf__input"
+                  id="areas_historicas"
+                  placeholder="Ingrese áreas históricas"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
 
-                  <small class="text-muted">Selecciona uno o más roles (Ctrl/Cmd + clic)</small>
-                </div>
+              <div class="pf__subsection">Cursos Realizados</div>
 
-                <div class="mb-3">
-                  <label for="apodo" class="form-label">Apodo</label>
-                  <input
-                    v-model="formData.apodo"
-                    type="text"
-                    class="form-control"
-                    id="apodo"
-                    placeholder="Ingrese apodo"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="activo" class="form-label me-2">¿Activo?</label>
-                  <input
-                    v-model="formData.activo"
-                    type="checkbox"
-                    class="form-check-input"
-                    id="activo"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="nivel" class="form-label">Nivel</label>
-                  <input
-                    v-model="formData.nivel"
-                    type="number"
-                    min="1"
-                    max="5"
-                    class="form-control"
-                    id="nivel"
-                    placeholder="Ingrese nivel"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="nivelHBTJ" class="form-label">Nivel HBTJ</label>
-                  <select
-                    v-model="formData.nivelHBTJ"
-                    class="form-select"
-                    id="nivelHBTJ"
-                    placeholder="Ingrese nivel HBTJ"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  >
-                    <option :value="nvl" v-for="nvl in nivelesHBTJ" :key="nvl">{{ nvl }}</option>
-                  </select>
-                </div>
-
-                <div class="mb-3">
-                  <label for="fecha_ingresoOrg" class="form-label">Fecha de Ingreso a Org</label>
-                  <input
-                    v-model="formData.fecha_ingresoOrg"
-                    type="date"
-                    class="form-control"
-                    id="fecha_ingresoOrg"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="fecha_ingresoMilu" class="form-label">Fecha de Ingreso a Milu</label>
-                  <input
-                    v-model="formData.fecha_ingresoMilu"
-                    type="date"
-                    class="form-control"
-                    id="fecha_ingresoMilu"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="areas_historicas" class="form-label">Áreas Históricas</label>
-                  <input
-                    v-model="formData.areas_historicas"
-                    type="text"
-                    class="form-control"
-                    id="areas_historicas"
-                    placeholder="Ingrese áreas históricas"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="CBok" class="form-label">Curso Básico</label>
-                  <input
-                    v-model="formData.CBok"
-                    type="text"
-                    class="form-control"
-                    id="CBok"
-                    placeholder="Ingrese datos del curso"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="curso_TL" class="form-label">Curso TL</label>
-                  <input
-                    v-model="formData.curso_TL"
-                    type="text"
-                    class="form-control"
-                    id="curso_TL"
-                    placeholder="Ingrese datos del curso"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="curso_AvH" class="form-label">Curso Av H</label>
-                  <input
-                    v-model="formData.curso_AvH"
-                    type="text"
-                    class="form-control"
-                    id="curso_AvH"
-                    placeholder="Ingrese datos del curso"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="curso_AvKM" class="form-label">Curso Av KM</label>
-                  <input
-                    v-model="formData.curso_AvKM"
-                    type="text"
-                    class="form-control"
-                    id="curso_AvKM"
-                    placeholder="Ingrese datos del curso"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="curso_IE" class="form-label">Curso IE</label>
-                  <input
-                    v-model="formData.curso_IE"
-                    type="text"
-                    class="form-control"
-                    id="curso_IE"
-                    placeholder="Ingrese datos del curso"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
-
-                <div class="mb-3">
-                  <label for="curso_FND" class="form-label">Curso FND</label>
-                  <input
-                    v-model="formData.curso_FND"
-                    type="text"
-                    class="form-control"
-                    id="curso_FND"
-                    placeholder="Ingrese datos del curso"
-                    :disabled="isLoading || !canEditSection('organizacion')"
-                  />
-                </div>
+              <div class="pf__field">
+                <label class="pf__label" for="CBok">Curso Básico</label>
+                <input
+                  v-model="formData.CBok"
+                  type="text"
+                  class="pf__input"
+                  id="CBok"
+                  placeholder="Ingrese datos del curso"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="curso_TL">Curso TL</label>
+                <input
+                  v-model="formData.curso_TL"
+                  type="text"
+                  class="pf__input"
+                  id="curso_TL"
+                  placeholder="Ingrese datos del curso"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="curso_AvH">Curso Avanzado H</label>
+                <input
+                  v-model="formData.curso_AvH"
+                  type="text"
+                  class="pf__input"
+                  id="curso_AvH"
+                  placeholder="Ingrese datos del curso"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="curso_AvKM">Curso Avanzado KM</label>
+                <input
+                  v-model="formData.curso_AvKM"
+                  type="text"
+                  class="pf__input"
+                  id="curso_AvKM"
+                  placeholder="Ingrese datos del curso"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="curso_IE">Curso IE</label>
+                <input
+                  v-model="formData.curso_IE"
+                  type="text"
+                  class="pf__input"
+                  id="curso_IE"
+                  placeholder="Ingrese datos del curso"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="curso_FND">Curso FND</label>
+                <input
+                  v-model="formData.curso_FND"
+                  type="text"
+                  class="pf__input"
+                  id="curso_FND"
+                  placeholder="Ingrese datos del curso"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
               </div>
             </div>
           </div>
 
           <!-- 6. Vida y Desarrollo -->
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#formDesarrollo"
-              >
-                <i class="bi bi-book me-2"></i> Vida y Desarrollo
-                <span v-if="!canEditSection('desarrollo')" class="badge bg-secondary ms-auto"
+          <div class="pf__acc-item">
+            <button
+              type="button"
+              class="pf__acc-trigger"
+              @click="toggleSection('desarrollo')"
+              :class="{ open: openSections.desarrollo }"
+            >
+              <span class="pf__acc-left">
+                <span class="pf__acc-icon pf__acc-icon--teal"><i class="bi bi-book"></i></span>
+                Vida y Desarrollo
+                <span v-if="!canEditSection('desarrollo')" class="pf__readonly-tag"
                   >Solo lectura</span
                 >
-              </button>
-            </h2>
-            <div
-              id="formDesarrollo"
-              class="accordion-collapse collapse"
-              data-bs-parent="#formAccordion"
-            >
-              <div class="accordion-body">
-                <!-- Estudios -->
-                <h5>Estudios</h5>
-                <div class="mb-3">
-                  <label for="estudios_grado">Mayor grado de estudios alcanzado</label>
-                  <select id="estudios_grado" v-model="formData.estudios_grado" class="form-select">
-                    <option value="Primario">Primario</option>
-                    <option value="Secundario">Secundario</option>
-                    <option value="Terciario">Terciario</option>
-                    <option value="Universitario">Universitario</option>
-                    <option value="Posgrado">Posgrado</option>
-                  </select>
-                </div>
-                <div class="mb-3">
-                  <label for="estudios_area">Área de Estudios</label>
-                  <select id="estudios_area" v-model="formData.estudios_area" class="form-select">
-                    <option value=""></option>
-                    <option v-for="carreer in Estudies" :value="carreer" :key="carreer">
-                      {{ carreer }}
-                    </option>
-                  </select>
-                </div>
-                <div class="mb-3">
-                  <label for="estudios_carrera" class="form-label">Nombre de la carrera</label>
-                  <input
-                    id="estudios_carrera"
-                    v-model="formData.estudios_carrera"
-                    class="form-control"
-                    type="text"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="estudios_barrio" class="form-label">Barrio donde estudia</label>
-                  <input
-                    id="estudios_barrio"
-                    v-model="formData.estudios_barrio"
-                    class="form-control"
-                    type="text"
-                  />
-                </div>
-
-                <!-- Trabajo -->
-                <h5 class="mt-1">Trabajo</h5>
-                <div class="mb-3">
-                  <label for="trabajo_area" class="form-label">Área del Trabajo</label>
-                  <select v-model="formData.trabajo_area" id="trabajo_area" class="form-select">
-                    <option value=""></option>
-                    <option v-for="work in Works" :value="work" :key="work">{{ work }}</option>
-                  </select>
-                </div>
-                <div class="mb-3">
-                  <label for="trabajo_puesto" class="form-label">Puesto de trabajo</label>
-                  <input
-                    type="text"
-                    v-model="formData.trabajo_puesto"
-                    id="trabajo_puesto"
-                    class="form-control"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="trabajo_barrio" class="form-label">Barrio donde trabaja</label>
-                  <input
-                    type="text"
-                    v-model="formData.trabajo_barrio"
-                    class="form-control"
-                    id="trabajo_barrio"
-                  />
-                </div>
-
-                <!-- Comunidad -->
-                <h5 class="mt-1">Comunidad</h5>
-                <div class="mb-3">
-                  <label for="comunidad_rol" class="form-label"
-                    >¿Tenés actualmente algún rol en la Comunidad?</label
-                  >
-                  <textarea
-                    class="form-control"
-                    v-model="formData.comunidad_rol"
-                    id="comunidad_rol"
-                    placeholder="CISSAB - Madrij&#10;Tarbut - Profesor"
-                  ></textarea>
-                  <div class="text-muted">Si es así, indique cuáles y dónde</div>
-                </div>
+              </span>
+              <i
+                class="bi bi-chevron-down pf__chevron"
+                :class="{ rotated: openSections.desarrollo }"
+              ></i>
+            </button>
+            <div class="pf__acc-body" v-show="openSections.desarrollo">
+              <div class="pf__subsection">Estudios</div>
+              <div class="pf__field">
+                <label class="pf__label" for="estudios_grado"
+                  >Mayor grado de estudios alcanzado</label
+                >
+                <select
+                  id="estudios_grado"
+                  v-model="formData.estudios_grado"
+                  class="pf__input pf__select"
+                >
+                  <option value="Primario">Primario</option>
+                  <option value="Secundario">Secundario</option>
+                  <option value="Terciario">Terciario</option>
+                  <option value="Universitario">Universitario</option>
+                  <option value="Posgrado">Posgrado</option>
+                </select>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="estudios_area">Área de Estudios</label>
+                <select
+                  id="estudios_area"
+                  v-model="formData.estudios_area"
+                  class="pf__input pf__select"
+                >
+                  <option value=""></option>
+                  <option v-for="carreer in Estudies" :value="carreer" :key="carreer">
+                    {{ carreer }}
+                  </option>
+                </select>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="estudios_carrera">Nombre de la carrera</label>
+                <input
+                  id="estudios_carrera"
+                  v-model="formData.estudios_carrera"
+                  class="pf__input"
+                  type="text"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="estudios_barrio">Barrio donde estudia</label>
+                <input
+                  id="estudios_barrio"
+                  v-model="formData.estudios_barrio"
+                  class="pf__input"
+                  type="text"
+                />
+              </div>
+              <div class="pf__subsection">Trabajo</div>
+              <div class="pf__field">
+                <label class="pf__label" for="trabajo_area">Área del Trabajo</label>
+                <select
+                  v-model="formData.trabajo_area"
+                  id="trabajo_area"
+                  class="pf__input pf__select"
+                >
+                  <option value=""></option>
+                  <option v-for="work in Works" :value="work" :key="work">{{ work }}</option>
+                </select>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="trabajo_puesto">Puesto de trabajo</label>
+                <input
+                  type="text"
+                  v-model="formData.trabajo_puesto"
+                  id="trabajo_puesto"
+                  class="pf__input"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="trabajo_barrio">Barrio donde trabaja</label>
+                <input
+                  type="text"
+                  v-model="formData.trabajo_barrio"
+                  class="pf__input"
+                  id="trabajo_barrio"
+                />
+              </div>
+              <div class="pf__subsection">Comunidad</div>
+              <div class="pf__field">
+                <label class="pf__label" for="comunidad_rol"
+                  >¿Tenés algún rol en la Comunidad?</label
+                >
+                <textarea
+                  class="pf__input pf__textarea"
+                  v-model="formData.comunidad_rol"
+                  id="comunidad_rol"
+                  placeholder="CISSAB - Madrij&#10;Tarbut - Profesor"
+                ></textarea>
+                <small class="pf__hint">Si es así, indicá cuáles y dónde</small>
               </div>
             </div>
           </div>
 
           <!-- 7. Familia -->
-          <div class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#formFamilia"
-              >
-                <i class="bi bi-people me-2"></i> Familia
-                <span v-if="!canEditSection('familia')" class="badge bg-secondary ms-auto"
-                  >Solo lectura</span
-                >
-              </button>
-            </h2>
-            <div
-              id="formFamilia"
-              class="accordion-collapse collapse"
-              data-bs-parent="#formAccordion"
+          <div class="pf__acc-item">
+            <button
+              type="button"
+              class="pf__acc-trigger"
+              @click="toggleSection('familia')"
+              :class="{ open: openSections.familia }"
             >
-              <div class="accordion-body">
-                <!-- Familiar 1 -->
-                <div class="row mb-4">
-                  <h5>Familiar 1</h5>
-                  <div class="mb-3">
-                    <label for="fam1_nombre" class="form-label">Nombre</label>
-                    <input
-                      type="text"
-                      id="fam1_nombre"
-                      v-model="formData.fam1_nombre"
-                      class="form-control"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <label for="fam1_apellido" class="form-label">Apellido</label>
-                    <input
-                      type="text"
-                      id="fam1_apellido"
-                      v-model="formData.fam1_apellido"
-                      class="form-control"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <label for="fam1_vinculo" class="form-label">Vínculo con el Javer</label>
-                    <input
-                      type="text"
-                      id="fam1_vinculo"
-                      v-model="formData.fam1_vinculo"
-                      class="form-control"
-                      placeholder="Madre/Padre/Hermano"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <label for="fam1_celular" class="form-label">Celular</label>
-                    <div class="input-group">
-                      <select
-                        v-model="formData.fam1_celular_countryCode"
-                        class="form-select"
-                        style="max-width: 150px"
-                        :disabled="isLoading || !canEditSection('familia')"
-                      >
-                        <option
-                          v-for="country in COUNTRIES_CODES"
-                          :key="country.code"
-                          :value="country.code"
-                        >
-                          +{{ country.dial_code }} {{ country.emoji }}
-                        </option>
-                      </select>
-                      <input
-                        type="tel"
-                        id="fam1_celular"
-                        v-model="formData.fam1_celular"
-                        class="form-control w-50"
-                        placeholder="1155554444"
-                        :disabled="isLoading || !canEditSection('familia')"
-                      />
-                    </div>
-                    <small class="text-muted"
-                      >Selecciona el país y luego ingresa el número sin el código de país</small
+              <span class="pf__acc-left">
+                <span class="pf__acc-icon pf__acc-icon--amber"><i class="bi bi-people"></i></span>
+                Familia
+                <span v-if="!canEditSection('familia')" class="pf__readonly-tag">Solo lectura</span>
+              </span>
+              <i
+                class="bi bi-chevron-down pf__chevron"
+                :class="{ rotated: openSections.familia }"
+              ></i>
+            </button>
+            <div class="pf__acc-body" v-show="openSections.familia">
+              <div class="pf__subsection">Familiar 1</div>
+              <div class="pf__field">
+                <label class="pf__label" for="fam1_nombre">Nombre</label>
+                <input
+                  type="text"
+                  id="fam1_nombre"
+                  v-model="formData.fam1_nombre"
+                  class="pf__input"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fam1_apellido">Apellido</label>
+                <input
+                  type="text"
+                  id="fam1_apellido"
+                  v-model="formData.fam1_apellido"
+                  class="pf__input"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fam1_vinculo">Vínculo con el Javer</label>
+                <input
+                  type="text"
+                  id="fam1_vinculo"
+                  v-model="formData.fam1_vinculo"
+                  class="pf__input"
+                  placeholder="Madre/Padre/Hermano"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fam1_celular">Celular</label>
+                <div class="pf__input-group">
+                  <select
+                    v-model="formData.fam1_celular_countryCode"
+                    class="pf__input pf__select pf__input-group-select"
+                    :disabled="isLoading || !canEditSection('familia')"
+                    :class="{ 'pf__input--disabled': isLoading || !canEditSection('familia') }"
+                  >
+                    <option
+                      v-for="country in COUNTRIES_CODES"
+                      :key="country.code"
+                      :value="country.code"
                     >
-                  </div>
-                  <div class="mb-3">
-                    <label for="fam1_direccion" class="form-label">Dirección</label>
-                    <input
-                      type="address"
-                      id="fam1_direccion"
-                      v-model="formData.fam1_direccion"
-                      class="form-control"
-                      placeholder="Av. Corrientes 123..."
-                    />
-                  </div>
+                      +{{ country.dial_code }} {{ country.emoji }}
+                    </option>
+                  </select>
+                  <input
+                    type="tel"
+                    id="fam1_celular"
+                    v-model="formData.fam1_celular"
+                    class="pf__input pf__input-group-main"
+                    placeholder="1155554444"
+                    :disabled="isLoading || !canEditSection('familia')"
+                    :class="{ 'pf__input--disabled': isLoading || !canEditSection('familia') }"
+                  />
                 </div>
-                <!-- Familiar 2 -->
-                <div class="row mb-4">
-                  <h5>Familiar 2</h5>
-                  <div class="mb-3">
-                    <label for="fam2_nombre" class="form-label">Nombre</label>
-                    <input
-                      type="text"
-                      id="fam2_nombre"
-                      v-model="formData.fam2_nombre"
-                      class="form-control"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <label for="fam2_apellido" class="form-label">Apellido</label>
-                    <input
-                      type="text"
-                      id="fam2_apellido"
-                      v-model="formData.fam2_apellido"
-                      class="form-control"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <label for="fam2_vinculo" class="form-label">Vínculo con el Javer</label>
-                    <input
-                      type="text"
-                      id="fam2_vinculo"
-                      v-model="formData.fam2_vinculo"
-                      class="form-control"
-                      placeholder="Madre/Padre/Hermano"
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <label for="fam2_celular" class="form-label">Celular</label>
-                    <div class="input-group">
-                      <select
-                        v-model="formData.fam2_celular_countryCode"
-                        class="form-select"
-                        style="max-width: 150px"
-                        :disabled="isLoading || !canEditSection('familia')"
-                      >
-                        <option
-                          v-for="country in COUNTRIES_CODES"
-                          :key="country.code"
-                          :value="country.code"
-                        >
-                          +{{ country.dial_code }} {{ country.emoji }}
-                        </option>
-                      </select>
-                      <input
-                        type="tel"
-                        id="fam2_celular"
-                        v-model="formData.fam2_celular"
-                        class="form-control w-50"
-                        placeholder="1155554444"
-                        :disabled="isLoading || !canEditSection('familia')"
-                      />
-                    </div>
-                    <small class="text-muted"
-                      >Selecciona el país y luego ingresa el número sin el código de país</small
-                    >
-                  </div>
+                <small class="pf__hint"
+                  >Seleccioná el país y luego ingresá el número sin código de país</small
+                >
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fam1_direccion">Dirección</label>
+                <input
+                  type="address"
+                  id="fam1_direccion"
+                  v-model="formData.fam1_direccion"
+                  class="pf__input"
+                  placeholder="Av. Corrientes 123..."
+                />
+              </div>
 
-                  <div class="mb-3">
-                    <label for="fam2_direccion" class="form-label">Dirección</label>
-                    <input
-                      type="address"
-                      id="fam2_direccion"
-                      v-model="formData.fam2_direccion"
-                      class="form-control"
-                      placeholder="Av. Corrientes 123..."
-                    />
-                  </div>
+              <div class="pf__subsection">Familiar 2</div>
+              <div class="pf__field">
+                <label class="pf__label" for="fam2_nombre">Nombre</label>
+                <input
+                  type="text"
+                  id="fam2_nombre"
+                  v-model="formData.fam2_nombre"
+                  class="pf__input"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fam2_apellido">Apellido</label>
+                <input
+                  type="text"
+                  id="fam2_apellido"
+                  v-model="formData.fam2_apellido"
+                  class="pf__input"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fam2_vinculo">Vínculo con el Javer</label>
+                <input
+                  type="text"
+                  id="fam2_vinculo"
+                  v-model="formData.fam2_vinculo"
+                  class="pf__input"
+                  placeholder="Madre/Padre/Hermano"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fam2_celular">Celular</label>
+                <div class="pf__input-group">
+                  <select
+                    v-model="formData.fam2_celular_countryCode"
+                    class="pf__input pf__select pf__input-group-select"
+                    :disabled="isLoading || !canEditSection('familia')"
+                    :class="{ 'pf__input--disabled': isLoading || !canEditSection('familia') }"
+                  >
+                    <option
+                      v-for="country in COUNTRIES_CODES"
+                      :key="country.code"
+                      :value="country.code"
+                    >
+                      +{{ country.dial_code }} {{ country.emoji }}
+                    </option>
+                  </select>
+                  <input
+                    type="tel"
+                    id="fam2_celular"
+                    v-model="formData.fam2_celular"
+                    class="pf__input pf__input-group-main"
+                    placeholder="1155554444"
+                    :disabled="isLoading || !canEditSection('familia')"
+                    :class="{ 'pf__input--disabled': isLoading || !canEditSection('familia') }"
+                  />
                 </div>
+                <small class="pf__hint"
+                  >Seleccioná el país y luego ingresá el número sin código de país</small
+                >
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fam2_direccion">Dirección</label>
+                <input
+                  type="address"
+                  id="fam2_direccion"
+                  v-model="formData.fam2_direccion"
+                  class="pf__input"
+                  placeholder="Av. Corrientes 123..."
+                />
               </div>
             </div>
           </div>
 
           <!-- 8. Técnicos -->
-          <div v-if="canEditSection('tecnicos')" class="accordion-item">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#formTecnicos"
-              >
-                <i class="bi bi-gear me-2"></i> Técnicos
-                <span v-if="!canEditSection('tecnicos')" class="badge bg-secondary ms-auto"
-                  >Solo lectura</span
-                >
-              </button>
-            </h2>
-            <div
-              id="formTecnicos"
-              class="accordion-collapse collapse"
-              data-bs-parent="#formAccordion"
+          <div v-if="canEditSection('tecnicos')" class="pf__acc-item">
+            <button
+              type="button"
+              class="pf__acc-trigger"
+              @click="toggleSection('tecnicos')"
+              :class="{ open: openSections.tecnicos }"
             >
-              <div class="accordion-body">
-                <div class="mb-3">
-                  <label for="ID_JVR" class="form-label">ID JVR</label>
-                  <div class="input-group mb-3">
-                    <select
-                      id="ID_JVR"
-                      v-model="formData.organizacion"
-                      class="form-select w-25"
-                      disabled="true"
-                    >
-                      <option value="JVR"></option>
-                      <option v-for="org in organizaciones" :key="org" :value="org">
-                        {{ org }}
-                      </option>
-                    </select>
-                    <span class="input-group-text">@</span>
-                    <input
-                      v-model="formData.DNI"
-                      type="number"
-                      class="form-control w-50"
-                      placeholder="DNI"
-                      min="1000000"
-                      max="99999999"
-                      aria-label="DNI"
-                      disabled="true"
-                    />
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <label for="telegram_id" class="form-label">Telegram ID</label>
-                  <input
-                    type="number"
-                    id="telegram_id"
-                    v-model="formData.telegram_id"
-                    class="form-control"
-                    min="1000000"
-                    max="99999999999"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="it_level" class="form-label">Nivel IT App</label>
-                  <select id="it_level" class="form-select" disabled="true">
-                    <option value=""></option>
+              <span class="pf__acc-left">
+                <span class="pf__acc-icon pf__acc-icon--gray"><i class="bi bi-gear"></i></span>
+                Técnicos
+              </span>
+              <i
+                class="bi bi-chevron-down pf__chevron"
+                :class="{ rotated: openSections.tecnicos }"
+              ></i>
+            </button>
+            <div class="pf__acc-body" v-show="openSections.tecnicos">
+              <div class="pf__field">
+                <label class="pf__label" for="ID_JVR">ID JVR</label>
+                <div class="pf__input-group">
+                  <select
+                    id="ID_JVR"
+                    v-model="formData.organizacion"
+                    class="pf__input pf__select pf__input-group-select pf__input--disabled"
+                    disabled="true"
+                  >
+                    <option value="JVR"></option>
+                    <option v-for="org in organizaciones" :key="org" :value="org">{{ org }}</option>
                   </select>
-                </div>
-                <div class="mb-3">
-                  <label for="fecha_ult" class="form-label">Fecha de última modificación</label>
+                  <span class="pf__input-group-sep">@</span>
                   <input
-                    type="datetime-local"
-                    class="form-control"
-                    id="fecha_ult"
-                    v-model="formData.fecha_ult"
-                    disabled
+                    v-model="formData.DNI"
+                    type="number"
+                    class="pf__input pf__input-group-main pf__input--disabled"
+                    placeholder="DNI"
+                    min="1000000"
+                    max="99999999"
+                    disabled="true"
                   />
                 </div>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="telegram_id">Telegram ID</label>
+                <input
+                  type="number"
+                  id="telegram_id"
+                  v-model="formData.telegram_id"
+                  class="pf__input"
+                  min="1000000"
+                  max="99999999999"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="it_level">Nivel IT App</label>
+                <select
+                  id="it_level"
+                  class="pf__input pf__select pf__input--disabled"
+                  disabled="true"
+                >
+                  <option value=""></option>
+                </select>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="fecha_ult">Última modificación</label>
+                <input
+                  type="datetime-local"
+                  class="pf__input pf__input--disabled"
+                  id="fecha_ult"
+                  v-model="formData.fecha_ult"
+                  disabled
+                />
               </div>
             </div>
           </div>
         </div>
 
         <!-- Mensajes -->
-        <div v-if="successMessage" class="alert alert-success alert-dismissible fade show">
-          {{ successMessage }}
-          <button type="button" class="btn-close" @click="successMessage = ''"></button>
+        <div v-if="successMessage" class="pf__message pf__message--success">
+          <i class="bi bi-check-circle"></i> {{ successMessage }}
+          <button type="button" class="pf__message-close" @click="successMessage = ''">
+            <i class="bi bi-x"></i>
+          </button>
         </div>
-        <div v-if="errorMessage" class="alert alert-danger alert-dismissible fade show">
-          {{ errorMessage }}
-          <button type="button" class="btn-close" @click="errorMessage = ''"></button>
+        <div v-if="errorMessage" class="pf__message pf__message--error">
+          <i class="bi bi-exclamation-circle"></i> {{ errorMessage }}
+          <button type="button" class="pf__message-close" @click="errorMessage = ''">
+            <i class="bi bi-x"></i>
+          </button>
         </div>
 
-        <!-- Botones -->
-        <div class="d-grid gap-2 mt-4">
-          <button type="submit" class="btn btn-primary" :disabled="isLoading || !canEditAny">
-            <span v-if="!isLoading"><i class="bi bi-check-circle me-2"></i>Actualizar Datos</span>
-            <span v-else>
-              <span class="spinner-border spinner-border-sm me-2"></span>Guardando...
+        <!-- Botones de acción -->
+        <div class="pf__actions">
+          <button type="submit" class="pf__submit-btn" :disabled="isLoading || !canEditAny">
+            <span v-if="!isLoading"><i class="bi bi-check-circle"></i> Actualizar Datos</span>
+            <span v-else class="pf__loading-text">
+              <span class="pf__spinner-sm"></span> Guardando...
             </span>
           </button>
-          <button
-            type="button"
-            class="btn btn-outline-secondary"
-            @click="close"
-            :disabled="isLoading || !canEditAny"
-          >
+          <button type="button" class="pf__cancel-btn" @click="close" :disabled="isLoading">
             Cancelar
           </button>
         </div>
@@ -1160,32 +1160,28 @@
     </div>
   </div>
 
-  <!-- Backdrop -->
-  <!-- Image preview modal -->
-  <div v-if="showImageModal" class="modal-backdrop d-block" @click.self="showImageModal = false">
-    <div class="modal d-block" tabindex="-1" style="background: transparent">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Imagen</h5>
-            <button type="button" class="btn-close" @click="showImageModal = false"></button>
-          </div>
-          <div class="modal-body text-center">
-            <img
-              src="https://picsum.photos/200/300"
-              alt="Imagen estudio"
-              style="max-width: 100%; max-height: 70vh"
-            />
-          </div>
-        </div>
+  <!-- Modal imagen -->
+  <div v-if="showImageModal" class="pf-modal-backdrop" @click.self="showImageModal = false">
+    <div class="pf-modal">
+      <div class="pf-modal__header">
+        <h5>Imagen</h5>
+        <button class="pf__close" @click="showImageModal = false">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="pf-modal__body">
+        <img
+          src="https://picsum.photos/200/300"
+          alt="Imagen estudio"
+          style="max-width: 100%; max-height: 70vh; border-radius: 8px"
+        />
       </div>
     </div>
   </div>
-  <div v-if="isOpen" class="offcanvas-backdrop fade show" @click="close"></div>
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, reactive } from 'vue'
 import { update, getAll } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import { usePermissions } from '@/composables/usePermissions'
@@ -1242,14 +1238,29 @@ const isLoading = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 const offcanvasId = `profileForm-${Math.random().toString(36).slice(2, 9)}`
-const hasSaved = ref(false) // Para evitar múltiples fetches
+const hasSaved = ref(false)
+
+// Acordeones
+const openSections = reactive({
+  personal: true,
+  contacto: false,
+  domicilio: false,
+  medicos: false,
+  organizacion: false,
+  desarrollo: false,
+  familia: false,
+  tecnicos: false,
+})
+
+const toggleSection = (section) => {
+  openSections[section] = !openSections[section]
+}
 
 // Datos de mjlkt
 const mjlktData = ref([])
 const areasRefDisponibles = computed(() => {
   const org = formData.value.organizacion
   if (!org) return []
-  // Obtener areas_ref únicas para la organización
   return [
     ...new Set(mjlktData.value.filter((item) => item.org === org).map((item) => item.area)),
   ].sort()
@@ -1258,7 +1269,6 @@ const rolesDisponibles = computed(() => {
   const org = formData.value.organizacion
   const areasRef = formData.value.areas_ref
   if (!org || !Array.isArray(areasRef) || areasRef.length === 0) return []
-  // Obtener roles que coincidan con org y CUALQUIERA de las areas_ref seleccionadas
   return [
     ...new Set(
       mjlktData.value
@@ -1285,7 +1295,6 @@ const canEditAny = computed(() => {
 
 // Formulario
 const formData = ref({
-  // Información Personal
   DNI: null,
   dni: null,
   CUIL: '',
@@ -1293,17 +1302,14 @@ const formData = ref({
   apellido: '',
   nacimiento: '',
   genero: '',
-  // Contacto
   celular: '',
-  celular_countryCode: 'AR', // País del celular
+  celular_countryCode: 'AR',
   mail_personal: '',
   mail_operativo: '',
-  // Domicilio
   direccion1: '',
   barrio1: '',
   direccion2: '',
   barrio2: '',
-  // Médicos
   obraSocial: '',
   obraSocial_Plan: '',
   obraSocial_id: '',
@@ -1324,7 +1330,6 @@ const formData = ref({
   med_estudios_fecha: '',
   med_estudios_img: '',
   med_estudios_otro: '',
-  // Organización
   organizacion: '',
   areas_ref: [],
   areas: [],
@@ -1341,7 +1346,6 @@ const formData = ref({
   curso_AvKM: '',
   curso_IE: '',
   curso_FND: '',
-  // Vida y Desarrollo
   estudios_grado: '',
   estudios_area: '',
   estudios_carrera: '',
@@ -1354,22 +1358,20 @@ const formData = ref({
   fam1_apellido: '',
   fam1_vinculo: '',
   fam1_celular: '',
-  fam1_celular_countryCode: 'AR', // País del celular familiar 1
+  fam1_celular_countryCode: 'AR',
   fam1_direccion: '',
   fam2_nombre: '',
   fam2_apellido: '',
   fam2_vinculo: '',
   fam2_celular: '',
-  fam2_celular_countryCode: 'AR', // País del celular familiar 2
+  fam2_celular_countryCode: 'AR',
   fam2_direccion: '',
-  // Técnicos
   ID_JVR: '',
   telegram_id: '',
   it_level: '',
   fecha_ult: '',
 })
 
-// Estudios (checkboxes) — se sincronizan con `formData.med_estudios` como lista separada por comas
 const estudiosOptions = [
   'Laboratorio completo',
   'Ergometría de 12 deriv.',
@@ -1378,11 +1380,8 @@ const estudiosOptions = [
   'Ecoestress o Perfusión Miocárdica',
 ]
 const selectedEstudios = ref([])
-
-// Modal para ver imagen
 const showImageModal = ref(false)
 
-// Mantener el string actualizado en formData
 watch(selectedEstudios, (newVal) => {
   formData.value.med_estudios = newVal.join(', ')
 })
@@ -1391,24 +1390,17 @@ watch(
   () => props.profileData,
   (newData) => {
     try {
-      if (hasSaved.value) return // Para evitar sobreescribir después de guardar
+      if (hasSaved.value) return
       if (newData && Object.keys(newData).length > 0) {
-        // Función auxiliar para normalizar fechas
         const normalizeFecha = (fecha) => {
           if (!fecha) return ''
-          // Si ya es ISO format (YYYY-MM-DD), retornar como está
-          if (/^\d{4}-\d{2}-\d{2}/.test(fecha)) {
-            return fecha.split('T')[0]
-          }
-          // Si es dd/mm/yyyy, convertir a YYYY-MM-DD
+          if (/^\d{4}-\d{2}-\d{2}/.test(fecha)) return fecha.split('T')[0]
           if (/^\d{2}\/\d{2}\/\d{4}/.test(fecha)) {
             const parts = fecha.split('/')
             return `${parts[2]}-${parts[1]}-${parts[0]}`
           }
           return fecha
         }
-
-        // Convertir áreas a array de forma segura
         const parseAreas = (areasData) => {
           if (Array.isArray(areasData)) return areasData
           if (typeof areasData === 'string' && areasData.trim()) {
@@ -1419,9 +1411,7 @@ watch(
           }
           return []
         }
-
         formData.value = {
-          // Información Personal
           DNI: newData.DNI || newData.dni,
           dni: newData.dni || newData.DNI,
           CUIL: newData.CUIL || '',
@@ -1429,22 +1419,17 @@ watch(
           apellido: newData.apellido || '',
           nacimiento: normalizeFecha(newData.nacimiento),
           genero: newData.genero || '',
-          // Contacto
           celular: (() => {
             const extracted = extractLocalNumber(newData.celular)
-            //console.log('CELULAR FROM DB:', newData.celular)
-            //console.log('EXTRACTED LOCAL:', extracted)
             return extracted || ''
           })(),
           celular_countryCode: extractCountryCode(newData.celular) || 'AR',
           mail_personal: newData.mail_personal || '',
           mail_operativo: newData.mail_operativo || '',
-          // Domicilio
           direccion1: newData.direccion1 || '',
           barrio1: newData.barrio1 || '',
           direccion2: newData.direccion2 || '',
           barrio2: newData.barrio2 || '',
-          // Médicos
           obraSocial: newData.obraSocial || '',
           obraSocial_Plan: newData.obraSocial_Plan || '',
           obraSocial_id: newData.obraSocial_id || '',
@@ -1466,7 +1451,6 @@ watch(
           med_aclararimg: newData.med_aclararimg || '',
           med_estudios_img: newData.med_estudios_img || '',
           med_estudios_otro: newData.med_estudios_otro || '',
-          // Organización
           organizacion: newData.organizacion || '',
           areas_ref: parseAreas(newData.areas_ref),
           areas: parseAreas(newData.areas),
@@ -1483,7 +1467,6 @@ watch(
           curso_AvKM: newData.curso_AvKM || '',
           curso_IE: newData.curso_IE || '',
           curso_FND: newData.curso_FND || '',
-          // Vida y Desarrollo
           estudios_grado: newData.estudios_grado || '',
           estudios_area: newData.estudios_area || '',
           estudios_carrera: capitalizarEsp(newData.estudios_carrera) || '',
@@ -1492,7 +1475,6 @@ watch(
           trabajo_puesto: newData.trabajo_puesto || '',
           trabajo_barrio: newData.trabajo_barrio || '',
           comunidad_rol: newData.comunidad_rol || '',
-          // Familia
           fam1_nombre: newData.fam1_nombre || '',
           fam1_apellido: newData.fam1_apellido || '',
           fam1_vinculo: newData.fam1_vinculo || '',
@@ -1505,14 +1487,10 @@ watch(
           fam2_celular: extractLocalNumber(newData.fam2_celular) || '',
           fam2_celular_countryCode: extractCountryCode(newData.fam2_celular) || 'AR',
           fam2_direccion: newData.fam2_direccion || '',
-          // Técnicos
           ID_JVR: newData.DNI ? `${newData.organizacion || 'JVR'}@${newData.DNI}` : '',
           telegram_id: newData.telegram_id || '',
-          // Última modificación: convertimos a ISO compatible datetime-local.
-          // si viene sólo como fecha la función util añadirá T00:00
           fecha_ult: parseFechaEnteraToISO(newData.fecha_ult) || '',
         }
-        // Inicializar checkboxes de estudios desde el string (si viene como "item1, item2")
         selectedEstudios.value = formData.value.med_estudios
           ? String(formData.value.med_estudios)
               .split(',')
@@ -1527,7 +1505,6 @@ watch(
   { deep: true, immediate: true },
 )
 
-// Métodos
 const loadMjlktData = async () => {
   try {
     const response = await getAll('mjlkt')
@@ -1545,9 +1522,8 @@ const getNowFormatted = () => {
     .map((p) => p.padStart(2, '0'))
     .join('/')
   const timePart = now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
-
   return {
-    display: `${datePart} ${timePart}`, // dd/mm/yyyy hh:mm
+    display: `${datePart} ${timePart}`,
     iso: new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16),
   }
 }
@@ -1555,10 +1531,6 @@ const getNowFormatted = () => {
 const open = async () => {
   hasSaved.value = false
   isOpen.value = true
-
-  // si el campo ya tenía sólo la fecha (p.e. 2024-02-02) ahora lo normalizamos a
-  // un formato aceptable para `<input type="datetime-local"` agregando
-  // hora cero. Si está vacío inicializamos con fecha/hora actual.
   if (formData.value.fecha_ult) {
     if (!formData.value.fecha_ult.includes('T')) {
       formData.value.fecha_ult = `${formData.value.fecha_ult}T00:00`
@@ -1566,7 +1538,6 @@ const open = async () => {
   } else {
     formData.value.fecha_ult = getNowFormatted().iso
   }
-
   if (mjlktData.value.length === 0) {
     await loadMjlktData()
   }
@@ -1579,28 +1550,12 @@ const close = () => {
 }
 
 const normalizePhoneNumber = (phoneNumber, countryCode) => {
-  // Convertir a string si no lo es, manejando arrays y otros tipos
-  if (!phoneNumber) {
-    return ''
-  }
-
+  if (!phoneNumber) return ''
   let phoneStr = phoneNumber
-
-  // Si es array, tomar el primer elemento
-  if (Array.isArray(phoneNumber)) {
-    phoneStr = phoneNumber[0] || ''
-  }
-
-  // Convertir a string si es outro tipo (como número)
-  if (typeof phoneStr !== 'string') {
-    phoneStr = String(phoneStr)
-  }
-
+  if (Array.isArray(phoneNumber)) phoneStr = phoneNumber[0] || ''
+  if (typeof phoneStr !== 'string') phoneStr = String(phoneStr)
   const trimmed = phoneStr.trim()
-  if (!trimmed) {
-    return ''
-  }
-
+  if (!trimmed) return ''
   try {
     const formatted = formatPhoneNumber(trimmed, countryCode)
     return formatted || ''
@@ -1614,53 +1569,39 @@ const handleSubmit = async () => {
   try {
     errorMessage.value = ''
     successMessage.value = ''
-
     if (!formData.value.nombre || !formData.value.apellido) {
-      errorMessage.value = 'Por favor completa nombre y apellido'
+      errorMessage.value = 'Por favor completá nombre y apellido'
       return
     }
-
-    // Validar números telefónicos
     if (formData.value.celular && !formData.value.celular_countryCode) {
-      errorMessage.value = 'Por favor selecciona un país para el celular'
+      errorMessage.value = 'Por favor seleccioná un país para el celular'
       return
     }
-
     if (formData.value.fam1_celular && !formData.value.fam1_celular_countryCode) {
-      errorMessage.value = 'Por favor selecciona un país para el celular del familiar 1'
+      errorMessage.value = 'Por favor seleccioná un país para el celular del familiar 1'
       return
     }
-
     if (formData.value.fam2_celular && !formData.value.fam2_celular_countryCode) {
-      errorMessage.value = 'Por favor selecciona un país para el celular del familiar 2'
+      errorMessage.value = 'Por favor seleccioná un país para el celular del familiar 2'
       return
     }
-
     isLoading.value = true
-
-    // forzamos la fecha de última modificación a ahora; no importan los cambios
     formData.value.fecha_ult = getNowFormatted().iso
-
-    // Actualizar en main con TODOS los campos
     console.log(formData.value.areas)
     const mainData = {
-      // Información Personal
       DNI: formData.value.DNI,
       CUIL: formData.value.CUIL,
       nombre: capitalizarEsp(formData.value.nombre),
       apellido: capitalizarEsp(formData.value.apellido),
       nacimiento: parseFechaToISO(formData.value.nacimiento),
       genero: formData.value.genero,
-      // Contacto
       celular: normalizePhoneNumber(formData.value.celular, formData.value.celular_countryCode),
       mail_personal: formData.value.mail_personal,
       mail_operativo: formData.value.mail_operativo,
-      // Domicilio
       direccion1: capitalizarEsp(formData.value.direccion1),
       barrio1: capitalizarEsp(formData.value.barrio1),
       direccion2: capitalizarEsp(formData.value.direccion2),
       barrio2: capitalizarEsp(formData.value.barrio2),
-      // Médicos
       obraSocial: formData.value.obraSocial,
       obraSocial_Plan: formData.value.obraSocial_Plan,
       obraSocial_id: formData.value.obraSocial_id,
@@ -1681,7 +1622,6 @@ const handleSubmit = async () => {
       med_estudios_fecha: parseFechaToISO(formData.value.med_estudios_fecha),
       med_estudios_img: formData.value.med_estudios_img,
       med_estudios_otro: formData.value.med_estudios_otro,
-      // Organización
       organizacion: formData.value.organizacion,
       areas_ref: Array.isArray(formData.value.areas_ref)
         ? formData.value.areas_ref.join(', ')
@@ -1702,7 +1642,6 @@ const handleSubmit = async () => {
       curso_AvKM: formData.value.curso_AvKM,
       curso_IE: formData.value.curso_IE,
       curso_FND: formData.value.curso_FND,
-      // Vida y Desarrollo
       estudios_grado: formData.value.estudios_grado,
       estudios_area: formData.value.estudios_area,
       estudios_carrera: capitalizarEsp(formData.value.estudios_carrera),
@@ -1711,7 +1650,6 @@ const handleSubmit = async () => {
       trabajo_puesto: capitalizarEsp(formData.value.trabajo_puesto),
       trabajo_barrio: capitalizarEsp(formData.value.trabajo_barrio),
       comunidad_rol: formData.value.comunidad_rol,
-      // Familia
       fam1_nombre: capitalizarEsp(formData.value.fam1_nombre),
       fam1_apellido: capitalizarEsp(formData.value.fam1_apellido),
       fam1_vinculo: formData.value.fam1_vinculo,
@@ -1732,10 +1670,7 @@ const handleSubmit = async () => {
       telegram_id: formData.value.telegram_id,
       fecha_ult: parseFechaEnteraToISO(formData.value.fecha_ult),
     }
-
     await update('main', mainData)
-
-    // Actualizar en users (campos limitados)
     try {
       await update('users', {
         dni: formData.value.dni,
@@ -1745,9 +1680,8 @@ const handleSubmit = async () => {
     } catch (err) {
       console.log('No se actualizó en users (puede no existir)')
     }
-
     hasSaved.value = true
-    successMessage.value = '✅ Datos actualizados correctamente'
+    successMessage.value = 'Datos actualizados correctamente'
     emit('update', {
       ...formData.value,
       areas: Array.isArray(formData.value.areas)
@@ -1757,7 +1691,6 @@ const handleSubmit = async () => {
         ? formData.value.areas_ref.join(', ')
         : formData.value.areas_ref,
     })
-
     setTimeout(() => {
       close()
     }, 1500)
@@ -1769,51 +1702,558 @@ const handleSubmit = async () => {
   }
 }
 
-// Exponer métodos
-defineExpose({
-  open,
-  close,
-})
+defineExpose({ open, close })
 </script>
 
 <style scoped>
-.offcanvas {
-  background-color: #f8f9fa;
-}
+/* ── Variables ── */
+.pf {
+  --pf-bg: #ffffff;
+  --pf-header-bg: #1a1d2e;
+  --pf-border: #e5e9f2;
+  --pf-text: #1a1d2e;
+  --pf-text-muted: #6b7280;
+  --pf-accent: #4361ee;
+  --pf-radius: 10px;
+  --pf-width: 420px;
 
-.offcanvas.show {
-  transform: translateX(0);
-  visibility: visible;
-}
-
-.offcanvas-backdrop {
   position: fixed;
   top: 0;
-  left: 0;
-  z-index: 1040;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
+  right: 0;
+  width: var(--pf-width);
+  height: 100dvh;
+  background: var(--pf-bg);
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', system-ui, sans-serif;
 }
 
-.offcanvas-header {
-  border-bottom: 1px solid #dee2e6;
+.pf--open {
+  transform: translateX(0);
 }
 
-.offcanvas-title {
+/* Backdrop */
+.pf-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 1049;
+}
+
+/* ── Header ── */
+.pf__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  background: var(--pf-header-bg);
+  color: white;
+  flex-shrink: 0;
+}
+
+.pf__header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pf__header-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+
+.pf__header-title {
+  font-size: 0.95rem;
   font-weight: 600;
-  color: #0d6efd;
+  margin: 0;
+  color: white;
 }
 
-@media (max-width: 768px) {
-  .offcanvas-end {
-    width: 100% !important;
+.pf__close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  padding: 0.2rem;
+  font-size: 0.85rem;
+  transition: color 0.15s;
+  line-height: 1;
+}
+
+.pf__close:hover {
+  color: white;
+}
+
+/* ── Body / Scroll ── */
+.pf__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ── Accordion ── */
+.pf__accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.pf__acc-item {
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  overflow: hidden;
+}
+
+.pf__acc-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--pf-text);
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.pf__acc-trigger:hover {
+  background: #eef2ff;
+}
+.pf__acc-trigger.open {
+  border-bottom: 1px solid var(--pf-border);
+  background: #eef2ff;
+}
+
+.pf__acc-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  overflow: hidden;
+}
+
+.pf__acc-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+}
+
+.pf__acc-icon--blue {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.pf__acc-icon--green {
+  background: #dcfce7;
+  color: #166534;
+}
+.pf__acc-icon--orange {
+  background: #ffedd5;
+  color: #9a3412;
+}
+.pf__acc-icon--red {
+  background: #fee2e2;
+  color: #991b1b;
+}
+.pf__acc-icon--purple {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+.pf__acc-icon--teal {
+  background: #ccfbf1;
+  color: #0f766e;
+}
+.pf__acc-icon--amber {
+  background: #fef9c3;
+  color: #854d0e;
+}
+.pf__acc-icon--gray {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.pf__readonly-tag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.1rem 0.45rem;
+  border-radius: 5px;
+  background: #f1f5f9;
+  color: var(--pf-text-muted);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.pf__chevron {
+  color: var(--pf-text-muted);
+  font-size: 0.72rem;
+  transition: transform 0.25s;
+  flex-shrink: 0;
+}
+
+.pf__chevron.rotated {
+  transform: rotate(180deg);
+}
+
+.pf__acc-body {
+  padding: 0.85rem 1rem;
+  background: white;
+}
+
+/* ── Fields ── */
+.pf__field {
+  margin-bottom: 0.85rem;
+}
+
+.pf__field:last-child {
+  margin-bottom: 0;
+}
+
+.pf__field--checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pf__label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--pf-text-muted);
+  margin-bottom: 0.3rem;
+}
+
+.pf__field--checkbox .pf__label {
+  margin-bottom: 0;
+}
+
+.pf__input {
+  width: 100%;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 7px;
+  font-size: 0.875rem;
+  color: var(--pf-text);
+  background: white;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.pf__input:focus {
+  outline: none;
+  border-color: var(--pf-accent);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.pf__input--disabled {
+  background: #f8fafc;
+  color: var(--pf-text-muted);
+  cursor: not-allowed;
+}
+
+.pf__select {
+  appearance: auto;
+}
+
+.pf__select--multi {
+  height: auto;
+}
+
+.pf__textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.pf__toggle {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--pf-accent);
+  cursor: pointer;
+}
+
+.pf__hint {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.72rem;
+  color: var(--pf-text-muted);
+}
+
+/* Input group */
+.pf__input-group {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.pf__input-group-select {
+  max-width: 130px;
+  flex-shrink: 0;
+}
+
+.pf__input-group-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.pf__input-group-sep {
+  display: flex;
+  align-items: center;
+  padding: 0 0.4rem;
+  font-size: 0.875rem;
+  color: var(--pf-text-muted);
+  background: #f8fafc;
+  border: 1px solid var(--pf-border);
+  border-radius: 7px;
+}
+
+/* Checkboxes */
+.pf__checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.pf__checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.pf__checkbox {
+  accent-color: var(--pf-accent);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+/* Image preview btn */
+.pf__img-preview-btn {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 7px;
+  background: #f8fafc;
+  color: var(--pf-text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.15s;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.pf__img-preview-btn:hover {
+  background: #eef2ff;
+  color: var(--pf-accent);
+}
+
+/* Subsection label */
+.pf__subsection {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--pf-accent);
+  margin: 1rem 0 0.6rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--pf-border);
+}
+
+/* ── Mensajes ── */
+.pf__message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  margin-bottom: 0.75rem;
+}
+
+.pf__message--success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.pf__message--error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.pf__message-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  font-size: 0.85rem;
+  padding: 0;
+}
+
+.pf__message-close:hover {
+  opacity: 1;
+}
+
+/* ── Botones ── */
+.pf__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.pf__submit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1rem;
+  border-radius: 9px;
+  background: var(--pf-accent);
+  color: white;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pf__submit-btn:hover:not(:disabled) {
+  background: #2d4fd4;
+}
+.pf__submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pf__cancel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--pf-text-muted);
+  border: 1px solid var(--pf-border);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.pf__cancel-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  color: var(--pf-text);
+}
+
+.pf__cancel-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pf__loading-text {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pf__spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 
-@media (min-width: 769px) {
-  .offcanvas-end {
-    width: 400px !important;
+/* ── Modal imagen ── */
+.pf-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1060;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.pf-modal {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 480px;
+  width: 100%;
+}
+
+.pf-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--pf-border);
+}
+
+.pf-modal__header h5 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.pf-modal__header .pf__close {
+  color: var(--pf-text-muted);
+}
+.pf-modal__header .pf__close:hover {
+  color: var(--pf-text);
+}
+
+.pf-modal__body {
+  padding: 1.25rem;
+  text-align: center;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .pf {
+    --pf-width: 100vw;
   }
 }
 </style>
