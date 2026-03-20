@@ -5,7 +5,7 @@
       <div class="auth-deco__inner">
         <div class="auth-deco__logo">✦</div>
         <h2 class="auth-deco__headline">Javerim Baires</h2>
-        <p class="auth-deco__sub">Creá tu cuenta y formá parte<br />de la comunidad.</p>
+        <p class="auth-deco__sub">Creá tu cuenta y podrás<br />acceder al sistema.</p>
         <div class="auth-deco__dots"><span></span><span></span><span></span></div>
       </div>
     </div>

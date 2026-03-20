@@ -5,7 +5,7 @@
       <div class="auth-deco__inner">
         <div class="auth-deco__logo">✦</div>
         <h2 class="auth-deco__headline">Javerim Baires</h2>
-        <p class="auth-deco__sub">El espacio de tu comunidad,<br />siempre a mano.</p>
+        <!--<p class="auth-deco__sub">El espacio de tu comunidad,<br />siempre a mano.</p>-->
         <div class="auth-deco__dots"><span></span><span></span><span></span></div>
       </div>
     </div>

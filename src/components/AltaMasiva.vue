@@ -1,34 +1,35 @@
 <template>
-  <div>
-    <!-- Mensajes globales -->
-    <div v-if="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
-      <i class="bi bi-check-circle me-2"></i>{{ successMessage }}
-      <button type="button" class="btn-close" @click="successMessage = ''"></button>
+  <div class="am">
+    <!-- Alertas globales -->
+    <div v-if="successMessage" class="jv-alert jv-alert--success am-alert">
+      <i class="bi bi-check-circle"></i> {{ successMessage }}
+      <button class="jv-alert__close" @click="successMessage = ''">
+        <i class="bi bi-x-lg"></i>
+      </button>
     </div>
-    <div v-if="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
-      <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
-      <button type="button" class="btn-close" @click="errorMessage = ''"></button>
+    <div v-if="errorMessage" class="jv-alert jv-alert--danger am-alert">
+      <i class="bi bi-exclamation-circle"></i> {{ errorMessage }}
+      <button class="jv-alert__close" @click="errorMessage = ''"><i class="bi bi-x-lg"></i></button>
     </div>
 
-    <!-- PASO 1: Zona de carga -->
+    <!-- ── PASO 1: Carga de archivo ── -->
     <div v-if="step === 1">
-      <!-- Descarga de plantilla -->
-      <div class="d-flex justify-content-end mb-3">
-        <button class="btn btn-outline-secondary btn-sm">
-          <a
-            href="https://docs.google.com/spreadsheets/d/1lIDendDqH6KhctatcfFfZrsMCIIbHw9_gNmKap_hlJE/template/preview"
-            target="_blank"
-            class="text-reset text-decoration-none"
-          >
-            <i class="bi bi-download me-1"></i>Utilizar plantilla
-          </a>
-        </button>
+      <!-- Plantilla -->
+      <div class="am-template-row">
+        <span class="am-step-label"><i class="bi bi-upload"></i> Subí tu archivo</span>
+        <a
+          href="https://docs.google.com/spreadsheets/d/1lIDendDqH6KhctatcfFfZrsMCIIbHw9_gNmKap_hlJE/template/preview"
+          target="_blank"
+          class="jv-btn jv-btn--ghost jv-btn--sm"
+        >
+          <i class="bi bi-table"></i> Usar plantilla
+        </a>
       </div>
 
       <!-- Dropzone -->
       <div
-        class="dropzone"
-        :class="{ 'dropzone--over': isDragging, 'dropzone--error': parseError }"
+        class="am-dropzone"
+        :class="{ 'am-dropzone--over': isDragging, 'am-dropzone--error': parseError }"
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
         @drop.prevent="onDrop"
@@ -38,167 +39,165 @@
           ref="fileInput"
           type="file"
           accept=".csv,.xlsx,.xls"
-          class="d-none"
+          style="display: none"
           @change="onFileChange"
         />
-        <div class="dropzone__content">
-          <i class="bi bi-cloud-upload dropzone__icon"></i>
-          <p class="dropzone__title">
-            Arrastrá tu archivo acá o <span class="dropzone__link">hacé clic para elegir</span>
+        <div class="am-dropzone__body">
+          <i class="bi bi-cloud-upload am-dropzone__icon"></i>
+          <p class="am-dropzone__title">
+            Arrastrá tu archivo acá o <span class="am-dropzone__link">hacé clic para elegir</span>
           </p>
-          <p class="dropzone__subtitle">CSV, Excel (.xlsx, .xls) — máx. 5 MB</p>
-          <p v-if="parseError" class="text-danger mt-2 mb-0">
-            <i class="bi bi-exclamation-circle me-1"></i>{{ parseError }}
+          <p class="am-dropzone__sub">CSV, Excel (.xlsx, .xls) — máx. 5 MB</p>
+          <p v-if="parseError" class="am-dropzone__error">
+            <i class="bi bi-exclamation-circle"></i> {{ parseError }}
           </p>
         </div>
       </div>
 
-      <!-- Columnas requeridas -->
-      <div class="columns-info mt-3">
-        <p class="columns-info__title">
-          <i class="bi bi-info-circle me-1"></i>Columnas reconocidas (el orden no importa):
+      <!-- Info de columnas -->
+      <div class="am-columns-info">
+        <p class="am-columns-info__title">
+          <i class="bi bi-info-circle"></i> Columnas reconocidas (el orden no importa):
         </p>
-        <div class="columns-info__tags">
+        <div class="am-columns-info__tags">
           <span
             v-for="col in COLUMN_MAP_DISPLAY"
             :key="col.key"
-            class="column-tag"
-            :class="col.required ? 'column-tag--required' : 'column-tag--optional'"
+            class="am-col-tag"
+            :class="col.required ? 'am-col-tag--required' : 'am-col-tag--optional'"
           >
-            {{ col.label }}<span v-if="col.required" class="ms-1 text-danger">*</span>
+            {{ col.label }}<span v-if="col.required" class="am-required">*</span>
           </span>
         </div>
       </div>
     </div>
 
-    <!-- PASO 2: Previsualización y validación -->
+    <!-- ── PASO 2: Previsualización ── -->
     <div v-if="step === 2">
-      <!-- Resumen de estado -->
-      <div class="preview-summary mb-3">
-        <div class="preview-summary__stat preview-summary__stat--total">
-          <i class="bi bi-people-fill me-1"></i>
-          <strong>{{ rows.length }}</strong> fila(s) detectadas
+      <!-- Resumen -->
+      <div class="am-summary">
+        <div class="am-summary__stat am-summary__stat--total">
+          <i class="bi bi-people-fill"></i>
+          <strong>{{ rows.length }}</strong> fila(s)
         </div>
-        <div class="preview-summary__stat preview-summary__stat--ok" v-if="validRows > 0">
-          <i class="bi bi-check-circle-fill me-1"></i>
+        <div v-if="validRows > 0" class="am-summary__stat am-summary__stat--ok">
+          <i class="bi bi-check-circle-fill"></i>
           <strong>{{ validRows }}</strong> válidas
         </div>
-        <div class="preview-summary__stat preview-summary__stat--error" v-if="invalidRows > 0">
-          <i class="bi bi-x-circle-fill me-1"></i>
+        <div v-if="invalidRows > 0" class="am-summary__stat am-summary__stat--error">
+          <i class="bi bi-x-circle-fill"></i>
           <strong>{{ invalidRows }}</strong> con errores
         </div>
       </div>
 
-      <!-- Tabla de previsualización -->
-      <div class="preview-table-wrapper">
-        <table class="preview-table">
+      <!-- Tabla editable -->
+      <div class="am-table-wrap">
+        <table class="am-table">
           <thead>
             <tr>
-              <th class="col-row">#</th>
+              <th class="am-th-num">#</th>
               <th
                 v-for="col in COLUMN_MAP_DISPLAY"
                 :key="col.key"
-                :class="col.required ? 'col-required' : ''"
+                :class="{ 'am-th-required': col.required }"
               >
-                {{ col.label }}<span v-if="col.required" class="text-danger ms-1">*</span>
+                {{ col.label }}<span v-if="col.required" class="am-required">*</span>
               </th>
-              <th class="col-status">Estado</th>
+              <th class="am-th-status">Estado</th>
             </tr>
           </thead>
           <tbody>
             <tr
               v-for="(row, idx) in rows"
               :key="idx"
-              :class="rowHasError(row) ? 'row--error' : 'row--ok'"
+              :class="rowHasError(row) ? 'am-tr--error' : 'am-tr--ok'"
             >
-              <td class="col-row text-muted">{{ idx + 1 }}</td>
+              <td class="am-td-num">{{ idx + 1 }}</td>
               <td
                 v-for="col in COLUMN_MAP_DISPLAY"
                 :key="col.key"
-                :class="{ 'cell--error': row._errors && row._errors[col.key] }"
+                :class="{ 'am-td--error': row._errors && row._errors[col.key] }"
               >
                 <input
-                  class="cell-input"
-                  :class="{ 'cell-input--error': row._errors && row._errors[col.key] }"
+                  class="am-cell-input"
+                  :class="{ 'am-cell-input--error': row._errors && row._errors[col.key] }"
                   v-model="row[col.key]"
                   :placeholder="col.label"
                   @input="revalidateRow(row, idx)"
                   @blur="revalidateRow(row, idx)"
                 />
-                <small v-if="row._errors && row._errors[col.key]" class="cell-error-msg">
+                <small v-if="row._errors && row._errors[col.key]" class="am-cell-error">
                   {{ row._errors[col.key] }}
                 </small>
               </td>
-              <td class="col-status">
-                <span v-if="!rowHasError(row)" class="badge bg-success">
+              <td class="am-td-status">
+                <span v-if="!rowHasError(row)" class="am-badge am-badge--ok">
                   <i class="bi bi-check-lg"></i> OK
                 </span>
-                <span v-else class="badge bg-danger"> <i class="bi bi-x-lg"></i> Error </span>
+                <span v-else class="am-badge am-badge--error">
+                  <i class="bi bi-x-lg"></i> Error
+                </span>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
+      <!-- Nota errores -->
+      <p v-if="invalidRows > 0" class="am-error-note">
+        <i class="bi bi-pencil-square"></i> Corregí los errores en la tabla antes de continuar.
+        Podés editar las celdas directamente.
+      </p>
+
       <!-- Acciones -->
-      <div class="d-flex gap-2 mt-4 flex-wrap">
-        <button class="btn btn-outline-secondary" @click="reset">
-          <i class="bi bi-arrow-left me-1"></i>Volver
+      <div class="am-step-actions">
+        <button class="jv-btn jv-btn--ghost" @click="reset">
+          <i class="bi bi-arrow-left"></i> Volver
         </button>
         <button
-          class="btn btn-primary ms-auto"
+          class="jv-btn jv-btn--primary"
           :disabled="invalidRows > 0 || isLoading"
           @click="handleBulkSubmit"
+          style="margin-left: auto"
         >
           <span v-if="!isLoading">
-            <i class="bi bi-people-fill me-2"></i>Dar de alta {{ validRows }} persona(s)
+            <i class="bi bi-people-fill"></i> Dar de alta {{ validRows }} persona(s)
           </span>
-          <span v-else>
-            <span
-              class="spinner-border spinner-border-sm me-2"
-              role="status"
-              aria-hidden="true"
-            ></span>
+          <span v-else class="am-loading">
+            <span class="jv-spinner jv-spinner--sm jv-spinner--white"></span>
             Registrando... ({{ uploadProgress }}/{{ rows.length }})
           </span>
         </button>
       </div>
-
-      <p v-if="invalidRows > 0" class="text-danger mt-2 mb-0 small">
-        <i class="bi bi-info-circle me-1"></i>Corregí los errores en la tabla antes de continuar.
-        Podés editar las celdas directamente.
-      </p>
     </div>
 
-    <!-- PASO 3: Resultado -->
-    <div v-if="step === 3">
-      <div class="result-panel">
-        <div v-if="uploadResults.success.length > 0" class="result-block result-block--success">
-          <i class="bi bi-check-circle-fill result-block__icon"></i>
-          <div>
-            <strong>{{ uploadResults.success.length }} personas dadas de alta correctamente</strong>
-            <ul class="result-list mt-1">
-              <li v-for="r in uploadResults.success" :key="r.DNI">
-                {{ r.nombre }} {{ r.apellido }} — DNI {{ r.DNI }}
-              </li>
-            </ul>
-          </div>
+    <!-- ── PASO 3: Resultado ── -->
+    <div v-if="step === 3" class="am-result">
+      <div v-if="uploadResults.success.length > 0" class="am-result-block am-result-block--success">
+        <i class="bi bi-check-circle-fill am-result-block__icon"></i>
+        <div>
+          <strong>{{ uploadResults.success.length }} persona(s) dadas de alta correctamente</strong>
+          <ul class="am-result-list">
+            <li v-for="r in uploadResults.success" :key="r.DNI">
+              {{ r.nombre }} {{ r.apellido }} — DNI {{ r.DNI }}
+            </li>
+          </ul>
         </div>
-        <div v-if="uploadResults.failed.length > 0" class="result-block result-block--error mt-3">
-          <i class="bi bi-x-circle-fill result-block__icon"></i>
-          <div>
-            <strong>{{ uploadResults.failed.length }} persona(s) no pudieron darse de alta</strong>
-            <ul class="result-list mt-1">
-              <li v-for="r in uploadResults.failed" :key="r.DNI">
-                {{ r.nombre }} {{ r.apellido }} — {{ r.reason }}
-              </li>
-            </ul>
-          </div>
-        </div>
-        <button class="btn btn-primary mt-4" @click="reset">
-          <i class="bi bi-arrow-clockwise me-2"></i>Cargar otro archivo
-        </button>
       </div>
+      <div v-if="uploadResults.failed.length > 0" class="am-result-block am-result-block--error">
+        <i class="bi bi-x-circle-fill am-result-block__icon"></i>
+        <div>
+          <strong>{{ uploadResults.failed.length }} persona(s) no pudieron darse de alta</strong>
+          <ul class="am-result-list">
+            <li v-for="r in uploadResults.failed" :key="r.DNI">
+              {{ r.nombre }} {{ r.apellido }} — {{ r.reason }}
+            </li>
+          </ul>
+        </div>
+      </div>
+      <button class="jv-btn jv-btn--primary" style="margin-top: 1.25rem" @click="reset">
+        <i class="bi bi-arrow-clockwise"></i> Cargar otro archivo
+      </button>
     </div>
   </div>
 </template>
@@ -207,9 +206,6 @@
 import { ref, computed } from 'vue'
 import * as api from '@/services/api'
 
-// ── Mapeado de columnas ──────────────────────────────────────────────────────
-// El parseo es por nombre de columna (case-insensitive, trim), NO por posición.
-// aliases: variaciones del nombre que el usuario puede poner en el CSV/Excel.
 const COLUMN_MAP = [
   { key: 'dni', aliases: ['dni'], required: true, label: 'DNI' },
   { key: 'nombre', aliases: ['nombre', 'name', 'first name'], required: true, label: 'Nombre' },
@@ -250,29 +246,24 @@ const COLUMN_MAP = [
 
 const COLUMN_MAP_DISPLAY = COLUMN_MAP
 
-// ── Estado ───────────────────────────────────────────────────────────────────
 const step = ref(1)
 const isDragging = ref(false)
 const parseError = ref('')
 const fileInput = ref(null)
-const rows = ref([]) // cada row es { dni, nombre, ..., _errors: {} }
+const rows = ref([])
 const isLoading = ref(false)
 const uploadProgress = ref(0)
 const successMessage = ref('')
 const errorMessage = ref('')
 const uploadResults = ref({ success: [], failed: [] })
 
-// ── Computed ─────────────────────────────────────────────────────────────────
 const validRows = computed(() => rows.value.filter((r) => !rowHasError(r)).length)
 const invalidRows = computed(() => rows.value.filter((r) => rowHasError(r)).length)
 
-// ── Utilidades de parseo ──────────────────────────────────────────────────────
-// Normaliza un header de columna para comparación
 function normalizeHeader(h) {
   return h.toString().toLowerCase().trim().replace(/\s+/g, ' ')
 }
 
-// Dado un header crudo, devuelve el key interno o null
 function resolveKey(rawHeader) {
   const normalized = normalizeHeader(rawHeader)
   for (const col of COLUMN_MAP) {
@@ -281,11 +272,10 @@ function resolveKey(rawHeader) {
   return null
 }
 
-// Convierte un array de arrays (rows) a array de objetos usando la primera fila como headers
 function arraysToObjects(data) {
   if (data.length < 2) return []
   const headers = data[0]
-  const keyMap = headers.map((h) => resolveKey(h)) // posición → key interno
+  const keyMap = headers.map((h) => resolveKey(h))
 
   return data
     .slice(1)
@@ -294,19 +284,16 @@ function arraysToObjects(data) {
       keyMap.forEach((key, i) => {
         if (key) obj[key] = rowArr[i] !== undefined ? String(rowArr[i]).trim() : ''
       })
-      // Rellenar keys faltantes con ''
       COLUMN_MAP.forEach((col) => {
         if (!(col.key in obj)) obj[col.key] = ''
       })
       return obj
     })
     .filter((row) => {
-      // Ignorar filas completamente vacías
       return COLUMN_MAP.some((col) => row[col.key] !== '')
     })
 }
 
-// ── Parseo CSV (sin dependencia externa) ─────────────────────────────────────
 function parseCSV(text) {
   const lines = text.split(/\r?\n/)
   return lines
@@ -331,10 +318,8 @@ function parseCSV(text) {
     })
 }
 
-// ── Parseo Excel usando SheetJS desde CDN ─────────────────────────────────────
 async function parseExcel(file) {
   return new Promise((resolve, reject) => {
-    // Cargamos SheetJS dinámicamente si no está disponible
     if (typeof window.XLSX === 'undefined') {
       const script = document.createElement('script')
       script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
@@ -364,13 +349,11 @@ function doParseExcel(file, resolve, reject) {
   reader.readAsArrayBuffer(file)
 }
 
-// ── Validación por fila ───────────────────────────────────────────────────────
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function validateRow(row, existingDNIs, batchDNIs) {
   const errors = {}
 
-  // DNI
   const dniStr = String(row.dni || '').trim()
   if (!dniStr) {
     errors.dni = 'Requerido'
@@ -382,16 +365,11 @@ function validateRow(row, existingDNIs, batchDNIs) {
     errors.dni = 'Duplicado en archivo'
   }
 
-  // Nombre
   if (!String(row.nombre || '').trim()) errors.nombre = 'Requerido'
-  // Apellido
   if (!String(row.apellido || '').trim()) errors.apellido = 'Requerido'
-  // Celular
   if (!String(row.celular || '').trim()) errors.celular = 'Requerido'
-  // Organización
   if (!String(row.organizacion || '').trim()) errors.organizacion = 'Requerida'
 
-  // Emails opcionales pero si tienen valor deben ser válidos
   const mo = String(row.mailOperativo || '').trim()
   if (mo && !EMAIL_REGEX.test(mo)) errors.mailOperativo = 'Email inválido'
   const mp = String(row.mailPersonal || '').trim()
@@ -404,7 +382,6 @@ function rowHasError(row) {
   return row._errors && Object.keys(row._errors).length > 0
 }
 
-// ── Proceso de carga de archivo ───────────────────────────────────────────────
 async function processFile(file) {
   parseError.value = ''
 
@@ -437,7 +414,6 @@ async function processFile(file) {
     return
   }
 
-  // Traer DNIs existentes en BD
   let existingDNIs = new Set()
   try {
     const res = await api.getAll('main')
@@ -446,7 +422,6 @@ async function processFile(file) {
     errorMessage.value = 'No se pudo conectar con la base de datos para verificar duplicados'
   }
 
-  // Detectar duplicados dentro del mismo archivo
   const seenDNIs = new Set()
   const batchDNIs = new Set()
   parsed.forEach((row) => {
@@ -457,7 +432,6 @@ async function processFile(file) {
     }
   })
 
-  // Validar cada fila
   rows.value = parsed.map((row) => ({
     ...row,
     _errors: validateRow(row, existingDNIs, batchDNIs),
@@ -467,7 +441,6 @@ async function processFile(file) {
 }
 
 function revalidateRow(row, _idx) {
-  // Para revalidar necesitamos los DNIs actuales del resto de filas
   const allDNIs = rows.value
     .filter((r) => r !== row)
     .map((r) => String(r.dni || '').trim())
@@ -480,13 +453,9 @@ function revalidateRow(row, _idx) {
     else seen.add(d)
   })
 
-  // Traemos existingDNIs de manera síncrona del store si ya lo cargamos,
-  // por simplicidad re-usamos el conjunto vacío: el error de BD se vuelve a
-  // mostrar solo al intentar hacer submit (o si el usuario no editó el DNI).
   row._errors = validateRow(row, new Set(), batchDNIs)
 }
 
-// ── Handlers de input ─────────────────────────────────────────────────────────
 function triggerFileInput() {
   fileInput.value?.click()
 }
@@ -502,7 +471,6 @@ function onDrop(e) {
   if (file) processFile(file)
 }
 
-// ── Submit masivo ─────────────────────────────────────────────────────────────
 async function handleBulkSubmit() {
   isLoading.value = true
   uploadProgress.value = 0
@@ -546,34 +514,6 @@ async function handleBulkSubmit() {
   step.value = 3
 }
 
-// ── Descarga de plantilla ─────────────────────────────────────────────────────
-/*
-function downloadTemplate() {
-  const headers = COLUMN_MAP.map((c) => c.aliases[0])
-  const example = [
-    '12345678',
-    'Juan',
-    'Pérez',
-    '1123456789',
-    'MiOrg',
-    'Juancho',
-    'juan@org.com',
-    'juan@gmail.com',
-    'Área A',
-    'Rol X',
-  ]
-  const csv = [headers.join(','), example.join(',')].join('\n')
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = 'plantilla_alta_masiva.csv'
-  a.click()
-  URL.revokeObjectURL(url)
-}
-*/
-
-// ── Reset ─────────────────────────────────────────────────────────────────────
 function reset() {
   step.value = 1
   rows.value = []
@@ -587,156 +527,252 @@ function reset() {
 </script>
 
 <style scoped>
-/* ── Dropzone ─────────────────────────────────────────────────── */
-.dropzone {
-  border: 2px dashed #ced4da;
-  border-radius: 10px;
+@import '@/assets/css/styles.css';
+
+.am {
+  font-family: var(--jv-font);
+}
+
+.am-alert {
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+/* ── Template row ── */
+.am-template-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.am-step-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--jv-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ── Dropzone ── */
+.am-dropzone {
+  border: 2px dashed var(--jv-border);
+  border-radius: var(--jv-radius);
   padding: 2.5rem 1.5rem;
   text-align: center;
   cursor: pointer;
   transition:
     border-color 0.2s,
-    background-color 0.2s;
-  background-color: #f8f9fa;
+    background 0.2s;
+  background: #f8fafc;
 }
-.dropzone:hover,
-.dropzone--over {
-  border-color: #0d6efd;
-  background-color: #e7f1ff;
+
+.am-dropzone:hover,
+.am-dropzone--over {
+  border-color: var(--jv-accent);
+  background: #eef2ff;
 }
-.dropzone--error {
-  border-color: #dc3545;
-  background-color: #fff5f5;
+
+.am-dropzone--error {
+  border-color: var(--jv-danger);
+  background: #fef2f2;
 }
-.dropzone__icon {
+
+.am-dropzone__body {
+  pointer-events: none;
+}
+
+.am-dropzone__icon {
   font-size: 2.5rem;
-  color: #6c757d;
+  color: var(--jv-text-muted);
   display: block;
   margin-bottom: 0.75rem;
 }
-.dropzone__title {
-  font-size: 1rem;
-  color: #495057;
-  margin-bottom: 0.25rem;
-}
-.dropzone__link {
-  color: #0d6efd;
-  text-decoration: underline;
-  cursor: pointer;
-}
-.dropzone__subtitle {
-  font-size: 0.82rem;
-  color: #adb5bd;
-  margin-bottom: 0;
+
+.am-dropzone--over .am-dropzone__icon,
+.am-dropzone:hover .am-dropzone__icon {
+  color: var(--jv-accent);
 }
 
-/* ── Info de columnas ─────────────────────────────────────────── */
-.columns-info {
-  background: #f1f3f5;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
+.am-dropzone__title {
+  font-size: 0.95rem;
+  color: var(--jv-text);
+  margin-bottom: 0.25rem;
 }
-.columns-info__title {
+
+.am-dropzone__link {
+  color: var(--jv-accent);
+  text-decoration: underline;
+  pointer-events: auto;
+}
+
+.am-dropzone__sub {
+  font-size: 0.8rem;
+  color: var(--jv-text-muted);
+  margin: 0;
+}
+
+.am-dropzone__error {
   font-size: 0.82rem;
-  color: #495057;
-  margin-bottom: 0.5rem;
+  color: var(--jv-danger);
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
 }
-.columns-info__tags {
+
+/* ── Column info ── */
+.am-columns-info {
+  background: #f8fafc;
+  border: 1px solid var(--jv-border);
+  border-radius: 9px;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+
+.am-columns-info__title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--jv-text-muted);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.am-columns-info__tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
 }
-.column-tag {
-  font-size: 0.75rem;
-  padding: 0.2rem 0.55rem;
+
+.am-col-tag {
+  font-size: 0.72rem;
+  padding: 0.18rem 0.55rem;
   border-radius: 20px;
-  font-family: monospace;
-}
-.column-tag--required {
-  background: #cfe2ff;
-  color: #084298;
-}
-.column-tag--optional {
-  background: #e2e3e5;
-  color: #41464b;
+  font-family: 'Courier New', monospace;
 }
 
-/* ── Preview summary ──────────────────────────────────────────── */
-.preview-summary {
+.am-col-tag--required {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.am-col-tag--optional {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.am-required {
+  color: var(--jv-danger);
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* ── Summary ── */
+.am-summary {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   flex-wrap: wrap;
-}
-.preview-summary__stat {
-  font-size: 0.88rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 20px;
-}
-.preview-summary__stat--total {
-  background: #e9ecef;
-  color: #343a40;
-}
-.preview-summary__stat--ok {
-  background: #d1e7dd;
-  color: #0f5132;
-}
-.preview-summary__stat--error {
-  background: #f8d7da;
-  color: #842029;
+  margin-bottom: 1rem;
 }
 
-/* ── Tabla de preview ─────────────────────────────────────────── */
-.preview-table-wrapper {
-  overflow-x: auto;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
+.am-summary__stat {
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
 }
-.preview-table {
+
+.am-summary__stat--total {
+  background: #f1f5f9;
+  color: #374151;
+}
+.am-summary__stat--ok {
+  background: #dcfce7;
+  color: #166534;
+}
+.am-summary__stat--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ── Preview table ── */
+.am-table-wrap {
+  overflow-x: auto;
+  border-radius: 9px;
+  border: 1px solid var(--jv-border);
+  -webkit-overflow-scrolling: touch;
+}
+
+.am-table {
   border-collapse: collapse;
   width: 100%;
   font-size: 0.82rem;
   min-width: 900px;
 }
-.preview-table th {
-  background: #f1f3f5;
-  padding: 0.5rem 0.6rem;
+
+.am-table th {
+  background: #f8fafc;
+  padding: 0.55rem 0.6rem;
   text-align: left;
-  font-weight: 600;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--jv-text-muted);
   white-space: nowrap;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 1px solid var(--jv-border);
   position: sticky;
   top: 0;
   z-index: 1;
 }
-.preview-table th.col-required {
-  background: #e8f0fe;
+
+.am-th-required {
+  background: #eef2ff;
+  color: var(--jv-accent);
 }
-.preview-table td {
-  padding: 0.3rem 0.4rem;
-  vertical-align: top;
-  border-bottom: 1px solid #f1f3f5;
-}
-.preview-table .col-row {
-  width: 32px;
+.am-th-num,
+.am-th-status {
+  width: 40px;
   text-align: center;
-  font-size: 0.75rem;
-}
-.preview-table .col-status {
-  white-space: nowrap;
-  text-align: center;
-}
-.preview-table .row--error {
-  background-color: #fff8f8;
-}
-.preview-table .row--ok {
-  background-color: #f9fffa;
 }
 
-/* Inputs de celdas editables */
-.cell-input {
+.am-table td {
+  padding: 0.3rem 0.4rem;
+  vertical-align: top;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.am-td-num {
+  text-align: center;
+  color: var(--jv-text-muted);
+  font-size: 0.72rem;
+}
+.am-td-status {
+  text-align: center;
+  white-space: nowrap;
+}
+.am-td--error {
+  background: #fff8f8;
+}
+
+.am-tr--error {
+  background: #fffafa;
+}
+.am-tr--ok:hover {
+  background: #fafffe;
+}
+
+/* Editable cell inputs */
+.am-cell-input {
   width: 100%;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: 5px;
   padding: 0.2rem 0.4rem;
   font-size: 0.82rem;
   background: transparent;
@@ -744,52 +780,109 @@ function reset() {
     border-color 0.15s,
     background 0.15s;
   min-width: 80px;
+  font-family: var(--jv-font);
+  color: var(--jv-text);
 }
-.cell-input:hover,
-.cell-input:focus {
-  background: #fff;
-  border-color: #0d6efd;
+
+.am-cell-input:hover,
+.am-cell-input:focus {
+  background: white;
+  border-color: var(--jv-accent);
   outline: none;
 }
-.cell-input--error {
-  border-color: #dc3545 !important;
-  background: #fff !important;
+
+.am-cell-input--error {
+  border-color: var(--jv-danger) !important;
+  background: white !important;
 }
-.cell-error-msg {
+
+.am-cell-error {
   display: block;
-  color: #dc3545;
-  font-size: 0.7rem;
+  color: var(--jv-danger);
+  font-size: 0.68rem;
   margin-top: 0.1rem;
   white-space: nowrap;
 }
 
-/* ── Resultado final ──────────────────────────────────────────── */
-.result-panel {
-  padding: 0.5rem 0;
+/* Status badges */
+.am-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 20px;
 }
-.result-block {
+
+.am-badge--ok {
+  background: #dcfce7;
+  color: #166534;
+}
+.am-badge--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* Error note */
+.am-error-note {
+  font-size: 0.8rem;
+  color: var(--jv-danger);
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* Step actions */
+.am-step-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+
+.am-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* ── Result ── */
+.am-result {
+  padding: 0.25rem 0;
+}
+
+.am-result-block {
   display: flex;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  border-radius: 8px;
+  border-radius: 9px;
   align-items: flex-start;
 }
-.result-block--success {
-  background: #d1e7dd;
-  color: #0f5132;
+
+.am-result-block + .am-result-block {
+  margin-top: 0.75rem;
 }
-.result-block--error {
-  background: #f8d7da;
-  color: #842029;
+
+.am-result-block--success {
+  background: #dcfce7;
+  color: #166534;
 }
-.result-block__icon {
+.am-result-block--error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.am-result-block__icon {
   font-size: 1.4rem;
   flex-shrink: 0;
   margin-top: 0.1rem;
 }
-.result-list {
-  margin: 0;
+
+.am-result-list {
+  margin: 0.35rem 0 0;
   padding-left: 1.2rem;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
 }
 </style>

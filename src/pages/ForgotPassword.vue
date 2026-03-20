@@ -6,6 +6,16 @@
         <div class="auth-deco__logo">✦</div>
         <h2 class="auth-deco__headline">Javerim Baires</h2>
         <p class="auth-deco__sub">Vamos a ayudarte a<br />recuperar el acceso.</p>
+        <p class="auth-deco__sub">
+          Si tienes problemas para acceder, contactanos <br />
+          <a
+            href="https://wa.me/5491158021867/?text=Hola!%20Necesitaba%20ayuda%20con%20la%20App%20de%20Javerim%20Baires"
+            class="ud__info-link"
+            target="_blank"
+          >
+            <i class="bi bi-whatsapp"></i> Tzaruj · 11 5802-1867
+          </a>
+        </p>
         <div class="auth-deco__steps">
           <div class="auth-deco__step" :class="{ active: step >= 1, done: step > 1 }">
             <span>1</span> Verificar identidad
@@ -739,6 +749,20 @@ const resetPassword = async () => {
 
 .auth-footer-link-item--muted:hover {
   color: var(--jv-accent);
+}
+
+.ud__info-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--jv-surface);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.ud__info-link:hover {
+  text-decoration: underline;
 }
 
 /* ── Responsive ── */
