@@ -5,7 +5,7 @@ import App from './App.vue'
 import router from './router'
 
 import 'bootstrap-icons/font/bootstrap-icons.css'
-
+import './assets/css/styles.css'
 
 const app = createApp(App)
 
