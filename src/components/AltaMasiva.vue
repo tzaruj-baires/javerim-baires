@@ -16,7 +16,7 @@
       <div class="d-flex justify-content-end mb-3">
         <button class="btn btn-outline-secondary btn-sm">
           <a
-            href="https://docs.google.com/spreadsheets/d/1lIDendDqH6KhctatcfFfZrsMCIIbHw9_gNmKap_hlJE//template/preview"
+            href="https://docs.google.com/spreadsheets/d/1lIDendDqH6KhctatcfFfZrsMCIIbHw9_gNmKap_hlJE/template/preview"
             target="_blank"
             class="text-reset text-decoration-none"
           >
