@@ -3,7 +3,9 @@
     <div class="navbar__inner">
       <!-- Logo -->
       <router-link to="/" class="navbar__brand">
-        <span class="navbar__brand-icon">✦</span>
+        <span class="navbar__brand-icon"
+          ><img src="/public/favicon.png" alt="✦" height="24"
+        /></span>
         <span class="navbar__brand-text">Javerim Baires</span>
       </router-link>
 
