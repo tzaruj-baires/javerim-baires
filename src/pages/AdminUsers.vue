@@ -1,245 +1,205 @@
 <template>
-  <div class="container-fluid mt-4">
-    <!-- Bienvenida -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="card shadow-sm bg-gradient-warning text-dark">
-          <div class="card-body d-flex justify-content-between align-items-center">
-            <div>
-              <h2 class="mb-0"><i class="bi bi-shield-lock"></i> Administración de Usuarios</h2>
-            </div>
-            <button @click="refreshUsers" class="btn btn-warning" :disabled="loading">
-              <i class="bi bi-arrow-clockwise"></i> Actualizar
-            </button>
-          </div>
+  <div class="jv-page">
+    <!-- ── Header ── -->
+    <div class="jv-page-header">
+      <div class="jv-page-header__left">
+        <div class="jv-page-header__icon jv-page-header__icon--amber">
+          <i class="bi bi-shield-lock"></i>
+        </div>
+        <div>
+          <p class="jv-page-header__eyebrow">Panel de administración</p>
+          <h1 class="jv-page-header__title">Usuarios</h1>
+        </div>
+      </div>
+      <button class="jv-btn jv-btn--ghost" @click="refreshUsers" :disabled="loading">
+        <i class="bi bi-arrow-clockwise" :class="{ 'au-spin': loading }"></i>
+        <span class="jv-btn__label">Actualizar</span>
+      </button>
+    </div>
+
+    <!-- ── Alertas ── -->
+    <div v-if="successMessage" class="jv-alert jv-alert--success">
+      <i class="bi bi-check-circle"></i>
+      {{ successMessage }}
+      <button class="jv-alert__close" @click="successMessage = ''">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div v-if="errorMessage" class="jv-alert jv-alert--danger">
+      <i class="bi bi-exclamation-circle"></i>
+      {{ errorMessage }}
+      <button class="jv-alert__close" @click="errorMessage = ''"><i class="bi bi-x-lg"></i></button>
+    </div>
+
+    <!-- ── Tabla de usuarios ── -->
+    <div class="jv-table-panel">
+      <div class="jv-table-panel__header">
+        <div class="jv-table-panel__title-row">
+          <i class="bi bi-people"></i>
+          <h2 class="jv-table-panel__title">Usuarios Registrados</h2>
+          <span class="jv-table-panel__count" v-if="!loading">{{ filteredUsers.length }}</span>
+        </div>
+        <div class="jv-search">
+          <i class="bi bi-search jv-search__icon"></i>
+          <input
+            v-model="searchQuery"
+            type="text"
+            class="jv-search__input"
+            placeholder="Buscar por email, DNI o nickname..."
+          />
+          <button v-if="searchQuery" @click="searchQuery = ''" class="jv-search__clear">
+            <i class="bi bi-x"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="jv-table-wrap">
+        <table class="jv-table">
+          <thead>
+            <tr>
+              <th class="sortable" @click="sortBy('dni')">
+                DNI <span class="au-sort">{{ getSortIndicator('dni') }}</span>
+              </th>
+              <th class="sortable" @click="sortBy('nickname')">
+                Nickname <span class="au-sort">{{ getSortIndicator('nickname') }}</span>
+              </th>
+              <th class="sortable" @click="sortBy('email')">
+                Email <span class="au-sort">{{ getSortIndicator('email') }}</span>
+              </th>
+              <th class="sortable jv-hide-sm" @click="sortBy('cellphone')">
+                Teléfono <span class="au-sort">{{ getSortIndicator('cellphone') }}</span>
+              </th>
+              <th class="sortable" @click="sortBy('it_level')">
+                Nivel <span class="au-sort">{{ getSortIndicator('it_level') }}</span>
+              </th>
+              <th class="center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td colspan="6">
+                <div class="jv-loading-row">
+                  <span class="jv-spinner"></span> Cargando usuarios...
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="filteredUsers.length === 0">
+              <td colspan="6" class="jv-table__empty">
+                <i class="bi bi-inbox"></i>
+                No hay usuarios
+              </td>
+            </tr>
+            <tr v-else v-for="user in paginatedUsers" :key="user.id">
+              <td>
+                <span class="jv-mono">{{ user.dni }}</span>
+              </td>
+              <td>{{ user.nickname }}</td>
+              <td>
+                <a :href="`mailto:${user.email}`" class="jv-link" v-if="user.email">{{
+                  user.email
+                }}</a>
+                <span v-else>—</span>
+              </td>
+              <td class="jv-hide-sm">
+                <a
+                  :href="`https://wa.me/${user.cellphone}`"
+                  class="jv-link jv-link--phone"
+                  v-if="user.cellphone"
+                  target="_blank"
+                >
+                  <i class="bi bi-whatsapp"></i> {{ user.cellphone }}
+                </a>
+                <span v-else>—</span>
+              </td>
+              <td>
+                <span :class="levelBadgeClass(user.it_level)" class="jv-badge">
+                  {{ getLevelName(user.it_level) }}
+                </span>
+              </td>
+              <td class="center">
+                <button
+                  @click="openGrantAccessModal(user)"
+                  class="jv-action-btn jv-action-btn--grant"
+                  title="Otorgar acceso"
+                >
+                  <i class="bi bi-check-circle"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="jv-table-footer">
+        <span class="jv-table-footer__info">
+          Mostrando <strong>{{ paginatedUsers.length }}</strong> de
+          <strong>{{ filteredUsers.length }}</strong> usuarios
+        </span>
+        <div class="jv-table-footer__actions">
+          <button
+            v-if="displayedCount < filteredUsers.length"
+            @click="loadMore"
+            class="jv-btn jv-btn--ghost jv-btn--sm"
+          >
+            <i class="bi bi-chevron-down"></i> Más
+          </button>
+          <button
+            v-if="displayedCount > itemsPerPage"
+            @click="showLess"
+            class="jv-btn jv-btn--ghost jv-btn--sm"
+          >
+            <i class="bi bi-chevron-up"></i> Menos
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Alertas -->
-    <div v-if="successMessage" class="row mb-3">
-      <div class="col-12">
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-          {{ successMessage }}
-          <button type="button" class="btn-close" @click="successMessage = ''"></button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="errorMessage" class="row mb-3">
-      <div class="col-12">
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-          {{ errorMessage }}
-          <button type="button" class="btn-close" @click="errorMessage = ''"></button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Configuración de emails para notificación -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="card shadow-sm">
-          <div class="card-header bg-info text-white">
-            <h5 class="mb-0"><i class="bi bi-envelope"></i> Configuración de Notificaciones</h5>
-          </div>
-          <div class="card-body">
-            <div class="mb-3">
-              <label for="notificationEmails" class="form-label">
-                Correos para notificaciones de nuevos registros
-              </label>
-              <textarea
-                v-model="notificationEmails"
-                id="notificationEmails"
-                class="form-control"
-                rows="3"
-                placeholder="correo1@ejemplo.com&#10;correo2@ejemplo.com&#10;correo3@ejemplo.com"
-                @change="saveNotificationEmails"
-              ></textarea>
-              <small class="text-muted">Ingresa un correo por línea</small>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tabla de usuarios -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <div class="card shadow-sm">
-          <div class="card-header bg-primary text-white">
-            <h5 class="mb-2"><i class="bi bi-people"></i> Usuarios Registrados</h5>
-            <input
-              v-model="searchQuery"
-              type="text"
-              class="form-control form-control-sm"
-              placeholder="Buscar por email, DNI o nickname..."
-            />
-          </div>
-
-          <div class="card-body p-0">
-            <div class="table-responsive">
-              <table class="table table-hover table-striped align-middle mb-0">
-                <thead class="table-light">
-                  <tr>
-                    <th @click="sortBy('dni')" class="cursor-pointer">
-                      DNI {{ getSortIndicator('dni') }}
-                    </th>
-                    <th @click="sortBy('nickname')" class="cursor-pointer">
-                      Nickname {{ getSortIndicator('nickname') }}
-                    </th>
-                    <th @click="sortBy('email')" class="cursor-pointer">
-                      Email {{ getSortIndicator('email') }}
-                    </th>
-                    <th @click="sortBy('cellphone')" class="cursor-pointer">
-                      Teléfono {{ getSortIndicator('cellphone') }}
-                    </th>
-                    <th @click="sortBy('it_level')" class="cursor-pointer">
-                      Nivel {{ getSortIndicator('it_level') }}
-                    </th>
-                    <th class="text-center">Acciones</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  <tr v-if="loading">
-                    <td colspan="6" class="text-center py-4">
-                      <span class="spinner-border spinner-border-sm me-2"></span> Cargando...
-                    </td>
-                  </tr>
-
-                  <tr v-else-if="filteredUsers.length === 0">
-                    <td colspan="6" class="text-center py-4 text-muted">No hay usuarios</td>
-                  </tr>
-
-                  <tr v-else v-for="user in paginatedUsers" :key="user.id">
-                    <td>
-                      <small
-                        ><strong>{{ user.dni }}</strong></small
-                      >
-                    </td>
-                    <td>{{ user.nickname }}</td>
-                    <td>
-                      <small>{{ user.email }}</small>
-                    </td>
-                    <td>
-                      <small>
-                        <a :href="`https://wa.me/${user.cellphone}`" v-if="user.cellphone">
-                          {{ user.cellphone }}
-                        </a>
-                        <span v-else>-</span>
-                      </small>
-                    </td>
-                    <td>
-                      <span
-                        :class="{
-                          'badge bg-danger': user.it_level === 0,
-                          'badge bg-info': user.it_level === 1,
-                          'badge bg-success': user.it_level === 2,
-                          'badge bg-warning text-dark': user.it_level === 3,
-                        }"
-                      >
-                        {{ getLevelName(user.it_level) }}
-                      </span>
-                    </td>
-                    <td class="text-center">
-                      <!-- Otorgar acceso -->
-                      <div class="btn-group btn-group-sm" role="group">
-                        <button
-                          @click="openGrantAccessModal(user)"
-                          class="btn btn-outline-success"
-                          title="Otorgar acceso"
-                        >
-                          <i class="bi bi-check-circle"></i>
-                        </button>
-
-                        <!-- Eliminar usuario -->
-                        <!--
-                        <button
-                          @click="deleteUser(user.id)"
-                          class="btn btn-outline-danger"
-                          title="Eliminar usuario"
-                        >
-                          <i class="bi bi-trash"></i>
-                        </button>
-                        -->
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Paginación -->
-          <div class="card-footer bg-light d-flex justify-content-between align-items-center">
-            <small class="text-muted">
-              Mostrando {{ paginatedUsers.length }} de {{ filteredUsers.length }} usuarios
-            </small>
-            <div>
-              <button
-                v-if="displayedCount < filteredUsers.length"
-                @click="loadMore"
-                class="btn btn-sm btn-outline-primary me-2"
-              >
-                <i class="bi bi-chevron-down"></i> Más
-              </button>
-              <button
-                v-if="displayedCount > itemsPerPage"
-                @click="showLess"
-                class="btn btn-sm btn-outline-secondary"
-              >
-                <i class="bi bi-chevron-up"></i> Menos
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal para otorgar acceso -->
+    <!-- ── Modal otorgar acceso ── -->
     <div
       v-if="showGrantAccessModal"
-      class="modal d-block"
-      style="background-color: rgba(0, 0, 0, 0.5)"
+      class="jv-modal-backdrop"
+      @click.self="showGrantAccessModal = false"
     >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Otorgar Acceso - {{ selectedUser?.email }}</h5>
-            <button type="button" class="btn-close" @click="showGrantAccessModal = false"></button>
+      <div class="jv-modal jv-modal--sm">
+        <div class="jv-modal__header">
+          <h3 class="jv-modal__title"><i class="bi bi-shield-check"></i> Otorgar Acceso</h3>
+          <button class="jv-modal__close" @click="showGrantAccessModal = false">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <div class="jv-modal__body">
+          <p class="au-modal-user">
+            <i class="bi bi-person-circle"></i>
+            {{ selectedUser?.email }}
+          </p>
+          <div class="jv-field">
+            <label class="jv-label" for="levelSelect">Nivel de acceso</label>
+            <select v-model.number="selectedLevel" id="levelSelect" class="jv-input jv-select">
+              <option :value="0">Sin acceso (0)</option>
+              <option :value="1">Usuario Básico (1)</option>
+              <option :value="2">Usuario Avanzado (2)</option>
+              <option :value="3">Administrador (3)</option>
+            </select>
           </div>
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="levelSelect" class="form-label">Selecciona el nivel de acceso:</label>
-              <select v-model.number="selectedLevel" id="levelSelect" class="form-select">
-                <option :value="0">Sin acceso (0)</option>
-                <option :value="1">Usuario Básico (1)</option>
-                <option :value="2">Usuario Avanzado (2)</option>
-                <option :value="3">Administrador (3)</option>
-              </select>
-            </div>
+          <!-- Preview del nivel -->
+          <div class="au-level-preview">
+            <span :class="levelBadgeClass(selectedLevel)" class="jv-badge">
+              {{ getLevelName(selectedLevel) }}
+            </span>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="showGrantAccessModal = false">
-              Cancelar
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="grantAccess"
-              :disabled="updatingUser"
-            >
-              <span v-if="!updatingUser">Actualizar</span>
-              <span v-else>
-                <span
-                  class="spinner-border spinner-border-sm me-2"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-                Actualizando...
-              </span>
-            </button>
-          </div>
+        </div>
+        <div class="jv-modal__footer">
+          <button class="jv-btn jv-btn--ghost" @click="showGrantAccessModal = false">
+            Cancelar
+          </button>
+          <button class="jv-btn jv-btn--primary" @click="grantAccess" :disabled="updatingUser">
+            <span v-if="!updatingUser"><i class="bi bi-check-circle"></i> Actualizar</span>
+            <span v-else class="au-loading-text">
+              <span class="jv-spinner jv-spinner--sm jv-spinner--white"></span>
+              Actualizando...
+            </span>
+          </button>
         </div>
       </div>
     </div>
@@ -364,14 +324,19 @@ const getSortIndicator = (key) => {
 const loadMore = () => {
   displayedCount.value += itemsPerPage
 }
-
 const showLess = () => {
   displayedCount.value = itemsPerPage
 }
-
 const refreshUsers = () => {
   loadUsers()
 }
+
+const levelBadgeClass = (level) => ({
+  'jv-badge--level-0': level === 0,
+  'jv-badge--level-1': level === 1,
+  'jv-badge--level-2': level === 2,
+  'jv-badge--level-3': level === 3,
+})
 
 const openGrantAccessModal = (user) => {
   selectedUser.value = user
@@ -393,13 +358,11 @@ const grantAccess = async () => {
 
     await update('users', updateData)
 
-    // Actualizar en la lista local
     const userIndex = users.value.findIndex((u) => u.id === selectedUser.value.id)
     if (userIndex !== -1) {
       users.value[userIndex].it_level = selectedLevel.value
     }
 
-    // Enviar notificación al usuario sobre el cambio de nivel
     const levelNames = {
       0: 'Sin acceso',
       1: 'Usuario Básico',
@@ -449,30 +412,58 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.cursor-pointer {
-  cursor: pointer;
-  user-select: none;
+/* Solo estilos que no están en javerim.css */
+.au-sort {
+  opacity: 0.55;
+  font-size: 0.65rem;
 }
 
-.cursor-pointer:hover {
-  background-color: #f5f5f5;
+@keyframes au-spin-anim {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.au-spin {
+  animation: au-spin-anim 0.8s linear infinite;
+  display: inline-block;
 }
 
-.modal.d-block {
-  display: block !important;
-}
-
-.badge {
-  font-size: 0.85rem;
-  padding: 0.5rem 0.75rem;
-}
-
-.btn-group-sm > .btn {
-  padding: 0.25rem 0.5rem;
+.au-modal-user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid var(--jv-border);
   font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: var(--jv-text);
+  word-break: break-all;
 }
 
-.bg-gradient-warning {
-  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+.au-modal-user i {
+  color: var(--jv-accent);
+  flex-shrink: 0;
+}
+
+.au-level-preview {
+  margin-top: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--jv-text-muted);
+}
+
+.au-level-preview::before {
+  content: 'Nuevo nivel:';
+}
+
+.au-loading-text {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 </style>
