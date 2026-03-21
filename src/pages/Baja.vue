@@ -186,6 +186,23 @@
             <span v-else class="jv-hint">No hay cursos agregados aún</span>
           </div>
 
+          <!-- Áreas Históricas -->
+          <div class="jv-field" v-if="areasHistoricasOpciones.length > 0">
+            <label class="jv-label">Áreas Históricas</label>
+            <div class="baja-checkboxes">
+              <label v-for="area in areasHistoricasOpciones" :key="area" class="baja-check-label">
+                <input
+                  type="checkbox"
+                  :value="area"
+                  v-model="formData.areas_historicas"
+                  class="baja-checkbox"
+                  style="accent-color: var(--jv-accent)"
+                />
+                <span>{{ area }}</span>
+              </label>
+            </div>
+          </div>
+
           <!-- Motivos -->
           <div class="jv-field">
             <label class="jv-label">Tipo de Motivo <span class="baja-required">*</span></label>
@@ -310,6 +327,7 @@ const formData = ref({
   reunion: '',
   miluim: '',
   comentarios: '',
+  areas_historicas: [],
 })
 
 const isLoading = ref(false)
@@ -326,13 +344,40 @@ const motivosOpciones = [
   { value: 'Otros', label: 'Otros' },
 ]
 
-onMounted(() => {
+const { can, canAccessUser } = usePermissions()
+
+onMounted(async () => {
   const router = useRouter()
-  const { can } = usePermissions()
   if (!can(2)) {
     router.push('/')
     return
   }
+  await loadMjlktData()
+})
+
+// Datos de mjlkt (se carga una sola vez al montar, igual que ProfileForm)
+const mjlktData = ref([])
+
+const loadMjlktData = async () => {
+  try {
+    const response = await api.getAll('mjlkt')
+    mjlktData.value = response.data || []
+  } catch (error) {
+    console.error('Error al cargar mjlkt:', error)
+  }
+}
+
+// Áreas únicas de la org del usuario — computed sobre los datos ya cargados
+const areasHistoricasOpciones = computed(() => {
+  if (!userData.value?.organizacion) return []
+  return [
+    ...new Set(
+      mjlktData.value
+        .filter((r) => r.org === userData.value.organizacion)
+        .map((r) => r.rol)
+        .filter(Boolean),
+    ),
+  ].sort()
 })
 
 const searchUser = async () => {
@@ -355,7 +400,6 @@ const searchUser = async () => {
       return
     }
 
-    const { canAccessUser } = usePermissions()
     if (!canAccessUser(user.DNI, user)) {
       errorMessage.value = 'No tenés permisos para dar de baja a este usuario'
       return
@@ -365,6 +409,24 @@ const searchUser = async () => {
     formData.value.años_voluntario = user.años_voluntario || null
     formData.value.rol_max = user.rol_max || ''
     formData.value.cursos = []
+
+    // Pre-fill: unión de areas_historicas + areas actuales, filtrado a opciones disponibles, sin duplicados
+    const preHistoricas = user.areas_historicas
+      ? user.areas_historicas
+          .split(',')
+          .map((a) => a.trim())
+          .filter(Boolean)
+      : []
+    const preAreas = user.areas
+      ? user.areas
+          .split(',')
+          .map((a) => a.trim())
+          .filter(Boolean)
+      : []
+    const preUnidas = [...new Set([...preHistoricas, ...preAreas])]
+    formData.value.areas_historicas = preUnidas.filter((a) =>
+      areasHistoricasOpciones.value.includes(a),
+    )
   } catch (error) {
     console.error('Error buscando usuario:', error)
     errorMessage.value = 'Error al buscar el usuario'
@@ -415,6 +477,12 @@ const confirmarBaja = () => {
 const handleSubmit = async () => {
   if (!validateForm()) return
 
+  // Segunda barrera: re-verificar permisos antes de ejecutar la baja
+  if (!canAccessUser(userData.value.DNI, userData.value)) {
+    errorMessage.value = 'No tenés permisos para dar de baja a este usuario'
+    return
+  }
+
   try {
     isLoading.value = true
     errorMessage.value = ''
@@ -444,22 +512,53 @@ const handleSubmit = async () => {
       comentarios: formData.value.comentarios,
     }
 
+    const now = new Date()
+    const pad = (n) => String(n).padStart(2, '0')
+    const fechaUlt = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`
+    const fechaMilu = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
+    const timestamp = fechaUlt
+
     const updateData = {
       DNI: userData.value.DNI,
       activo: 0,
-      fecha_ult: new Date().toISOString().split('T')[0],
+      fecha_ult: fechaUlt,
     }
+
+    // Merge areas_historicas: checkbox base (pre-cargado + modificado por el usuario) + área actual, sin duplicados
+    const buildAreasHistoricas = (checkboxList, currentAreas) => {
+      const base = Array.isArray(checkboxList) ? [...checkboxList] : []
+      const current = currentAreas
+        ? currentAreas
+            .split(',')
+            .map((a) => a.trim())
+            .filter(Boolean)
+        : []
+      const merged = [...base]
+      for (const area of current) {
+        if (!merged.includes(area)) merged.push(area)
+      }
+      return merged.join(', ')
+    }
+
+    const areasHistoricas = buildAreasHistoricas(
+      formData.value.areas_historicas,
+      userData.value.areas,
+    )
 
     if (formData.value.tipo_baja === 'Janij') {
       updateData.areas = ''
       updateData.areas_ref = ''
-      bajaRecord.areas_historicas = userData.value.areas || ''
+      bajaRecord.areas_historicas = areasHistoricas
+      updateData.areas_historicas = areasHistoricas
     } else if (formData.value.tipo_baja === 'Voluntario') {
       updateData.areas = 'MILU'
       updateData.areas_ref = 'MILU'
-      bajaRecord.areas_historicas = userData.value.areas || ''
-      updateData.fecha_ingresoMilu = new Date().toISOString().split('T')[0]
+      bajaRecord.areas_historicas = areasHistoricas
+      updateData.areas_historicas = areasHistoricas
+      updateData.fecha_ingresoMilu = fechaMilu
     }
+
+    bajaRecord.timestamp = timestamp
 
     await api.create('bajas_activo', bajaRecord)
     await api.update('main', updateData)
@@ -493,6 +592,7 @@ const resetForm = () => {
     reunion: '',
     miluim: '',
     comentarios: '',
+    areas_historicas: [],
   }
   errorMessage.value = ''
 }
