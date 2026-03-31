@@ -14,35 +14,35 @@ export const nivelesHBTJ = ['B', 'A', 'MFKD0', 'MFKD1', 'MFKD2']
 export const organizaciones = ['DAC', 'FJ', 'BH', 'LH', 'IONA']
 
 export const Works = [
-    'Tecnología',
-    'Ingeniería',
-    'Economía',
-    'Ciencias',
-    'Medicina/Veterinaria',
-    'Derecho',
-    'RRHH',
-    'Filosofía y Letras',
-    'Diseño/Arquitectura',
-    'Educación física',
-    'Educación',
-    'Gastronomía',
-    'Otro'
+  'Tecnología',
+  'Ingeniería',
+  'Economía',
+  'Ciencias',
+  'Medicina/Veterinaria',
+  'Derecho',
+  'RRHH',
+  'Filosofía y Letras',
+  'Diseño/Arquitectura',
+  'Educación física',
+  'Educación',
+  'Gastronomía',
+  'Otro',
 ]
 export const Estudies = [
-    'Estudios secundarios',
-    'Tecnología',
-    'Ingeniería',
-    'Economía',
-    'Ciencias',
-    'Medicina/Veterinaria',
-    'Derecho',
-    'RRHH',
-    'Filosofía y Letras',
-    'Diseño/Arquitectura',
-    'Educación física',
-    'Educación',
-    'Gastronomía',
-    'Otro'
+  'Estudios secundarios',
+  'Tecnología',
+  'Ingeniería',
+  'Economía',
+  'Ciencias',
+  'Medicina/Veterinaria',
+  'Derecho',
+  'RRHH',
+  'Filosofía y Letras',
+  'Diseño/Arquitectura',
+  'Educación física',
+  'Educación',
+  'Gastronomía',
+  'Otro',
 ]
 
 export const cursosMis = [
@@ -53,8 +53,10 @@ export const cursosMis = [
   { value: 'IE', label: 'Curso de Ieri' },
   { value: 'IE - MDRJ', label: 'Curso de Instructor Ieri' },
   { value: 'FND', label: 'Curso de Fondo' },
+  { value: 'CARE', label: 'Curso de CARE' },
+  { value: 'CR', label: 'Curso de CR' },
+  { value: 'MFKD', label: 'Curso de Mefakdim' },
 ]
-
 
 /**
  * Convierte una fecha a formato dd/mm/yyyy
@@ -92,7 +94,6 @@ export const formatFecha = (fecha) => {
   return `${day}/${month}/${year}`
 }
 
-
 /**
  * Convierte una fecha a formato dd/mm/yyyy HH:mm
  * Maneja correctamente valores inválidos
@@ -100,12 +101,12 @@ export const formatFecha = (fecha) => {
  * @returns {string|null} fecha formateada como dd/mm/yyyy HH:mm o null si es inválida
  */
 export function formatFechaEntera(fecha) {
-  if (!fecha) return null; // "", null, undefined
+  if (!fecha) return null // "", null, undefined
 
-  const d = new Date(fecha);
+  const d = new Date(fecha)
 
   // Validación CLAVE
-  if (isNaN(d.getTime())) return null;
+  if (isNaN(d.getTime())) return null
 
   const opciones = {
     day: '2-digit',
@@ -113,17 +114,11 @@ export function formatFechaEntera(fecha) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    hour12: false
-  };
+    hour12: false,
+  }
 
-  return new Intl.DateTimeFormat('es-ES', opciones)
-    .format(d)
-    .replace(',', '');
+  return new Intl.DateTimeFormat('es-ES', opciones).format(d).replace(',', '')
 }
-
-
-
-
 
 /**
  * Convierte una fecha en formato dd/mm/yyyy a ISO string YYYY-MM-DD
@@ -166,13 +161,13 @@ export const parseFechaEnteraToISO = (fechaFormato) => {
 
   // 2. Separar fecha de hora
   const [datePart, timePart] = fechaFormato.trim().split(/\s+/)
-  
+
   // 3. Procesar dd/mm/yyyy
   const parts = datePart.split('/')
   if (parts.length === 3) {
     const [day, month, year] = parts
     const isoDate = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
-    
+
     // 4. Retornar con hora (HH:mm) si existe
     if (timePart && /^([01]\d|2[0-3]):([0-5]\d)/.test(timePart)) {
       return `${isoDate}T${timePart}`
