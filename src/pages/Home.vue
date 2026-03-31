@@ -251,7 +251,7 @@ import { useAuthStore } from '@/stores/auth'
 import { usePermissions } from '@/composables/usePermissions'
 
 const authStore = useAuthStore()
-const { can, getLevelName } = usePermissions()
+const { can, getLevelName, canSeeUserInTable } = usePermissions()
 
 const users = ref([])
 const loading = ref(true)
@@ -317,59 +317,13 @@ const areaContains = (areasStr = '', target = '') => {
 }
 
 /* =========================
-   FILTRADO POR NIVEL
+   FILTRADO POR NIVEL (MJLKT)
 ========================= */
 const visibleUsers = computed(() => {
   const currentUser = authStore.user
   if (!currentUser) return []
 
-  const level = currentUser.it_level
-  const myOrg = normalizeText(currentUser.organizacion || '')
-  const myAreasRef = splitAreas(currentUser.areas_ref || '')
-  const myAreas = splitAreas(currentUser.areas || '')
-
-  return users.value.filter((u) => {
-    // ── Nivel 3: ve todos ──────────────────────────────────────────────
-    if (level >= 3) return true
-
-    // ── Nivel 2 ───────────────────────────────────────────────────────
-    if (level === 2) {
-      // Si areas_ref contiene "ROSH": ve toda su organización
-      const isRosh = myAreasRef.some((a) => normalizeText(a) === 'rosh')
-      if (isRosh) {
-        return normalizeText(u.organizacion || '') === myOrg
-      }
-      // Caso general: misma org + areas_ref coincidente con areas_ref del usuario
-      if (normalizeText(u.organizacion || '') !== myOrg) return false
-      const uAreasRef = splitAreas(u.areas_ref || '')
-      return myAreasRef.some((ref) =>
-        uAreasRef.some((uRef) => normalizeText(uRef) === normalizeText(ref)),
-      )
-    }
-
-    // ── Nivel 1 ───────────────────────────────────────────────────────
-    if (level === 1) {
-      // Si algún ítem de areas contiene la palabra "JNJ" (ej: "HDRJ - JNJ RGL K4")
-      // filtra por org + coincidencia exacta de ítem de areas (no areas_ref)
-      const isJnj = myAreas.some((a) => normalizeText(a).split(/\s+/).includes('jnj'))
-      if (isJnj) {
-        if (normalizeText(u.organizacion || '') !== myOrg) return false
-        const uAreas = splitAreas(u.areas || '')
-        // Compara ítems completos exactos (no sub-strings)
-        return myAreas.some((area) =>
-          uAreas.some((uArea) => normalizeText(uArea) === normalizeText(area)),
-        )
-      }
-      // Caso general: misma org + areas_ref coincidente
-      if (normalizeText(u.organizacion || '') !== myOrg) return false
-      const uAreasRef = splitAreas(u.areas_ref || '')
-      return myAreasRef.some((ref) =>
-        uAreasRef.some((uRef) => normalizeText(uRef) === normalizeText(ref)),
-      )
-    }
-
-    return false
-  })
+  return users.value.filter((u) => canSeeUserInTable(u))
 })
 
 /* =========================

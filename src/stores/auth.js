@@ -246,6 +246,17 @@ export const useAuthStore = defineStore('auth', () => {
         userSession.organizacion = mainRecordUpdated.organizacion || ''
       }
 
+      try {
+        const mjlktResponse = await api.getAll('mjlkt')
+        const mjlktRecords = Array.isArray(mjlktResponse.data) ? mjlktResponse.data : []
+        userSession.mjlkt = mjlktRecords.filter(
+          (item) => parseInt(item.dni) === parseInt(userSession.dni),
+        )
+      } catch (error) {
+        console.error('No se pudo cargar mjlkt para el usuario:', error)
+        userSession.mjlkt = []
+      }
+
       user.value = userSession
       localStorage.setItem('user', JSON.stringify(userSession))
 
@@ -274,6 +285,18 @@ export const useAuthStore = defineStore('auth', () => {
         user.value.areas_ref = mainRecord.areas_ref || ''
         user.value.areas = mainRecord.areas || ''
         user.value.organizacion = mainRecord.organizacion || ''
+      }
+
+      // Sincronizar datos de mjlkt
+      try {
+        const mjlktResponse = await api.getAll('mjlkt')
+        const mjlktRecords = Array.isArray(mjlktResponse.data) ? mjlktResponse.data : []
+        user.value.mjlkt = mjlktRecords.filter(
+          (item) => parseInt(item.dni) === parseInt(user.value.dni),
+        )
+      } catch (error) {
+        console.error('No se pudo cargar mjlkt del usuario al refrescar:', error)
+        user.value.mjlkt = []
       }
 
       localStorage.setItem('user', JSON.stringify(user.value))

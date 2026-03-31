@@ -671,32 +671,8 @@ const toggleSection = (section) => {
 // Computed: verificar si puede editar
 const canEdit = computed(() => {
   if (!authStore.user) return false
-  const userLevel = authStore.user.it_level ?? 0
   const targetDni = parseInt(route.params.dni)
-
-  if (userLevel === 3) return true
-  if (userLevel === 1) return authStore.user.dni === targetDni
-  if (userLevel === 2) {
-    if (authStore.user.dni === targetDni) return true
-    if (userData.value && authStore.user.organizacion) {
-      const sameOrganization = authStore.user.organizacion === userData.value.organizacion
-      if (!sameOrganization) return false
-      if (authStore.user.areas_ref) {
-        const userAreasArray = authStore.user.areas_ref.split(',').map((a) => a.trim())
-        if (userAreasArray.includes('ROSH')) return true
-      }
-      if (authStore.user.areas_ref && userData.value.areas_ref) {
-        const shareAreas = (areas1, areas2) => {
-          if (!areas1 || !areas2) return false
-          const areasArray1 = areas1.split(',').map((a) => a.trim())
-          const areasArray2 = areas2.split(',').map((a) => a.trim())
-          return areasArray1.some((area) => areasArray2.includes(area))
-        }
-        return shareAreas(authStore.user.areas_ref, userData.value.areas_ref)
-      }
-    }
-  }
-  return false
+  return canAccessUser(targetDni, userData.value)
 })
 
 onMounted(async () => {
