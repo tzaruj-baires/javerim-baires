@@ -129,12 +129,67 @@ export const usePermissions = () => {
     return areasArray1.some((area) => areasArray2.includes(area))
   }
 
+  const normalizeCsv = (value) => {
+    if (!value) return []
+    if (Array.isArray(value)) {
+      return value.map((item) => String(item).trim().toUpperCase()).filter(Boolean)
+    }
+    return String(value)
+      .split(',')
+      .map((item) => item.trim().toUpperCase())
+      .filter(Boolean)
+  }
+
+  const canAccessUserByMjlkt = (targetUserData) => {
+    const mjlktRecords = Array.isArray(authStore.user?.mjlkt) ? authStore.user.mjlkt : []
+    if (mjlktRecords.length === 0 || !targetUserData) return false
+
+    const targetAreasRef = normalizeCsv(targetUserData.areas_ref)
+    const targetAreas = normalizeCsv(targetUserData.areas)
+    const targetOrg = String(targetUserData.organizacion || '')
+      .trim()
+      .toUpperCase()
+
+    for (const record of mjlktRecords) {
+      const recordOrg = String(record.org || '')
+        .trim()
+        .toUpperCase()
+      if (!recordOrg || recordOrg !== targetOrg) continue
+
+      const recordArea = String(record.area || '')
+        .trim()
+        .toUpperCase()
+      const recordRol = String(record.rol || '')
+        .trim()
+        .toUpperCase()
+      const recordSubrol = String(record.subrol || '')
+        .trim()
+        .toUpperCase()
+
+      // Rol de área ROSh manda a acceso completo por organización
+      if (recordArea === 'ROSH') return true
+
+      // Subrol ROSH o SGAN: área completa dentro de su org
+      if (['ROSH', 'SGAN'].includes(recordSubrol)) {
+        if (targetAreasRef.includes(recordArea)) {
+          return true
+        }
+      } else {
+        // Subrol normal: org, area y rol estrictos
+        if (targetAreasRef.includes(recordArea) && targetAreas.includes(recordRol)) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
   /**
    * Verifica si el usuario puede acceder al perfil de otro usuario
-   * Usa areas_ref (áreas puras) para la comparación, no areas (áreas+roles)
-   * CASO ESPECIAL: Usuarios con "ROSH" en areas_ref pueden ver TODOS de su organización
+   * Usa tabla mjlkt para reglas de nivel 2 por subrol/rol/area
    * @param {number} targetDni - DNI del usuario objetivo
-   * @param {object} targetUserData - Datos del usuario objetivo (areas_ref, organizacion)
+   * @param {object} targetUserData - Datos del usuario objetivo (areas_ref, areas, organizacion)
    * @returns {boolean} true si puede ver
    */
   const canAccessUser = (targetDni, targetUserData = null) => {
@@ -148,23 +203,97 @@ export const usePermissions = () => {
     // Nivel 1: solo su propio perfil
     if (userLevel === 1) return authStore.user.dni === targetDni
 
-    // Nivel 2: su propio perfil + usuarios que compartan MISMA organización
+    // Nivel 2: su propio perfil + reglas desde mjlkt
     if (userLevel === 2) {
       if (authStore.user.dni === targetDni) return true
 
-      if (targetUserData && authStore.user.organizacion) {
-        // Verificar que sean de la misma organización
-        const sameOrganization = authStore.user.organizacion === targetUserData.organizacion
-        if (!sameOrganization) return false
+      if (!targetUserData || !authStore.user.organizacion) return false
 
-        // CASO ESPECIAL: Si el usuario tiene "ROSH" en areas_ref, puede ver a TODOS de su organización
-        if (authStore.user.areas_ref && authStore.user.areas_ref.includes('ROSH')) {
-          return true
-        }
+      const sameOrganization =
+        String(authStore.user.organizacion || '')
+          .trim()
+          .toUpperCase() ===
+        String(targetUserData.organizacion || '')
+          .trim()
+          .toUpperCase()
+      if (!sameOrganization) return false
 
-        // CASO NORMAL: Verificar que compartan al menos una área
-        if (authStore.user.areas_ref && targetUserData.areas_ref) {
-          return shareAreas(authStore.user.areas_ref, targetUserData.areas_ref)
+      // Solo autorizaciones definidas desde mjlkt; si no hay entry en mjlkt, no puede.
+      return canAccessUserByMjlkt(targetUserData)
+    }
+
+    return false
+  }
+
+  /**
+   * Verifica si el usuario puede VER a otro usuario en la tabla (visualización en Home)
+   * Reglas por nivel de manera más granular con mjlkt
+   * @param {object} targetUserData - Datos del usuario objetivo (areas_ref, areas, organizacion)
+   * @returns {boolean} true si puede ver en tabla
+   */
+  const canSeeUserInTable = (targetUserData = null) => {
+    if (!authStore.user || !targetUserData) return false
+
+    const userLevel = authStore.user.it_level ?? 0
+
+    // Nivel 0: no ve nada
+    if (userLevel === 0) return false
+
+    // Nivel 3: ve todos
+    if (userLevel === 3) return true
+
+    // Nivel 1: solo personas que comparten 'areas' (main)
+    if (userLevel === 1) {
+      const myAreas = normalizeCsv(authStore.user.areas)
+      const targetAreas = normalizeCsv(targetUserData.areas)
+      return myAreas.some((area) => targetAreas.includes(area))
+    }
+
+    // Nivel 2: dentro de misma organización + reglas mjlkt
+    if (userLevel === 2) {
+      const sameOrganization =
+        String(authStore.user.organizacion || '')
+          .trim()
+          .toUpperCase() ===
+        String(targetUserData.organizacion || '')
+          .trim()
+          .toUpperCase()
+      if (!sameOrganization) return false
+
+      const mjlktRecords = Array.isArray(authStore.user?.mjlkt) ? authStore.user.mjlkt : []
+
+      // Sin estar en mjlkt: igual que nivel 1 (comparten 'areas' main)
+      if (mjlktRecords.length === 0) {
+        const myAreas = normalizeCsv(authStore.user.areas)
+        const targetAreas = normalizeCsv(targetUserData.areas)
+        return myAreas.some((area) => targetAreas.includes(area))
+      }
+
+      // Estando en mjlkt: aplicar reglas por subrol
+      const targetAreasRef = normalizeCsv(targetUserData.areas_ref)
+      const targetAreas = normalizeCsv(targetUserData.areas)
+      const myAreas = normalizeCsv(authStore.user.areas)
+
+      for (const record of mjlktRecords) {
+        const recordArea = String(record.area || '')
+          .trim()
+          .toUpperCase()
+        const recordSubrol = String(record.subrol || '')
+          .trim()
+          .toUpperCase()
+
+        // Si area === "ROSH": ve todos en su org (ya verificado arriba)
+        if (recordArea === 'ROSH') return true
+
+        // Si subrol === "ROSH" o "SGAN": ve todos cuya areas_ref contenga el 'area' del record
+        if (['ROSH', 'SGAN'].includes(recordSubrol)) {
+          if (targetAreasRef.includes(recordArea)) return true
+        } else {
+          // Subrol normal/vacío: ve quienes comparten 'areas' + quienes estén en ese 'area' (areas_ref)
+          // Primera condición: comparten 'areas'
+          if (myAreas.some((area) => targetAreas.includes(area))) return true
+          // Segunda condición: target tiene ese 'area' en areas_ref
+          if (targetAreasRef.includes(recordArea)) return true
         }
       }
     }
@@ -179,6 +308,7 @@ export const usePermissions = () => {
     canEditSection,
     canSeeTechnical,
     canAccessUser,
+    canSeeUserInTable,
     getLevelName,
     shareAreas,
   }
