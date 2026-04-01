@@ -701,12 +701,12 @@
               <div class="pf__subsection">Cursos Realizados</div>
 
               <div class="pf__field">
-                <label class="pf__label" for="CBok">Curso Básico</label>
+                <label class="pf__label" for="curso_CB">Curso Básico</label>
                 <input
-                  v-model="formData.CBok"
+                  v-model="formData.curso_CB"
                   type="text"
                   class="pf__input"
-                  id="CBok"
+                  id="curso_CB"
                   placeholder="Ingrese datos del curso"
                   :disabled="isLoading || !canEditSection('organizacion')"
                   :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
@@ -768,6 +768,54 @@
                   class="pf__input"
                   id="curso_FND"
                   placeholder="Ingrese datos del curso"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="curso_IEIns">Curso IE-Ins</label>
+                <input
+                  v-model="formData.curso_IEIns"
+                  type="text"
+                  class="pf__input"
+                  id="curso_IEIns"
+                  placeholder="Ingrese datos del curso"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="curso_CR">Curso CR</label>
+                <input
+                  v-model="formData.curso_CR"
+                  type="text"
+                  class="pf__input"
+                  id="curso_CR"
+                  placeholder="Ingrese datos del curso"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="curso_CARE">Curso CARE</label>
+                <input
+                  v-model="formData.curso_CARE"
+                  type="text"
+                  class="pf__input"
+                  id="curso_CARE"
+                  placeholder="Ingrese datos del curso"
+                  :disabled="isLoading || !canEditSection('organizacion')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
+                />
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="cursos_tiempo">Duración Cursos</label>
+                <input
+                  v-model="formData.cursos_tiempo"
+                  type="text"
+                  class="pf__input"
+                  id="cursos_tiempo"
+                  placeholder="Ingrese duración total"
                   :disabled="isLoading || !canEditSection('organizacion')"
                   :class="{ 'pf__input--disabled': isLoading || !canEditSection('organizacion') }"
                 />
@@ -1339,13 +1387,17 @@ const formData = ref({
   nivelHBTJ: '',
   fecha_ingresoOrg: '',
   fecha_ingresoMilu: '',
-  CBok: '',
+  curso_CB: '',
   areas_historicas: '',
   curso_TL: '',
   curso_AvH: '',
   curso_AvKM: '',
   curso_IE: '',
   curso_FND: '',
+  curso_IEIns: '',
+  curso_CR: '',
+  curso_CARE: '',
+  cursos_tiempo: '',
   estudios_grado: '',
   estudios_area: '',
   estudios_carrera: '',
@@ -1461,12 +1513,16 @@ watch(
           fecha_ingresoOrg: normalizeFecha(newData.fecha_ingresoOrg),
           fecha_ingresoMilu: normalizeFecha(newData.fecha_ingresoMilu),
           areas_historicas: newData.areas_historicas || '',
-          CBok: newData.CBok || '',
+          curso_CB: newData.curso_CB || '',
           curso_TL: newData.curso_TL || '',
           curso_AvH: newData.curso_AvH || '',
           curso_AvKM: newData.curso_AvKM || '',
           curso_IE: newData.curso_IE || '',
           curso_FND: newData.curso_FND || '',
+          curso_IEIns: newData.curso_IEIns || '',
+          curso_CR: newData.curso_CR || '',
+          curso_CARE: newData.curso_CARE || '',
+          cursos_tiempo: newData.cursos_tiempo || '',
           estudios_grado: newData.estudios_grado || '',
           estudios_area: newData.estudios_area || '',
           estudios_carrera: capitalizarEsp(newData.estudios_carrera) || '',
@@ -1636,12 +1692,16 @@ const handleSubmit = async () => {
       fecha_ingresoOrg: parseFechaToISO(formData.value.fecha_ingresoOrg),
       fecha_ingresoMilu: parseFechaToISO(formData.value.fecha_ingresoMilu),
       areas_historicas: formData.value.areas_historicas,
-      CBok: formData.value.CBok,
+      curso_CB: formData.value.curso_CB,
       curso_TL: formData.value.curso_TL,
       curso_AvH: formData.value.curso_AvH,
       curso_AvKM: formData.value.curso_AvKM,
       curso_IE: formData.value.curso_IE,
       curso_FND: formData.value.curso_FND,
+      curso_IEIns: formData.value.curso_IEIns,
+      curso_CR: formData.value.curso_CR,
+      curso_CARE: formData.value.curso_CARE,
+      cursos_tiempo: formData.value.cursos_tiempo,
       estudios_grado: formData.value.estudios_grado,
       estudios_area: formData.value.estudios_area,
       estudios_carrera: capitalizarEsp(formData.value.estudios_carrera),
