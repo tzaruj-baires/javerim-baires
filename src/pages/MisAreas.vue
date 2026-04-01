@@ -411,23 +411,31 @@ const calculateMetrics = (areaUsers) => {
   })
 
   const cursoColumnas = {
-    CB: 'CBok',
+    CB: 'curso_CB',
     TL: 'curso_TL',
     'Av. H': 'curso_AvH',
     'Av. KM': 'curso_AvKM',
     IE: 'curso_IE',
     FND: 'curso_FND',
+    'IE-Ins': 'curso_IEIns',
+    CR: 'curso_CR',
+    CARE: 'curso_CARE',
+    Tiempo: 'cursos_tiempo',
   }
 
   if (areaUsers.length > 0) {
     console.log('[Cursos debug] Claves del primer usuario:', Object.keys(areaUsers[0]))
     console.log('[Cursos debug] Valores de curso del primer usuario:', {
-      CBok: areaUsers[0].CBok,
+      curso_CB: areaUsers[0].curso_CB,
       curso_TL: areaUsers[0].curso_TL,
       curso_AvH: areaUsers[0].curso_AvH,
       curso_AvKM: areaUsers[0].curso_AvKM,
       curso_IE: areaUsers[0].curso_IE,
       curso_FND: areaUsers[0].curso_FND,
+      curso_IEIns: areaUsers[0].curso_IEIns,
+      curso_CR: areaUsers[0].curso_CR,
+      curso_CARE: areaUsers[0].curso_CARE,
+      cursos_tiempo: areaUsers[0].cursos_tiempo,
     })
   }
 

@@ -384,7 +384,7 @@
               <div class="ud__fields">
                 <div class="ud__field">
                   <span class="ud__field-label">Curso Básico</span>
-                  <span class="ud__field-value">{{ userData.CBok || '—' }}</span>
+                  <span class="ud__field-value">{{ userData.curso_CB || '—' }}</span>
                 </div>
                 <div class="ud__field">
                   <span class="ud__field-label">Team Leader</span>
@@ -405,6 +405,22 @@
                 <div class="ud__field">
                   <span class="ud__field-label">Curso FND</span>
                   <span class="ud__field-value">{{ userData.curso_FND || '—' }}</span>
+                </div>
+                <div class="ud__field">
+                  <span class="ud__field-label">Curso IE-Ins</span>
+                  <span class="ud__field-value">{{ userData.curso_IEIns || '—' }}</span>
+                </div>
+                <div class="ud__field">
+                  <span class="ud__field-label">Curso CR</span>
+                  <span class="ud__field-value">{{ userData.curso_CR || '—' }}</span>
+                </div>
+                <div class="ud__field">
+                  <span class="ud__field-label">Curso CARE</span>
+                  <span class="ud__field-value">{{ userData.curso_CARE || '—' }}</span>
+                </div>
+                <div class="ud__field">
+                  <span class="ud__field-label">Duración Cursos</span>
+                  <span class="ud__field-value">{{ userData.cursos_tiempo || '—' }}</span>
                 </div>
               </div>
             </div>
@@ -751,12 +767,16 @@ const loadUserData = async () => {
       fecha_ingresoOrg: mainRecord?.fecha_ingresoOrg || '',
       fecha_ingresoMilu: mainRecord?.fecha_ingresoMilu || '',
       areas_historicas: mainRecord?.areas_historicas || '',
-      CBok: mainRecord?.apodoCBok || '',
+      curso_CB: mainRecord?.curso_CB || '',
       curso_TL: mainRecord?.curso_TL || '',
       curso_AvH: mainRecord?.curso_AvH || '',
       curso_AvKM: mainRecord?.curso_AvKM || '',
       curso_IE: mainRecord?.curso_IE || '',
       curso_FND: mainRecord?.curso_FND || '',
+      curso_IEIns: mainRecord?.curso_IEIns || '',
+      curso_CR: mainRecord?.curso_CR || '',
+      curso_CARE: mainRecord?.curso_CARE || '',
+      cursos_tiempo: mainRecord?.cursos_tiempo || '',
       estudios_grado: mainRecord?.estudios_grado || '',
       estudios_area: mainRecord?.estudios_area || '',
       estudios_carrera: mainRecord?.estudios_carrera || '',
