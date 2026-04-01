@@ -9,6 +9,19 @@ export const tiposSangre = [
   { value: 'O-', label: 'O-' },
 ]
 
+export const Dietas = [
+  'Sin restricciones',
+  'Vegetariana',
+  'Vegana',
+  'Pescetariana',
+  'Sin gluten',
+  'Sin lactosa',
+  'Kosher',
+  'Kosher style',
+  'Diabética',
+  'Hipertensión',
+]
+
 export const nivelesHBTJ = ['B', 'A', 'MFKD0', 'MFKD1', 'MFKD2']
 
 export const organizaciones = ['DAC', 'FJ', 'BH', 'LH', 'IONA']

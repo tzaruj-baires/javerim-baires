@@ -347,10 +347,14 @@
                   type="text"
                   class="pf__input"
                   id="med_dieta"
-                  placeholder="Restricciones dietarias"
+                  list="dietas"
+                  placeholder="Restricciones alimentarias.."
                   :disabled="isLoading || !canEditSection('medicos')"
                   :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
                 />
+                <datalist id="dietas">
+                  <option v-for="dieta in Dietas" :key="dieta" :value="dieta"></option>
+                </datalist>
               </div>
               <div class="pf__field">
                 <label class="pf__label" for="med_sangre">Tipo de Sangre</label>
@@ -1239,6 +1243,7 @@ import {
   nivelesHBTJ,
   Works,
   Estudies,
+  Dietas,
   formatFecha,
   parseFechaToISO,
   parseFechaEnteraToISO,
