@@ -331,14 +331,18 @@
               <div class="pf__field">
                 <label class="pf__label" for="obraSocial_Carnet">Carnet Obra Social</label>
                 <input
-                  v-model="formData.obraSocial_Carnet"
-                  type="text"
+                  type="file"
                   class="pf__input"
                   id="obraSocial_Carnet"
-                  placeholder="Ingrese carnet"
+                  accept="image/*,.pdf"
+                  @change="handleFileUpload('obraSocial_Carnet', $event, 'obrasoc')"
                   :disabled="isLoading || !canEditSection('medicos')"
                   :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
                 />
+                <small v-if="formData.obraSocial_Carnet" class="pf__hint">
+                  Archivo actual:
+                  <a :href="formData.obraSocial_Carnet" target="_blank">Ver Archivo</a>
+                </small>
               </div>
               <div class="pf__field">
                 <label class="pf__label" for="med_dieta">Dieta</label>
@@ -420,26 +424,32 @@
               <div class="pf__field">
                 <label class="pf__label" for="foto_dni">Foto DNI</label>
                 <input
-                  v-model="formData.foto_dni"
-                  type="text"
+                  type="file"
                   class="pf__input"
                   id="foto_dni"
-                  placeholder="Ruta o URL de foto"
+                  accept="image/*"
+                  @change="handleFileUpload('foto_dni', $event, 'dni')"
                   :disabled="isLoading || !canEditSection('medicos')"
                   :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
                 />
+                <small v-if="formData.foto_dni" class="pf__hint">
+                  Imagen actual: <a :href="formData.foto_dni" target="_blank">Ver Imagen</a>
+                </small>
               </div>
               <div class="pf__field">
                 <label class="pf__label" for="foto_rostro">Foto Rostro</label>
                 <input
-                  v-model="formData.foto_rostro"
-                  type="text"
+                  type="file"
                   class="pf__input"
                   id="foto_rostro"
-                  placeholder="Ruta o URL de foto"
+                  accept="image/*"
+                  @change="handleFileUpload('foto_rostro', $event, 'rostro')"
                   :disabled="isLoading || !canEditSection('medicos')"
                   :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
                 />
+                <small v-if="formData.foto_rostro" class="pf__hint">
+                  Imagen actual: <a :href="formData.foto_rostro" target="_blank">Ver Imagen</a>
+                </small>
               </div>
 
               <div class="pf__subsection">Estudios Médicos</div>
@@ -487,16 +497,35 @@
                 />
               </div>
               <div class="pf__field">
-                <label class="pf__label" for="med_estudios_certificado">Certificado</label>
+                <label class="pf__label" for="med_estudios_pdf">PDF de Estudios</label>
                 <input
-                  v-model="formData.med_estudios_certificado"
-                  type="text"
+                  type="file"
                   class="pf__input"
-                  id="med_estudios_certificado"
-                  placeholder="Ingrese certificado"
+                  id="med_estudios_pdf"
+                  accept=".pdf"
+                  @change="handleFileUpload('med_estudios_pdf', $event, 'med_certificado')"
                   :disabled="isLoading || !canEditSection('medicos')"
                   :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
                 />
+                <small v-if="formData.med_estudios_pdf" class="pf__hint">
+                  Archivo actual: <a :href="formData.med_estudios_pdf" target="_blank">Ver PDF</a>
+                </small>
+              </div>
+              <div class="pf__field">
+                <label class="pf__label" for="med_estudios_certificado">Certificado</label>
+                <input
+                  type="file"
+                  class="pf__input"
+                  id="med_estudios_certificado"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  @change="handleFileUpload('med_estudios_certificado', $event, 'med_pdf')"
+                  :disabled="isLoading || !canEditSection('medicos')"
+                  :class="{ 'pf__input--disabled': isLoading || !canEditSection('medicos') }"
+                />
+                <small v-if="formData.med_estudios_certificado" class="pf__hint">
+                  Archivo actual:
+                  <a :href="formData.med_estudios_certificado" target="_blank">Ver Archivo</a>
+                </small>
               </div>
               <div class="pf__field">
                 <label class="pf__label" for="med_estudios_fechaEst">Fecha Estudio</label>
@@ -1234,7 +1263,7 @@
 
 <script setup>
 import { ref, watch, computed, reactive } from 'vue'
-import { update, getAll } from '@/services/api'
+import { update, getAll, uploadFile } from '@/services/api'
 import { useAuthStore } from '@/stores/auth'
 import { usePermissions } from '@/composables/usePermissions'
 import {
@@ -1764,6 +1793,27 @@ const handleSubmit = async () => {
     console.error('Error:', error)
   } finally {
     isLoading.value = false
+  }
+}
+
+const handleFileUpload = async (field, event, folderKey) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  try {
+    const authStore = useAuthStore()
+    const dniUser = formData.value.DNI
+    const dniStamp = authStore.user?.dni || dniUser
+
+    console.log('Upload params:', { field, folderKey, dniUser, dniStamp, file: file.name })
+    const response = await uploadFile(file, folderKey, { dniUser, dniStamp })
+    console.log('Upload response completo:', response)
+    formData.value[field] = response.fileUrl
+    successMessage.value = 'Archivo subido correctamente'
+    setTimeout(() => (successMessage.value = ''), 3000)
+  } catch (error) {
+    errorMessage.value = 'Error al subir archivo: ' + error.message
+    console.error('Upload error:', error)
   }
 }
 
