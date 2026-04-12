@@ -228,6 +228,7 @@
                       >
                         <template v-if="!imageLoadError.foto_dni">
                           <img
+                            :key="userData.foto_dni"
                             :src="getDriveImageUrl(userData.foto_dni)"
                             alt="Foto DNI"
                             @error="handleImageLoadError('foto_dni')"
@@ -254,6 +255,7 @@
                       >
                         <template v-if="!imageLoadError.foto_rostro">
                           <img
+                            :key="userData.foto_rostro"
                             :src="getDriveImageUrl(userData.foto_rostro)"
                             alt="Foto Rostro"
                             @error="handleImageLoadError('foto_rostro')"
@@ -949,7 +951,10 @@ const openSections = reactive({
   tecnicos: false,
 })
 
-const imageLoadError = reactive({})
+const imageLoadError = reactive({
+  foto_dni: false,
+  foto_rostro: false,
+})
 const handleImageLoadError = (fieldName) => {
   imageLoadError[fieldName] = true
 }
@@ -1200,6 +1205,8 @@ const loadUserData = async () => {
       telegram_id: mainRecord?.telegram_id || '',
       fecha_ult: mainRecord?.fecha_ult || '',
     }
+    imageLoadError.foto_dni = false
+    imageLoadError.foto_rostro = false
   } catch (error) {
     console.error('Error loading user data:', error)
     notFound.value = true
