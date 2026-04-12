@@ -135,6 +135,40 @@ export function formatFechaEntera(fecha) {
   return new Intl.DateTimeFormat('es-ES', opciones).format(d).replace(',', '')
 }
 
+export const getDriveFileId = (url) => {
+  if (!url || typeof url !== 'string') return ''
+  const patterns = [
+    /\/d\/([a-zA-Z0-9_-]+)/,
+    /id=([a-zA-Z0-9_-]+)/,
+    /\/open\?id=([a-zA-Z0-9_-]+)/,
+    /\/file\/d\/([a-zA-Z0-9_-]+)/,
+  ]
+  for (const pattern of patterns) {
+    const match = url.match(pattern)
+    if (match?.[1]) return match[1]
+  }
+  return ''
+}
+
+export const isGoogleDriveUrl = (url) => {
+  if (!url || typeof url !== 'string') return false
+  return /drive\.google\.com|docs\.google\.com/i.test(url)
+}
+
+export const getDriveImageUrl = (url) => {
+  if (!url || typeof url !== 'string') return ''
+  const id = getDriveFileId(url)
+  if (!id) return url
+  return `https://drive.google.com/uc?export=view&id=${id}`
+}
+
+export const getDriveEmbedUrl = (url) => {
+  if (!url || typeof url !== 'string') return ''
+  const id = getDriveFileId(url)
+  if (!id) return url
+  return `https://drive.google.com/file/d/${id}/preview`
+}
+
 /**
  * Convierte una fecha en formato dd/mm/yyyy a ISO string YYYY-MM-DD
  * Usado para enviar fechas al backend

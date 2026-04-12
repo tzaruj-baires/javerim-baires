@@ -219,11 +219,55 @@
               <div class="ud__fields">
                 <div class="ud__field">
                   <span class="ud__field-label">Foto DNI</span>
-                  <span class="ud__field-value">{{ userData.foto_dni || '—' }}</span>
+                  <span class="ud__field-value">
+                    <template v-if="isValidFileLink(userData.foto_dni)">
+                      <button
+                        type="button"
+                        class="ud__image-card"
+                        @click="openPreviewModal(userData.foto_dni, 'Foto DNI')"
+                      >
+                        <template v-if="!imageLoadError.foto_dni">
+                          <img
+                            :src="getDriveImageUrl(userData.foto_dni)"
+                            alt="Foto DNI"
+                            @error="handleImageLoadError('foto_dni')"
+                          />
+                        </template>
+                        <template v-else>
+                          <div class="ud__image-card-fallback">
+                            <i class="bi bi-person-circle"></i>
+                          </div>
+                        </template>
+                      </button>
+                    </template>
+                    <span v-else>—</span>
+                  </span>
                 </div>
                 <div class="ud__field">
                   <span class="ud__field-label">Foto Rostro</span>
-                  <span class="ud__field-value">{{ userData.foto_rostro || '—' }}</span>
+                  <span class="ud__field-value">
+                    <template v-if="isValidFileLink(userData.foto_rostro)">
+                      <button
+                        type="button"
+                        class="ud__image-card"
+                        @click="openPreviewModal(userData.foto_rostro, 'Foto Rostro')"
+                      >
+                        <template v-if="!imageLoadError.foto_rostro">
+                          <img
+                            :src="getDriveImageUrl(userData.foto_rostro)"
+                            alt="Foto Rostro"
+                            @error="handleImageLoadError('foto_rostro')"
+                          />
+                        </template>
+                        <template v-else>
+                          <div class="ud__image-card-fallback">
+                            <i class="bi bi-person-circle"></i>
+                          </div>
+                        </template>
+                      </button>
+                    </template>
+                    <span v-else>—</span>
+                  </span>
                 </div>
                 <div class="ud__field">
                   <span class="ud__field-label">Obra Social</span>
@@ -239,7 +283,66 @@
                 </div>
                 <div class="ud__field">
                   <span class="ud__field-label">Carnet</span>
-                  <span class="ud__field-value">{{ userData.obraSocial_Carnet || '—' }}</span>
+                  <span class="ud__field-value">
+                    <template v-if="isValidFileLink(userData.obraSocial_Carnet)">
+                      <template v-if="isImageUrl(userData.obraSocial_Carnet)">
+                        <button
+                          type="button"
+                          class="ud__image-card"
+                          @click="
+                            openPreviewModal(userData.obraSocial_Carnet, 'Carnet Obra Social')
+                          "
+                        >
+                          <img :src="userData.obraSocial_Carnet" alt="Carnet Obra Social" />
+                        </button>
+                      </template>
+                      <template v-else>
+                        <span class="ud__file-pill-wrapper">
+                          <button
+                            type="button"
+                            class="ud__file-pill"
+                            :class="{
+                              'ud__file-pill--disabled': !isValidFileLink(
+                                userData.obraSocial_Carnet,
+                              ),
+                              'ud__file-pill--active':
+                                fileActionFor && fileActionFor.url === userData.obraSocial_Carnet,
+                            }"
+                            :disabled="!isValidFileLink(userData.obraSocial_Carnet)"
+                            @click.stop="
+                              isValidFileLink(userData.obraSocial_Carnet) &&
+                              toggleFileActions(userData.obraSocial_Carnet, 'Carnet Obra Social')
+                            "
+                          >
+                            <i :class="getFileIcon(userData.obraSocial_Carnet)"></i>
+                            {{ 'Carnet' }}
+                          </button>
+                          <div
+                            v-if="fileActionFor && fileActionFor.url === userData.obraSocial_Carnet"
+                            class="ud__file-actions"
+                          >
+                            <button
+                              type="button"
+                              class="ud__file-action-btn"
+                              @click.stop="openFileUrl(userData.obraSocial_Carnet)"
+                            >
+                              Abrir archivo
+                            </button>
+                            <button
+                              type="button"
+                              class="ud__file-action-btn"
+                              @click.stop="
+                                openPreviewModal(userData.obraSocial_Carnet, 'Carnet Obra Social')
+                              "
+                            >
+                              Ver previsualización
+                            </button>
+                          </div>
+                        </span>
+                      </template>
+                    </template>
+                    <span v-else>—</span>
+                  </span>
                 </div>
                 <div class="ud__field">
                   <span class="ud__field-label">Dieta</span>
@@ -284,17 +387,139 @@
                 </div>
                 <div class="ud__field">
                   <span class="ud__field-label">Archivo de Estudios</span>
-                  <span class="ud__field-value">{{ userData.med_estudios_pdf || '—' }}</span>
+                  <span class="ud__field-value">
+                    <template v-if="isValidFileLink(userData.med_estudios_pdf)">
+                      <template v-if="isImageUrl(userData.med_estudios_pdf)">
+                        <button
+                          type="button"
+                          class="ud__image-card"
+                          @click="
+                            openPreviewModal(userData.med_estudios_pdf, 'Archivo de Estudios')
+                          "
+                        >
+                          <img :src="userData.med_estudios_pdf" alt="Archivo de Estudios" />
+                        </button>
+                      </template>
+                      <template v-else>
+                        <span class="ud__file-pill-wrapper">
+                          <button
+                            type="button"
+                            class="ud__file-pill"
+                            :class="{
+                              'ud__file-pill--disabled': !isValidFileLink(
+                                userData.med_estudios_pdf,
+                              ),
+                              'ud__file-pill--active':
+                                fileActionFor && fileActionFor.url === userData.med_estudios_pdf,
+                            }"
+                            :disabled="!isValidFileLink(userData.med_estudios_pdf)"
+                            @click.stop="
+                              isValidFileLink(userData.med_estudios_pdf) &&
+                              toggleFileActions(userData.med_estudios_pdf, 'Archivo de Estudios')
+                            "
+                          >
+                            <i :class="getFileIcon(userData.med_estudios_pdf)"></i>
+                            {{ 'Estudios Médicos' }}
+                          </button>
+                          <div
+                            v-if="fileActionFor && fileActionFor.url === userData.med_estudios_pdf"
+                            class="ud__file-actions"
+                          >
+                            <button
+                              type="button"
+                              class="ud__file-action-btn"
+                              @click.stop="openFileUrl(userData.med_estudios_pdf)"
+                            >
+                              Abrir archivo
+                            </button>
+                            <button
+                              type="button"
+                              class="ud__file-action-btn"
+                              @click.stop="
+                                openPreviewModal(userData.med_estudios_pdf, 'Archivo de Estudios')
+                              "
+                            >
+                              Ver previsualización
+                            </button>
+                          </div>
+                        </span>
+                      </template>
+                    </template>
+                    <span v-else>—</span>
+                  </span>
                 </div>
                 <div class="ud__field">
                   <span class="ud__field-label">Certificado</span>
-                  <span class="ud__field-value">{{
-                    userData.med_estudios_certificado || '—'
-                  }}</span>
+                  <span class="ud__field-value">
+                    <template v-if="isValidFileLink(userData.med_estudios_certificado)">
+                      <template v-if="isImageUrl(userData.med_estudios_certificado)">
+                        <button
+                          type="button"
+                          class="ud__image-card"
+                          @click="
+                            openPreviewModal(userData.med_estudios_certificado, 'Certificado')
+                          "
+                        >
+                          <img :src="userData.med_estudios_certificado" alt="Certificado" />
+                        </button>
+                      </template>
+                      <template v-else>
+                        <span class="ud__file-pill-wrapper">
+                          <button
+                            type="button"
+                            class="ud__file-pill"
+                            :class="{
+                              'ud__file-pill--disabled': !isValidFileLink(
+                                userData.med_estudios_certificado,
+                              ),
+                              'ud__file-pill--active':
+                                fileActionFor &&
+                                fileActionFor.url === userData.med_estudios_certificado,
+                            }"
+                            :disabled="!isValidFileLink(userData.med_estudios_certificado)"
+                            @click.stop="
+                              isValidFileLink(userData.med_estudios_certificado) &&
+                              toggleFileActions(userData.med_estudios_certificado, 'Certificado')
+                            "
+                          >
+                            <i :class="getFileIcon(userData.med_estudios_certificado)"></i>
+                            {{ 'Certificado' }}
+                          </button>
+                          <div
+                            v-if="
+                              fileActionFor &&
+                              fileActionFor.url === userData.med_estudios_certificado
+                            "
+                            class="ud__file-actions"
+                          >
+                            <button
+                              type="button"
+                              class="ud__file-action-btn"
+                              @click.stop="openFileUrl(userData.med_estudios_certificado)"
+                            >
+                              Abrir archivo
+                            </button>
+                            <button
+                              type="button"
+                              class="ud__file-action-btn"
+                              @click.stop="
+                                openPreviewModal(userData.med_estudios_certificado, 'Certificado')
+                              "
+                            >
+                              Ver previsualización
+                            </button>
+                          </div>
+                        </span>
+                      </template>
+                    </template>
+                    <span v-else>—</span>
+                  </span>
                 </div>
                 <div class="ud__field">
                   <span class="ud__field-label">Fecha Certificado</span>
-                  <span class="ud__field-value">{{ userData.med_estudios_fecha || '—' }}</span>
+                  <span class="ud__field-value">{{
+                    formatFecha(userData.med_estudios_fecha) || '—'
+                  }}</span>
                 </div>
                 <div class="ud__field ud__field--full">
                   <span class="ud__field-label">Historia Clínica</span>
@@ -633,6 +858,45 @@
       </div>
     </div>
 
+    <div v-if="previewModal.open" class="jv-modal-backdrop" @click.self="closePreviewModal">
+      <div class="jv-modal jv-modal--lg">
+        <div class="jv-modal__header">
+          <h3 class="jv-modal__title">{{ previewModal.title }}</h3>
+          <button class="jv-modal__close" @click="closePreviewModal">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <div class="jv-modal__body">
+          <template v-if="previewModal.isImage">
+            <img class="ud__preview-image" :src="previewModal.url" :alt="previewModal.title" />
+          </template>
+          <template v-else-if="previewModal.embed">
+            <iframe
+              class="ud__preview-frame"
+              :src="previewModal.url"
+              :title="previewModal.title"
+            ></iframe>
+          </template>
+          <template v-else>
+            <div class="ud__preview-doc">
+              <i :class="getFileIcon(previewModal.url)"></i>
+              <div>
+                <strong>{{ previewModal.title }}</strong>
+                <p>{{ getFileName(previewModal.url) }}</p>
+                <button
+                  type="button"
+                  class="ud__file-action-btn"
+                  @click="openFileUrl(previewModal.url)"
+                >
+                  Abrir archivo
+                </button>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
     <!-- ProfileForm component -->
     <ProfileForm
       ref="profileForm"
@@ -647,12 +911,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, nextTick, reactive } from 'vue'
+import { ref, onMounted, computed, nextTick, reactive, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { usePermissions } from '@/composables/usePermissions'
 import { getAll, remove } from '@/services/api'
-import { formatFecha, formatFechaEntera } from '@/utils/forms_consts'
+import {
+  formatFecha,
+  formatFechaEntera,
+  getDriveEmbedUrl,
+  getDriveImageUrl,
+} from '@/utils/forms_consts'
 import { formatPhone } from '@/utils/phone'
 import ProfileForm from '@/components/ProfileForm.vue'
 
@@ -680,8 +949,138 @@ const openSections = reactive({
   tecnicos: false,
 })
 
+const imageLoadError = reactive({})
+const handleImageLoadError = (fieldName) => {
+  imageLoadError[fieldName] = true
+}
+
 const toggleSection = (section) => {
   openSections[section] = !openSections[section]
+}
+
+const fileActionFor = ref(null)
+const previewModal = ref({
+  open: false,
+  title: '',
+  url: '',
+  isImage: false,
+  extension: '',
+})
+
+const isImageUrl = (value) => {
+  if (!value || typeof value !== 'string') return false
+  if (/^data:image\//i.test(value)) return true
+  if (/\.(jpe?g|png|gif|bmp|webp|svg)(\?.*)?$/i.test(value)) return true
+  return false
+}
+
+const isValidFileLink = (value) => {
+  if (!value || typeof value !== 'string') return false
+  const trimmed = value.trim()
+  if (!trimmed) return false
+  const normalized = trimmed
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+  if (/^no cargo estudios medicos$/i.test(normalized)) return false
+  return true
+}
+
+const getFileExtension = (value) => {
+  if (!value || typeof value !== 'string') return ''
+  const match = value.match(/\.([a-z0-9]{2,5})(?:\?.*)?$/i)
+  return match ? match[1].toLowerCase() : ''
+}
+
+const getFileName = (value) => {
+  if (!value || typeof value !== 'string') return ''
+  try {
+    return decodeURIComponent(value.split('/').pop().split('?')[0])
+  } catch {
+    return value
+  }
+}
+
+const getFileIcon = (value) => {
+  const ext = getFileExtension(value)
+  switch (ext) {
+    case 'pdf':
+      return 'bi bi-file-earmark-pdf'
+    case 'doc':
+    case 'docx':
+      return 'bi bi-file-earmark-word'
+    case 'xls':
+    case 'xlsx':
+      return 'bi bi-file-earmark-excel'
+    case 'ppt':
+    case 'pptx':
+      return 'bi bi-file-earmark-ppt'
+    case 'txt':
+      return 'bi bi-file-earmark-text'
+    default:
+      return 'bi bi-file-earmark'
+  }
+}
+
+const toggleFileActions = (url, title) => {
+  if (!isValidFileLink(url)) {
+    fileActionFor.value = null
+    return
+  }
+  if (fileActionFor.value?.url === url) {
+    fileActionFor.value = null
+    return
+  }
+  fileActionFor.value = {
+    url,
+    title,
+    isImage: isImageUrl(url),
+  }
+}
+
+// Close tooltips when clicking outside
+const closeFileActions = () => {
+  fileActionFor.value = null
+}
+
+// Handle clicks outside of pills
+onMounted(() => {
+  const handleClickOutside = (event) => {
+    const pillWrapper = event.target.closest('.ud__file-pill-wrapper')
+    if (!pillWrapper) {
+      closeFileActions()
+    }
+  }
+  document.addEventListener('click', handleClickOutside)
+
+  // Cleanup on unmount
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside)
+  })
+})
+
+const openPreviewModal = (url, title) => {
+  if (!isValidFileLink(url)) return
+  const isImage = isImageUrl(url)
+  const normalizedUrl = isImage ? getDriveImageUrl(url) : getDriveEmbedUrl(url)
+  previewModal.value = {
+    open: true,
+    title,
+    url: normalizedUrl,
+    isImage,
+    extension: getFileExtension(url),
+    embed: !isImage,
+  }
+  fileActionFor.value = null
+}
+
+const closePreviewModal = () => {
+  previewModal.value.open = false
+}
+
+const openFileUrl = (url) => {
+  if (!isValidFileLink(url)) return
+  window.open(url, '_blank', 'noopener')
 }
 
 // Computed: verificar si puede editar
@@ -1193,6 +1592,238 @@ const getLevelDescription = (level) => {
   font-weight: 500;
   color: var(--c-text);
   word-break: break-word;
+}
+
+.ud__image-card {
+  display: inline-grid;
+  width: 130px;
+  height: 130px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--c-border);
+  background: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.ud__image-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ud__image-card-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #475569;
+  background: #f8fafc;
+}
+
+.ud__image-card-fallback i {
+  font-size: 2.2rem;
+}
+
+.ud__file-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--c-border);
+  background: #f8fafc;
+  color: var(--c-text);
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 180px;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.ud__file-pill:hover:not(.ud__file-pill--disabled) {
+  background: #eef2ff;
+  border-color: rgba(67, 97, 238, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.15);
+}
+
+.ud__file-pill:active:not(.ud__file-pill--disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.2);
+}
+
+.ud__file-pill--disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #f4f5f8;
+  border-color: #e5e7eb;
+  color: #6b7280;
+}
+
+.ud__file-pill--active {
+  background: #dbeafe;
+  border-color: #3b82f6;
+  color: #1e40af;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.ud__file-pill i {
+  font-size: 1rem;
+}
+
+.ud__file-pill-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.ud__file-actions {
+  position: absolute;
+  top: calc(100% + 0.45rem);
+  left: 0;
+  z-index: 11;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0;
+  padding: 0.85rem;
+  min-width: 220px;
+  background: #ffffff;
+  border: 1px solid var(--c-border);
+  border-radius: 16px;
+  box-shadow: 0 18px 40px rgba(16, 24, 40, 0.08);
+}
+
+.ud__file-action-btn {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--c-border);
+  background: #ffffff;
+  color: var(--c-text);
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+
+.ud__file-action-btn:hover {
+  background: #eef2ff;
+  border-color: rgba(67, 97, 238, 0.3);
+}
+
+.ud__preview-image {
+  width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+  border-radius: 18px;
+  display: block;
+}
+
+.ud__preview-frame {
+  width: 100%;
+  min-height: 60vh;
+  border: 1px solid var(--c-border);
+  border-radius: 14px;
+}
+
+.ud__preview-doc {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--c-border);
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.ud__preview-doc i {
+  font-size: 2rem;
+  color: #4361ee;
+}
+
+.ud__preview-doc p {
+  margin: 0.25rem 0 0;
+  color: var(--c-text-muted);
+}
+
+@media (max-width: 860px) {
+  .ud__body {
+    grid-template-columns: 1fr;
+  }
+  .ud__fields {
+    grid-template-columns: 1fr;
+  }
+  .ud__image-card {
+    width: 100%;
+    max-width: 240px;
+    height: 170px;
+  }
+  .ud__file-pill-wrapper {
+    width: 100%;
+    position: relative;
+  }
+  .ud__file-pill {
+    width: 100%;
+    min-width: unset;
+    padding: 0.7rem 1rem;
+    font-size: 0.875rem;
+  }
+  .ud__file-actions {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    width: auto;
+    min-width: 200px;
+    max-width: calc(100vw - 2rem);
+    z-index: 1000;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    margin-top: 0;
+    padding: 0.75rem;
+  }
+  .ud__file-action-btn {
+    padding: 0.7rem 1rem;
+    font-size: 0.875rem;
+    border-radius: 8px;
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .ud {
+    padding: 1rem;
+  }
+  .ud__file-pill {
+    padding: 0.8rem 1.1rem;
+    gap: 0.6rem;
+    min-height: 44px; /* iOS touch target minimum */
+    display: flex;
+    align-items: center;
+  }
+  .ud__file-pill i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .ud__file-actions {
+    left: -0.5rem;
+    right: -0.5rem;
+    min-width: unset;
+    max-width: unset;
+    width: calc(100% + 1rem);
+    padding: 0.6rem;
+    border-radius: 12px;
+  }
+  .ud__file-action-btn {
+    padding: 0.8rem 1.1rem;
+    min-height: 44px; /* iOS touch target minimum */
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+  }
 }
 
 .ud__field-value--mono {
