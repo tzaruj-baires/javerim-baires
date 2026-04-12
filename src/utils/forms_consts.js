@@ -69,8 +69,6 @@ export const cursosMis = [
   { value: 'CARE', label: 'Curso de CARE' },
   { value: 'CR', label: 'Curso de CR' },
   { value: 'MFKD', label: 'Curso de Mefakdim' },
-  { value: 'IE-Ins', label: 'Curso IE-Ins' },
-  { value: 'Tiempo', label: 'Duración Cursos' },
 ]
 
 /**
